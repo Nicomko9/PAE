@@ -1,0 +1,119 @@
+package biz;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+import biz.dto.CompanyDto;
+import biz.exceptions.BusinessErrorException;
+import biz.exceptions.BusinessException;
+import biz.exceptions.ErrorsCode;
+import biz.objects.Company;
+import dal.DalFrontEndServices;
+import dal.dao.CompanyDao;
+import ihm.utils.Logger;
+
+/**
+ * Implementation of the Company's Use Case Controller.
+ */
+class CompanyUccImpl implements CompanyUcc {
+
+  private DalFrontEndServices dal;
+
+  private CompanyDao companyDao;
+
+  CompanyUccImpl(DalFrontEndServices dal, CompanyDao companyDao) {
+    this.dal = dal;
+    this.companyDao = companyDao;
+  }
+
+  /**
+   * Register a new company in the database.
+   *
+   * @param companyDto {@link CompanyDto} to persist
+   * @return a boolean to indicate whether it worked or not
+   */
+  @Override
+  public boolean register(CompanyDto companyDto) {
+    Logger.log("CompanyUccImpl", "createCompany", "Creating company");
+
+    Company company = (Company) companyDto;
+    company.checkConstraints();
+
+    if (null != this.companyDao.findByName(companyDto.getCompanyName())) {
+      Logger.log("CompanyUccImpl", "register", companyDto.getCompanyName() + " already exists.");
+      throw new BusinessException(ErrorsCode.BUSINESS_NAME_COMPANY_EXISTED);
+    }
+
+    company = (Company) companyDto;
+    company.setInscriptionDate(LocalDateTime.now());
+
+    try {
+      this.dal.startTransaction();
+
+      if (null == this.companyDao.create(company)) {
+        throw new BusinessErrorException(ErrorsCode.INTERNAL_UNKNOWN_ERROR);
+      }
+
+      this.dal.commitTransaction();
+
+      return true;
+    } catch (Exception exc) {
+      this.dal.rollbackTransaction();
+      throw exc;
+    }
+  }
+
+  /**
+   * Update a company already present in the database.
+   *
+   * @param companyDto {@link CompanyDto} to persist
+   * @return the information of the company updated in the database
+   */
+  @Override
+  public CompanyDto update(CompanyDto companyDto) {
+    Logger.log("CompanyUccImpl", "update", "Updating company");
+
+    Company company = (Company) companyDto;
+    company.checkConstraints();
+
+    try {
+      this.dal.startTransaction();
+
+      if (null == this.companyDao.update(company)) {
+        throw new BusinessErrorException(ErrorsCode.INTERNAL_UNKNOWN_ERROR);
+      }
+
+      this.dal.commitTransaction();
+
+      return company;
+    } catch (Exception exception) {
+      Logger.log("CompanyUccImpl", "update", "Error updating company : " + exception.getMessage());
+      this.dal.rollbackTransaction();
+      throw new BusinessException(ErrorsCode.UNDEFINED_ERROR);
+    }
+  }
+
+  /**
+   * Give all the Companies of the database.
+   *
+   * @return a {@link List} of {@link CompanyDto}
+   */
+  public List<CompanyDto> getAllCompanies() {
+    try {
+      return this.companyDao.findAllCompanies();
+    } catch (Exception exception) {
+      Logger.log("CompanyUccImpl", "getAllCompanies", "Error Querying Companies");
+      throw new IllegalArgumentException(exception.getMessage());
+    }
+  }
+
+  public Company getCompanyByName(String name) {
+    try {
+      return this.companyDao.findByName(name);
+    } catch (IllegalArgumentException exception) {
+      Logger.log("CompanyUccImpl", "getCompanyByName", "~Error querying Company~");
+      throw new IllegalArgumentException(exception.getMessage());
+    }
+  }
+
+}

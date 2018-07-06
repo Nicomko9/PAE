@@ -1,0 +1,7 @@
+#Welcome{
+	padding-top: 150px;
+}
+
+.btn-rigth{
+	float: right;
+}

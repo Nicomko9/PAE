@@ -1,0 +1,18 @@
+package dal.dao;
+
+
+import bizz.DtoFactory;
+import dal.DalBackEndServices;
+
+abstract class AbstractDao {
+
+  protected DalBackEndServices dal;
+
+  protected DtoFactory factory;
+
+  AbstractDao(DalBackEndServices dal, DtoFactory factory) {
+    this.dal = dal;
+    this.factory = factory;
+  }
+
+}

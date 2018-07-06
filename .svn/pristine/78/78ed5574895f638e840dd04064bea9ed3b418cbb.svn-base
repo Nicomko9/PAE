@@ -1,0 +1,27 @@
+<div id="inner-popup-company" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="modal-dialog modal-lg clearfix">
+        <div class="modal-content">
+          <div class=" col-lg-12 col-md-12 ">
+            <div class="panel panel-default">
+              <div class="panel-heading clearfix">
+                <div class="col-md-10 col-md-offset-1 text-center">
+                  Attention : <span data-attribute="title"></span>
+                </div>
+              </div>
+              <div class="panel-body">
+                <div data-attribute="message">
+
+                </div>
+              </div>
+              <div class="panel-footer">
+                <a data-source="button" href="#" class="btn btn-primary"></a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

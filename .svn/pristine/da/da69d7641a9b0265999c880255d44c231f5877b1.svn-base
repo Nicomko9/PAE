@@ -1,0 +1,116 @@
+package mock.dao;
+
+import static util.Util.COMPANY_NAME;
+import static util.Util.EMAIL;
+import static util.Util.FIRSTNAME;
+import static util.Util.LASTNAME;
+import static util.Util.PHONE;
+import static util.Util.fillCompany;
+import static util.Util.fillContact;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import biz.DtoFactory;
+import biz.dto.ContactDto;
+import biz.objects.Company;
+import biz.objects.Contact;
+import dal.dao.CompanyDao;
+import dal.dao.ContactDao;
+
+public class ContactDaoMock implements ContactDao {
+
+  private DtoFactory dtoFactory;
+  private CompanyDao companyDao;
+  
+  ContactDaoMock(DtoFactory dtoFactory, CompanyDao companyDao) {
+    this.dtoFactory = dtoFactory;
+    this.companyDao = companyDao;
+  }
+  
+  @Override
+  public ContactDto create(Contact contact) throws Exception {
+    if(contact == null) {
+      return null;
+    }
+    contact.setPk(6);
+    return contact;
+  }
+
+  @Override
+  public ContactDto findByPk(int pk) {
+    if(pk < 0) {
+      return null;
+    }
+    Company company = companyDao.findByName(COMPANY_NAME);
+    
+    Contact contact = (Contact) dtoFactory.getContact();
+    fillContact(contact, company, EMAIL, FIRSTNAME, LASTNAME, PHONE, pk);
+    return contact;
+  }
+
+  @Override
+  public ContactDto findByEmail(String email) {
+    if(email == null) {
+      return null;
+    }
+    Company company = companyDao.findByName(COMPANY_NAME);
+    
+    Contact contact = (Contact) dtoFactory.getContact();
+    fillContact(contact, company, email, FIRSTNAME, LASTNAME, PHONE, 1);
+    return contact;
+  }
+
+  @Override
+  public Contact findContact(String firstname, String lastname, String companyName) {
+    if (firstname == null || lastname == null || companyName == null) {
+      return null;
+    }
+    Company company = companyDao.findByName(companyName);
+    
+    Contact contact = (Contact) dtoFactory.getContact();
+    fillContact(contact, company, EMAIL, firstname, lastname, PHONE, 2);
+    return contact;
+  }
+
+  @Override
+  public List<ContactDto> findContactsForCompany(String companyName)  {
+    List<ContactDto> contacts = new ArrayList<>();
+    if(companyName == null) {
+      return contacts; 
+    }
+    Company company = companyDao.findByName(companyName);
+    
+    Contact contact = (Contact) dtoFactory.getContact();
+    fillContact(contact, company, EMAIL, FIRSTNAME, LASTNAME, PHONE, 0);
+    for (int i = 0; i < 3; i++) {
+      contact.setPk(i);
+      contacts.add(contact);
+    }
+    return contacts;
+  }
+
+  @Override
+  public List<ContactDto> findAllContacts() {
+    List<ContactDto> contacts = new ArrayList<>();
+    Contact contact = (Contact) dtoFactory.getContact();
+    Company company = (Company) dtoFactory.getCompany();
+    fillCompany(company, null, COMPANY_NAME, null, 1);
+    fillContact(contact, company, EMAIL, FIRSTNAME, LASTNAME, PHONE, 0);
+    for (int i = 0; i < 5; i++) {
+      contact.setPk(i);
+      contacts.add(contact);
+    }
+    return contacts;
+  }
+
+  @Override
+  public ContactDto update(Contact contact) {
+    if(contact == null) {
+      return null;
+    }
+    contact.setVersion(contact.getVersion()+1);
+    return contact;
+  }
+
+}

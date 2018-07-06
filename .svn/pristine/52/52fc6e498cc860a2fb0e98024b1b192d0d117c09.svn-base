@@ -1,0 +1,10 @@
+package biz.objects;
+
+import biz.dto.CompanyDto;
+
+/**
+ * Company's business object.
+ */
+public interface Company extends CompanyDto {
+
+}

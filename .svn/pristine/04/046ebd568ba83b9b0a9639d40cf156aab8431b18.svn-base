@@ -1,0 +1,34 @@
+package dal.dao;
+
+import java.util.List;
+
+import biz.dto.PresenceDto;
+import biz.objects.Presence;
+
+public interface PresenceDao {
+
+  /**
+   * Persist a presence into the table presences in database.
+   *
+   * @param presence the {@link Presence} to persist
+   * @return the {@link PresenceDto} persisted
+   */
+  PresenceDto create(Presence presence);
+  
+  /**
+   * Get All the presences for the given year.
+   *
+   * @param year the year to recover all presences
+   * @return {@link List} of {@link PresenceDto}
+   */
+  List<PresenceDto> findByYear(int year);
+  
+  /**
+  * Update a presence already present in the database.
+  *
+  * @param presence {@link Presence} to persist
+  * @return the new value of the {@link Presence} casted in {@link PresenceDto}
+  */
+ PresenceDto update(Presence presence);
+  
+}

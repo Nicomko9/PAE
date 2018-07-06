@@ -1,0 +1,59 @@
+package mock.dao;
+
+import java.util.List;
+
+import biz.dto.CompanyDto;
+import biz.dto.ContactDto;
+import biz.objects.Company;
+import biz.objects.Contact;
+import dal.dao.ContactDao;
+import mock.DataBaseMock;
+
+public class ContactDaoMock implements ContactDao {
+
+  private DataBaseMock dataBaseMock;
+
+  ContactDaoMock() {
+    this.dataBaseMock = DataBaseMock.getInstance();
+  }
+
+  @Override
+  public ContactDto create(Contact contact) throws Exception {
+    return dataBaseMock.addContact(contact);
+  }
+
+  @Override
+  public ContactDto findByPk(int pk) {
+    return dataBaseMock.getContactDtoByPk(pk);
+  }
+
+  @Override
+  public ContactDto findByEmail(String email) {
+    return dataBaseMock.getContactByEmail(email);
+  }
+
+  @Override
+  public ContactDto findContact(String firstname, String lastname, String companyName) {
+    CompanyDto company = dataBaseMock.getCompanyByName(companyName);
+    List<ContactDto> contactDtoByCompany = dataBaseMock.getContactsByCompany((Company)company);
+    return contactDtoByCompany.stream().filter(c -> c.getFirstname().equals(firstname)
+        && c.getLastname().equals(lastname)).findAny().orElse(null);
+  }
+
+  @Override
+  public List<ContactDto> findContactsForCompany(String companyName)  {
+    CompanyDto company = dataBaseMock.getCompanyByName(companyName);
+    return dataBaseMock.getContactsByCompany((Company) company);
+  }
+
+  @Override
+  public List<ContactDto> findAllContacts() {
+    return dataBaseMock.getContacts();
+  }
+
+  @Override
+  public ContactDto update(Contact contact) {
+    return dataBaseMock.updateContact(contact);
+  }
+
+}

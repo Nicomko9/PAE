@@ -1,0 +1,56 @@
+package biz;
+
+import biz.dto.CompanyDto;
+import java.util.List;
+
+/**
+ * Company's Use Case Controller.
+ */
+public interface CompanyUcc {
+
+  /**
+   * Register a new company in the database.
+   *
+   * @param biz {@link CompanyDto} to persist
+   * @return the {@link CompanyDto} with the information added in the DataBase
+   */
+  CompanyDto register(CompanyDto biz);
+
+  /**
+   * Update a company already present in the database.
+   *
+   * @param biz {@link CompanyDto} to persist
+   * @return the information of the company updated in the database
+   */
+  CompanyDto update(CompanyDto biz);
+
+  /**
+   * Give all the Companies of the database.
+   *
+   * @return a {@link List} of {@link CompanyDto}
+   */
+  List<CompanyDto> getAllCompanies();
+
+  /**
+   * Give a {@link CompanyDto} based on her name.
+   *
+   * @param name the company's name to match
+   * @return the {@link CompanyDto} found with the name
+   */
+  CompanyDto getCompanyByName(String name);
+
+  /**
+   * Give a {@link CompanyDto} based on her pk.
+   *
+   * @return the {@link CompanyDto}
+   */
+  CompanyDto getCompanyByPk(int pk);
+
+  /**
+   * Give all the Companies of the database for the selection.
+   *
+   * @return a {@link List} of {@link CompanyDto}
+   */
+  List<CompanyDto> getAllCompaniesForTheSelection();
+
+}

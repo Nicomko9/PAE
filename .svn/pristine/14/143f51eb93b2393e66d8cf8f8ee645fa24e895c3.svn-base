@@ -1,0 +1,83 @@
+package biz;
+
+import java.util.List;
+
+import biz.dto.CompanyDto;
+import biz.dto.JeDto;
+import biz.dto.ParticipationDto;
+
+public interface ParticipationUcc {
+
+  /**
+   * Create the given participation in the DataBase.
+   * 
+   * @param participationDto the participation to add in the DataBase
+   * @return the particpationDto with the information added in the DataBase
+   */
+  ParticipationDto invite(ParticipationDto participationDto);
+
+  /**
+   * Create the given participations in the DataBase.
+   * 
+   * @param participations the {@link List} of {@link ParticipationDto} to add in the DataBase
+   * @return the {@link List} of {@link ParticipationDto} with the information added in the DataBase
+   */
+  List<ParticipationDto> inviteCompanies(List<ParticipationDto> participations);
+
+  /**
+   * Update the state of the given participation by "confirmée".
+   * 
+   * @param participationDto the participationDto to update in the DataBase
+   * @return the participationDto with the information updated
+   */
+  ParticipationDto confirm(ParticipationDto participationDto);
+
+  /**
+   * Update the state of the given participation by "refusée".
+   * 
+   * @param participationDto the participationDto to update in the DataBase
+   * @return the participationDto with the information updated
+   */
+  ParticipationDto refuse(ParticipationDto participationDto);
+
+  /**
+   * Update the state of the given participation by "facturée".
+   * 
+   * @param participationDto the participationDto to update in the DataBase
+   * @return the participationDto with the information updated
+   */
+  ParticipationDto invoice(ParticipationDto participationDto);
+
+  /**
+   * Update the state of the given participation by "payée".
+   * 
+   * @param participationDto the participationDto to update in the DataBase
+   * @return the participationDto with the information updated
+   */
+  ParticipationDto pay(ParticipationDto participationDto);
+
+  /**
+   * Update the state of the given participation by "annulée".
+   * 
+   * @param participationDto the participationDto to update in the DataBase
+   * @return the participationDto with the information updated
+   */
+  ParticipationDto cancel(ParticipationDto participationDto);
+
+  /**
+   * Get all participation of the given JE.
+   * 
+   * @param jeDto the jeDto to recover all its participations
+   * @return a list of ParticipationDto
+   */
+  List<ParticipationDto> getAllParticipationsOf(JeDto jeDto);
+
+  /**
+   * Get all participation of the given company.
+   * 
+   * @param companyDto the companyDto to recover all its participations
+   * @return a list of ParticipationDto
+   */
+  List<ParticipationDto> getAllParticipationsOf(CompanyDto companyDto);
+
+}

@@ -1,0 +1,14 @@
+package dal.dao;
+
+
+import biz.DtoFactory;
+import dal.DalBackEndServices;
+
+public class JeDaoImpl extends AbstractDao implements JeDao {
+
+  public JeDaoImpl(DalBackEndServices dal, DtoFactory factory) {
+    super(dal, factory);
+  }
+
+
+}

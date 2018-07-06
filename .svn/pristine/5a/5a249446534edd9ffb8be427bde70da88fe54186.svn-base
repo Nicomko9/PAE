@@ -1,0 +1,83 @@
+package ucc;
+
+import bizz.exceptions.BusinessException;
+import bizz.objects.UserBizz;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import ucc.dto.UserDto;
+import utils.Logger;
+
+class UserUccImpl implements UserUcc {
+
+  private UserBizz user;
+
+  public UserUccImpl(UserBizz userBizz) {
+    this.user = userBizz;
+  }
+
+  public String getId() {
+    return "user";
+  }
+
+  /**
+   * Connect a new user.
+   *
+   * @param request the context, to allow access to request cookies & shit
+   * @param userDto a user with password and login
+   * @return UserDto user transport object
+   */
+  public UserDto connect(HttpServletRequest request, HttpServletResponse response,
+      UserDto userDto) {
+    Logger.log("ucc", "UserUccImpl", "connect triggered");
+
+    if (null != user.loadFromSession(request)) {
+      throw new BusinessException("Un utilisateur est déja connecté");
+    }
+
+    userDto = user.verifyPassword(userDto);
+
+    user.saveToSession(response, userDto);
+
+    return userDto;
+  }
+
+
+  /**
+   * Return a user dto based on available session & cookies.
+   *
+   * @param req the context request
+   * @return a user dto
+   */
+  public UserDto getUser(HttpServletRequest req) {
+    Logger.log("ucc", "UserUccImpl", "getUser triggered");
+    UserDto userDto = user.loadFromSession(req);
+
+    if (userDto == null) {
+      throw new BusinessException("Unauthorized used");
+    }
+
+    return userDto;
+  }
+
+  /**
+   * Disconnect the current user.
+   */
+  public void disconnect(HttpServletRequest request, HttpServletResponse response) {
+    Logger.log("ucc", "UserUccImpl", "disconnect triggered");
+    user.cleanSession(request, response);
+  }
+
+  /**
+   * Register a new user into the application.
+   *
+   * @param userDto the user to persist
+   * @return a boolean to indicate whether or not it worked
+   */
+  @Override
+  public boolean subscribe(UserDto userDto) {
+    Logger.log("ucc", "UserUccImpl", "subscribe triggered");
+
+    return user.register(userDto);
+  }
+
+}

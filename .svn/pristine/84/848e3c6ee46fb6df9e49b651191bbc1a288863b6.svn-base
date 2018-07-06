@@ -1,0 +1,421 @@
+package mock;
+
+import static util.Util.fillAddress;
+import static util.Util.fillCompany;
+import static util.Util.fillContact;
+import static util.Util.fillParticipation;
+import static util.Util.fillUser;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import biz.dto.AddressDto;
+import biz.dto.CompanyDto;
+import biz.dto.ContactDto;
+import biz.dto.JeDto;
+import biz.dto.ParticipationDto;
+import biz.dto.PresenceDto;
+import biz.dto.UserDto;
+import biz.objects.Address;
+import biz.objects.BusinessFactory;
+import biz.objects.Company;
+import biz.objects.Contact;
+import biz.objects.Je;
+import biz.objects.Participation;
+import biz.objects.Presence;
+import biz.objects.User;
+
+public class DataBaseMock {
+
+  private static DataBaseMock dataBaseMock = new DataBaseMock();
+
+  private List<User> users = new ArrayList<>();
+  private List<Address> addresses = new ArrayList<>();
+  private List<Company> companies = new ArrayList<>();
+  private List<Contact> contacts = new ArrayList<>();
+  private List<Je> jes = new ArrayList<>();
+  private List<Participation> participations = new ArrayList<>();
+  private List<Presence> presences = new ArrayList<>();
+
+  {
+    // adds users
+    User user = BusinessFactory.getUser();
+    fillUser(user, "zakaria.lamrini@student.vinci.be", "Zakaria", "Lamrini", "zak", "motdepasse",
+        users.size() + 1);
+    users.add(user);
+    user = BusinessFactory.getUser();
+    fillUser(user, "benjamin.pierre@student.vinci.be", "Benjamin", "Pierre", "ben", "motdepasse",
+        users.size() + 1);
+    user.setResponsible(true);
+    users.add(user);
+    user = BusinessFactory.getUser();
+    fillUser(user, "clément.dujardin@student.vinci.be", "Clément", "Du Jardin", "cdj", "motdepasse",
+        users.size() + 1);
+    users.add(user);
+    user = BusinessFactory.getUser();
+    fillUser(user, "thomas.ronsmans@student.vinci.be", "Thomas", "Ronsmans", "tho", "motdepasse",
+        users.size() + 1);
+    users.add(user);
+    user = BusinessFactory.getUser();
+    fillUser(user, "nicolas.christodoulou@student.vinci.be", "Nicolas", "Christodoulou", "nic",
+        "motdepasse", users.size() + 1);
+    users.add(user);
+
+    // adds addresses
+    Address address = BusinessFactory.getAddress();
+    fillAddress(address, 12, "Molenbeek", addresses.size() + 1, "rue de la prospérité", 112, 1080);
+    addresses.add(address);
+    address = BusinessFactory.getAddress();
+    fillAddress(address, 12, "Anderlecht", addresses.size() + 1, "rue saint guidon", 141, 1070);
+    addresses.add(address);
+    address = BusinessFactory.getAddress();
+    fillAddress(address, 12, "Jette", addresses.size() + 1, "rue de la loire", 112, 1080);
+    addresses.add(address);
+    address = BusinessFactory.getAddress();
+    fillAddress(address, 12, "Schaarbeek", addresses.size() + 1, "rue de la tranquilité", 112,
+        1080);
+    addresses.add(address);
+
+    // adds companies
+    Company company = BusinessFactory.getCompany();
+    fillCompany(company, addresses.get(0), "Apple", users.get(0), LocalDateTime.now(),
+        companies.size() + 1);
+    companies.add(company);
+    company = BusinessFactory.getCompany();
+    fillCompany(company, addresses.get(1), "Microsoft", user, LocalDateTime.now(),
+        companies.size() + 1);
+    companies.add(company);
+    company = BusinessFactory.getCompany();
+    fillCompany(company, addresses.get(2), "Samsung", user, LocalDateTime.now(),
+        companies.size() + 1);
+    companies.add(company);
+    company = BusinessFactory.getCompany();
+    fillCompany(company, addresses.get(3), "Mainsys", user, LocalDateTime.now(),
+        companies.size() + 1);
+    companies.add(company);
+
+    // adds contacts
+    Contact contact = BusinessFactory.getContact();
+    fillContact(contact, companies.get(0), "richard.watterson.apple.be", "Richard", "Watterson",
+        "0474636845", contacts.size() + 1);
+    contacts.add(contact);
+    contact = BusinessFactory.getContact();
+    fillContact(contact, companies.get(1), "ronald.weasley.microsoft.be", "Ronald", "Weasley",
+        "0482368451", contacts.size() + 1);
+    contacts.add(contact);
+    contact = BusinessFactory.getContact();
+    fillContact(contact, companies.get(2), "emmanuelle.lepoint.samsung.be", "Emmanuelle",
+        "Le Point", "0484626736", contacts.size() + 1);
+    contacts.add(contact);
+    contact = BusinessFactory.getContact();
+    fillContact(contact, companies.get(3), "valérie.elisabeth.Mainsys.be", "Valérie", "Elisabeth",
+        "0489639473", contacts.size() + 1);
+    contacts.add(contact);
+
+    // adds je
+    Je je = BusinessFactory.getJe();
+    je.setDate(LocalDate.now().minusYears(2));
+    jes.add(je);
+    je = BusinessFactory.getJe();
+    je.setDate(LocalDate.now().minusYears(1));
+    jes.add(je);
+
+    // adds participations
+    Participation participation = BusinessFactory.getParticipation();
+    fillParticipation(participation, companies.get(0), jes.get(0), "facturée", "payée");
+    participations.add(participation);
+    participation = BusinessFactory.getParticipation();
+    fillParticipation(participation, companies.get(1), jes.get(0), "facturée", "payée");
+    participations.add(participation);
+    participation = BusinessFactory.getParticipation();
+    fillParticipation(participation, companies.get(2), jes.get(0), "invitée", "refusée");
+    participations.add(participation);
+    participation = BusinessFactory.getParticipation();
+    fillParticipation(participation, companies.get(1), jes.get(1), "confirmée", "facturée");
+    participations.add(participation);
+    participation = BusinessFactory.getParticipation();
+    fillParticipation(participation, companies.get(2), jes.get(1), "confirmée", "facturée");
+    participations.add(participation);
+    participation = BusinessFactory.getParticipation();
+    fillParticipation(participation, companies.get(3), jes.get(1), "confirmée", "annulée");
+    participations.add(participation);
+
+    // adds presences
+
+  }
+
+  private DataBaseMock() {}
+
+  public static DataBaseMock getInstance() {
+    return dataBaseMock;
+  }
+
+  public static void main(String argc[]) {
+    DataBaseMock dbm = DataBaseMock.getInstance();
+    System.out.println(dbm.getUserByPk(1));
+    System.out.println(dbm.getUserByLogin("zak"));
+  }
+
+  // USER
+
+  private int getUser(User user) {
+    return users.indexOf(user);
+  }
+
+  public UserDto getUserByPk(int pk) {
+    User user = users.stream().filter(u -> u.getPk() == pk).findAny().orElse(null);
+    return (user != null) ? (UserDto) user.clone() : null;
+  }
+
+  public UserDto getUserByLogin(String login) {
+    User user = users.stream().filter(u -> u.getLogin().equals(login)).findAny().orElse(null);
+    return (user != null) ? (UserDto) user.clone() : null;
+  }
+
+  public UserDto getUserByEmail(String email) {
+    User user = users.stream().filter(u -> u.getEmail().equals(email)).findAny().orElse(null);
+    return (user != null) ? (UserDto) user.clone() : null;
+  }
+
+  public UserDto addUser(User user) {
+    user.setPk(users.size() + 1);
+    user = (User) user.clone();
+    users.add(user);
+    return user;
+  }
+
+  public UserDto updateUser(User user) {
+    int index = getUser(user);
+    if (index == -1) {
+      return null;
+    }
+    user = (User) user.clone();
+    users.set(index, user);
+    return user;
+  }
+
+  // ADDRESS
+
+  private int getAddress(Address address) {
+    return addresses.indexOf(address);
+  }
+
+  public AddressDto getAddressByPk(int pk) {
+    Address address = addresses.stream().filter(a -> a.getPk() == pk).findAny().orElse(null);
+    return (address != null) ? (AddressDto) address.clone() : null;
+  }
+
+  public AddressDto getAddressByField(String street, int streetNumber, int zipCode,
+      String commune) {
+    Address address = addresses.stream()
+        .filter(a -> a.getCommune().equals(commune) && a.getStreet().equals(street)
+            && a.getStreetNumber() == streetNumber && a.getZipCode() == zipCode)
+        .findAny().orElse(null);
+    return (address != null) ? (AddressDto) address.clone() : null;
+  }
+
+  public AddressDto addAddress(Address address) {
+    address.setPk(addresses.size() + 1);
+    address = (Address) address.clone();
+    addresses.add(address);
+    return address;
+  }
+
+  public AddressDto updateAddress(Address address) {
+    int index = getAddress(address);
+    if (index == -1) {
+      return null;
+    }
+    address = (Address) address.clone();
+    addresses.set(index, address);
+    return address;
+  }
+
+  // COMPANY
+
+  private int getCompany(Company company) {
+    return companies.indexOf(company);
+  }
+
+  public CompanyDto getCompanyByName(String companyName) {
+    Company company = companies.stream().filter(c -> c.getCompanyName().equals(companyName))
+        .findAny().orElse(null);
+    return (company != null) ? (CompanyDto) company : null;
+  }
+
+  public CompanyDto getCompanyByPk(int pk) {
+    Company company = companies.stream().filter(c -> c.getPk() == pk).findAny().orElse(null);
+    return (company != null) ? (CompanyDto) company.clone() : null;
+  }
+
+  public List<CompanyDto> getCompanies() {
+    List<CompanyDto> companiesDto = new ArrayList<>();
+    for (Company company : companies) {
+      companiesDto.add((CompanyDto) company.clone());
+    }
+    return companiesDto;
+  }
+
+  public List<CompanyDto> getCompaniesForSelection() {
+    return companies.stream()
+        .filter(c -> c.getInscriptionDate().isAfter(LocalDateTime.now().minusYears(1)))
+        .collect(Collectors.toList());
+  }
+
+  public Company addCompany(Company company) {
+    company.setPk(companies.size() + 1);
+    company = (Company) company.clone();
+    companies.add(company);
+    return company;
+  }
+
+  public Company updateCompany(Company company) {
+    int index = getCompany(company);
+    if (index == -1) {
+      return null;
+    }
+    company = (Company) company.clone();
+    companies.set(index, company);
+    return company;
+  }
+
+  // CONTACT
+
+  private int getContact(Contact contact) {
+    return contacts.indexOf(contact);
+  }
+
+  public List<ContactDto> getContacts() {
+    List<ContactDto> contactsDto = new ArrayList<>();
+    for (Contact contact : contacts) {
+      contactsDto.add((ContactDto) contact.clone());
+    }
+    return contactsDto;
+  }
+
+  public ContactDto getContactDtoByPk(int pk) {
+    Contact contact = contacts.stream().filter(c -> c.getPk() == pk).findAny().orElse(null);
+    return (contact != null) ? (ContactDto) contact.clone() : null;
+  }
+
+  public ContactDto getContactByFirstname(String firstname) {
+    Contact contact =
+        contacts.stream().filter(c -> c.getFirstname().equals(firstname)).findAny().orElse(null);
+    return (contact != null) ? (ContactDto) contact.clone() : null;
+  }
+
+  public ContactDto getContactByLastname(String lastname) {
+    Contact contact =
+        contacts.stream().filter(c -> c.getFirstname().equals(lastname)).findAny().orElse(null);
+    return (contact != null) ? (ContactDto) contact.clone() : null;
+  }
+
+  public ContactDto getContactByEmail(String email) {
+    Contact contact =
+        contacts.stream().filter(c -> c.getEmail().equals(email)).findAny().orElse(null);
+    return (contact != null) ? (ContactDto) contact.clone() : null;
+  }
+
+  public List<ContactDto> getContactsByCompany(Company company) {
+    return contacts.stream().filter(c -> c.getCompany().equals(company))
+        .collect(Collectors.toList());
+  }
+
+  public ContactDto addContact(Contact contact) {
+    contact.setPk(contacts.size() + 1);
+    contact = (Contact) contact.clone();
+    contacts.add(contact);
+    return contact;
+  }
+
+  public ContactDto updateContact(Contact contact) {
+    int index = getContact(contact);
+    if (index == -1) {
+      return null;
+    }
+    contact = (Contact) contact.clone();
+    contacts.set(index, contact);
+    return contact;
+  }
+
+  // JE
+
+  public JeDto getJeByYear(int year) {
+    Je je = jes.stream().filter(j -> j.getDayYear() == year).findAny().orElse(null);
+    return (je != null) ? (JeDto) je.clone() : null;
+  }
+
+  public List<JeDto> getJes() {
+    List<JeDto> jesDto = new ArrayList<>();
+    for (Je je : jes) {
+      jesDto.add((JeDto) je.clone());
+    }
+    return jesDto;
+  }
+
+  public JeDto addJe(Je je) {
+    je = (Je) je.clone();
+    jes.add(je);
+    return je;
+  }
+
+  // PARTICIPATION
+
+  private int getParticipation(Participation participation) {
+    return participations.indexOf(participation);
+  }
+
+  public List<ParticipationDto> getParticipationByCompanyNumber(int companyNumber) {
+    return participations.stream().filter(p -> p.getCompany().getPk() == companyNumber)
+        .collect(Collectors.toList());
+  }
+
+  public List<ParticipationDto> getParticipationByYear(int year) {
+    return participations.stream().filter(p -> p.getJe().getDayYear() == year)
+        .collect(Collectors.toList());
+  }
+
+  public ParticipationDto getParticipationByYearAndCompanyNumber(int year, int companyNumber) {
+    return participations.stream().filter(p -> p.getCompany().getPk() == companyNumber
+        && p.getJe().getDayYear() == year).findAny().orElse(null);
+  }
+
+  public List<ParticipationDto> getParticipationForSelection() {
+    return participations.stream()
+        .filter(p -> p.getJe().getDayDate().isAfter(LocalDate.now().minusYears(4)) && p.isPayed())
+        .collect(Collectors.toList());
+  }
+
+  public ParticipationDto addParticipation(Participation participation) {
+    participation = (Participation) participation.clone();
+    participations.add(participation);
+    return participation;
+  }
+
+  public ParticipationDto updateParticipation(Participation participation) {
+    int index = getParticipation(participation);
+    if (index == -1) {
+      return null;
+    }
+    participation = (Participation) participation.clone();
+    participations.set(index, participation);
+    return participation;
+  }
+
+  // PRESENCE
+
+  public List<PresenceDto> getPresencesByYear(int year) {
+    return presences.stream().filter(p -> p.getParticipation().getJe().getDayYear() == year)
+        .collect(Collectors.toList());
+  }
+
+  public PresenceDto addPresence(Presence presence) {
+    presence = (Presence) presence.clone();
+    presences.add(presence);
+    return presence;
+  }
+
+}

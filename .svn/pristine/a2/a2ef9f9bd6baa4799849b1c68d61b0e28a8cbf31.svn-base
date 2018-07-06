@@ -1,0 +1,126 @@
+package biz.objects;
+
+import biz.dto.CompanyDto;
+import biz.exceptions.BusinessException;
+import biz.exceptions.ErrorsCode;
+import ihm.utils.DataValidator;
+
+/**
+ * Contact's business object.
+ */
+class ContactBiz extends BizObject implements Contact {
+
+  /**
+   * Contact's company.
+   */
+  private Company company;
+
+  /**
+   * Contact's lastname.
+   */
+  private String lastname;
+
+  /**
+   * Contact's firstname.
+   */
+  private String firstname;
+
+  /**
+   * Contact's email.
+   */
+  private String email;
+
+  /**
+   * Contact's phone.
+   */
+  private String phone;
+
+  /**
+   * Contact's activity.
+   */
+  private boolean active = true;
+
+  ContactBiz() {}
+
+  /**
+   * Prepare the {@link Contact} to be insert in the database.
+   */
+  public void prepareForInsert() {
+    this.checkConstraints();
+  }
+
+  /**
+   * Check some Constraints.
+   *
+   * @throws BusinessException if of no respect of the constraints.
+   */
+  public void checkConstraints() {
+    if (!DataValidator.validateString(firstname)
+        || !DataValidator.validateString(lastname)
+        || company == null) {
+      throw new BusinessException(ErrorsCode.BUSINESS_INVALID_CONTACT);
+    }
+    company.checkConstraints();
+  }
+  
+  /*
+   * Getters & setters.
+   */
+
+
+  public CompanyDto getCompany() {
+    return company;
+  }
+
+  public void setCompany(Company company) {
+    this.company = company;
+  }
+
+  public String getLastname() {
+    return lastname;
+  }
+
+  public void setLastname(String lastname) {
+    this.lastname = lastname;
+  }
+
+  public String getFirstname() {
+    return firstname;
+  }
+
+  public void setFirstname(String firstname) {
+    this.firstname = firstname;
+  }
+
+  public String getEmail() {
+    return email;
+  }
+
+  public void setEmail(String email) {
+    this.email = email;
+  }
+
+  public String getPhone() {
+    return phone;
+  }
+
+  public void setPhone(String phone) {
+    this.phone = phone;
+  }
+
+  public boolean isActive() {
+    return active;
+  }
+
+  public void setActive(boolean active) {
+    this.active = active;
+  }
+
+  @Override
+  public String toString() {
+    return "ContactBiz [primaryKey=" + primaryKey + ", company=" + company.getCompanyName() + ", lastname="
+        + lastname + ", firstname=" + firstname + ", email=" + email + ", phone=" + phone
+        + ", active=" + active + "]";
+  }
+
+}

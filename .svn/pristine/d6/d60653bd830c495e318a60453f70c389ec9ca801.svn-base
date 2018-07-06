@@ -1,0 +1,93 @@
+package mock.dao;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static util.Util.*;
+
+import biz.DtoFactory;
+import biz.dto.CompanyDto;
+import biz.objects.Address;
+import biz.objects.Company;
+import biz.objects.User;
+import dal.dao.AddressDao;
+import dal.dao.CompanyDao;
+import dal.dao.UserDao;
+
+public class CompanyDaoMock implements CompanyDao {
+
+  private DtoFactory dtoFactory;
+  private AddressDao addressDao;
+  private UserDao userDao;
+  
+  CompanyDaoMock(DtoFactory dtoFactory, AddressDao addressDao, UserDao userDao) {
+    this.dtoFactory = dtoFactory;
+    this.addressDao = addressDao;
+    this.userDao = userDao;
+  }
+  
+  @Override
+  public CompanyDto create(Company company) {
+    if(company == null) {
+      return null;
+    }
+    company.setPk(5);
+    return company;
+  }
+
+  @Override
+  public CompanyDto update(Company company) {
+    if(company == null) {
+      return null;
+    }
+    company.setVersion(company.getVersion()+1);
+    return company;
+  }
+
+  @Override
+  public CompanyDto findByPk(int pk) {
+    if(pk < 0) {
+      return null;
+    }
+    Address address = (Address) addressDao.findByPk(1);
+    
+    User creator = (User) userDao.findByLogin(LOGIN);
+        
+    Company company = (Company) dtoFactory.getCompany();
+    fillCompany(company, address, COMPANY_NAME, creator, pk);
+    return company;
+  }
+
+  @Override
+  public Company findByName(String name) {
+    if(name == null) {
+      return null;
+    }
+    Address address = (Address) addressDao.findByPk(1);
+    
+    User creator = (User) userDao.findByLogin(LOGIN);
+    
+    Company company = (Company) dtoFactory.getCompany();
+    fillCompany(company, address, name, creator, 1);
+    return company;
+  }
+
+  @Override
+  public List<CompanyDto> findAllCompanies() {
+    List<CompanyDto> companies = new ArrayList<>();
+    
+    Address address = (Address) addressDao.findByPk(1);
+    
+    User creator = (User) userDao.findByLogin(LOGIN);
+    
+    Company company = (Company) dtoFactory.getCompany();
+    fillCompany(company, address, COMPANY_NAME, creator, 0);
+    for (int i = 0; i < 5; i++) {
+      company.setPk(i);
+      company.setCompanyName(COMPANY_NAME+i);
+      companies.add(company);
+    }
+    return companies;
+  }
+
+}

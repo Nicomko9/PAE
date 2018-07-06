@@ -1,0 +1,143 @@
+package dal.dao;
+
+import bizz.objects.UserBizz;
+import config.DependencyManager;
+import dal.DalBackEndServices;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.Collections;
+
+class UserDaoImpl implements UserDao {
+
+
+  /**
+   * A compiled expression finding all fields from database.
+   */
+  private static final String USER_FIND_QUERY = "SELECT " + String.join(",", FIELDS_MAP)
+      + " FROM " + TABLE + "  WHERE ";
+
+  private static final String USER_CREATE_QUERY = "INSERT INTO " + TABLE + " ("
+      + String.join(",", FIELDS_MAP) + ") VALUES ("
+      + String.join(",", Collections.nCopies(FIELDS_MAP.size(), "?")) + ")";
+
+  /**
+   * Accesses to database.
+   */
+  private DalBackEndServices dalServices;
+
+  /**
+   * Construct a new UserDao.
+   *
+   * @param dalServices accesses to database
+   */
+  public UserDaoImpl(DalBackEndServices dalServices) {
+    this.dalServices = dalServices;
+  }
+
+  /**
+   * Create an instance of DTO user based on result set.
+   *
+   * @param rs a result set coming directly from database
+   * @return the dto object
+   * @throws SQLException if an error occurs during result set access
+   */
+  private static UserBizz populateDto(ResultSet rs) throws SQLException {
+    UserBizz userDto = DependencyManager.INSTANCE.getClassForName(UserBizz.class);
+
+    userDto.setLogin(rs.getString(FIELD_USER_LOGIN));
+    userDto.setPassword(rs.getString(FIELD_USER_PASSWORD));
+    userDto.setLastname(rs.getString(FIELD_USER_LAST_NAME));
+    userDto.setFirstname(rs.getString(FIELD_USER_FIRST_NAME));
+    userDto.setEmail(rs.getString(FIELD_USER_EMAIL));
+    userDto.setResponsible(rs.getBoolean(FIELD_USER_RESPONSIBLE));
+    userDto.setInscriptionDate(rs.getTimestamp(FIELD_USER_SUBSCRIBE_DATE).toLocalDateTime());
+
+    return userDto;
+  }
+
+
+  public boolean create(UserBizz userDto) {
+    System.out.println("UserDAO - creating user !");
+    try {
+      PreparedStatement stmt = this.dalServices.prepareStatement(USER_CREATE_QUERY);
+
+      stmt.setString(1, userDto.getLogin());
+      stmt.setString(2, userDto.getPassword());
+      stmt.setString(3, userDto.getFirstname());
+      stmt.setString(4, userDto.getLastname());
+      stmt.setString(5, userDto.getEmail());
+      stmt.setBoolean(6, false);
+      stmt.setTimestamp(7, Timestamp.valueOf(userDto.getInscriptionDate()));
+
+      System.out.println("UserDAO - user saved");
+
+      stmt.execute();
+
+      return true;
+    } catch (Exception e) {
+      System.out.println("Saving user : " + e.getMessage() + " (" + USER_CREATE_QUERY + ")");
+      return false;
+    }
+  }
+
+  /**
+   * Find a single user based on login.
+   *
+   * @param login the value to lookup
+   * @return a UserDto instance
+   */
+  @Override
+  public UserBizz findByLogin(String login) {
+    return findBy(FIELD_USER_LOGIN, login);
+  }
+
+  /**
+   * Find a single user based on email.
+   *
+   * @param email the value to lookup
+   * @return a UserDto instance
+   */
+  @Override
+  public UserBizz findByEmail(String email) {
+    return findBy(FIELD_USER_EMAIL, email);
+  }
+
+  /**
+   * Find a user based on a couple of key<->value.
+   *
+   * @param key field to lookup
+   * @param value value to match
+   * @return a userDto instance
+   */
+  private UserBizz findBy(String key, String value) {
+    UserBizz user;
+
+    if (!FIELDS_MAP.contains(key)) {
+      throw new IllegalArgumentException("You cannot lookup user based on " + key);
+    }
+
+    try {
+      PreparedStatement stmt = this.dalServices.prepareStatement(USER_FIND_QUERY + key + " = ?");
+
+      stmt.setString(1, value);
+      ResultSet rs = stmt.executeQuery();
+
+      if (!rs.next()) {
+        rs.close();
+
+        return null;
+      }
+
+      user = populateDto(rs);
+
+      rs.close();
+    } catch (SQLException e) {
+      System.out.println("Exception : " + e.getMessage());
+      throw new IllegalArgumentException("Error querying user : " + USER_FIND_QUERY + key + " = ?");
+    }
+
+    return user;
+  }
+}

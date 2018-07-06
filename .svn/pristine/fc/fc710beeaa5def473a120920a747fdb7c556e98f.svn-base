@@ -1,0 +1,6 @@
+package biz.objects;
+
+
+class JeBiz extends BizObject implements Je {
+
+}

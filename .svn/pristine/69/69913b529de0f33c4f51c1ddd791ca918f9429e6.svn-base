@@ -1,0 +1,34 @@
+package dal;
+
+import java.sql.PreparedStatement;
+
+/**
+ * Supply a common interface to communicate to database.
+ */
+public interface DalBackEndServices {
+
+  /**
+   * Start transaction mode.
+   */
+  void startTransaction();
+
+  /**
+   * Commit the current transaction.
+   */
+  void commitTransaction();
+
+  /**
+   * Rollback the current transaction.
+   */
+  void rollbackTransaction();
+
+
+  /**
+   * Prepare a statement, if not already cached.
+   *
+   * @param sql query to prepare
+   * @return a PreparedStatement based on given string
+   */
+  PreparedStatement prepareStatement(String sql);
+
+}

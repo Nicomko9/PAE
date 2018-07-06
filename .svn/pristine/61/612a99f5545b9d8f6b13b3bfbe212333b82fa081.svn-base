@@ -1,0 +1,8 @@
+package dal.dao;
+
+
+import dal.dao.schema.CompanySchema;
+
+public interface CompanyDao extends CompanySchema {
+
+}

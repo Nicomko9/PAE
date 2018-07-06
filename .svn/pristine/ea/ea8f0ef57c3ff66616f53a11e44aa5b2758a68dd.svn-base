@@ -1,0 +1,90 @@
+package biz;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import biz.dto.JeDto;
+import biz.dto.PresenceDto;
+import biz.exceptions.BusinessErrorException;
+import biz.exceptions.ErrorsCode;
+import biz.objects.Je;
+import biz.objects.Presence;
+import dal.DalFrontEndServices;
+import dal.dao.PresenceDao;
+import ihm.utils.Logger;
+
+class PresenceUccImpl implements PresenceUcc {
+
+  private DalFrontEndServices dal;
+
+  private PresenceDao presenceDao;
+
+  PresenceUccImpl(DalFrontEndServices dal, PresenceDao presenceDao) {
+    this.dal = dal;
+    this.presenceDao = presenceDao;
+  }
+
+  @Override
+  public PresenceDto register(PresenceDto presenceDto) {
+    Logger.log("PresenceUccImpl", "register", "Creating presence");
+
+    Presence presence = (Presence) presenceDto;
+    presence.checkConstraints();
+
+    try {
+      this.dal.startTransaction();
+
+      presenceDto = this.presenceDao.create(presence);
+      if (null == presenceDto) {
+        throw new BusinessErrorException(ErrorsCode.INTERNAL_UNKNOWN_ERROR);
+      }
+
+      this.dal.commitTransaction();
+
+      return presenceDto;
+    } catch (Exception exc) {
+      this.dal.rollbackTransaction();
+      throw exc;
+    }
+  }
+
+  @Override
+  public List<PresenceDto> register(List<PresenceDto> presencesDto) {
+    Logger.log("PresenceUccImpl", "register", "Creating presences");
+
+    List<PresenceDto> presences = new ArrayList<>();
+
+    try {
+      this.dal.startTransaction();
+
+      for (PresenceDto presenceDto : presencesDto) {        
+        Presence presence = (Presence) presenceDto;
+        presence.checkConstraints();
+
+        presenceDto = this.presenceDao.create(presence);
+
+        if (null == presenceDto) {
+          throw new BusinessErrorException(ErrorsCode.INTERNAL_UNKNOWN_ERROR);
+        }
+        presences.add(presenceDto);
+
+      }
+
+      this.dal.commitTransaction();
+
+      return presencesDto;
+    } catch (Exception exc) {
+      this.dal.rollbackTransaction();
+      throw exc;
+    }
+  }
+
+  @Override
+  public List<PresenceDto> getAllPresencesOf(JeDto jeDto) {
+    Je je = (Je) jeDto;
+    je.checkConstraints();
+
+    return presenceDao.findByYear(je.getDayYear());
+  }
+
+}

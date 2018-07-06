@@ -1,0 +1,13 @@
+  <div id="notification-area">
+  </div>
+  <!-- PopUp -->
+
+  <div id="loading-status" style="display: none">
+    <div id="loading-bar-colored">
+    </div>
+    <div id="loading-bar-textual">
+      <i class="fa fa-spinner fa-spin"></i> Chargement des données
+    </div>
+  </div>
+
+  </body>

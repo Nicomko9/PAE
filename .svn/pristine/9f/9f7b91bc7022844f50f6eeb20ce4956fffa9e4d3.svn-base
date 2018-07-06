@@ -1,0 +1,31 @@
+package ucc.dto;
+
+import java.time.LocalDateTime;
+
+public interface UserDto {
+
+  String getLogin();
+
+  void setLogin(String login);
+
+  String getLastname();
+
+  void setLastname(String lastname);
+
+  String getFirstname();
+
+  void setFirstname(String firstname);
+
+  String getEmail();
+
+  void setEmail(String email);
+
+  LocalDateTime getInscriptionDate();
+
+  void setInscriptionDate(LocalDateTime inscriptionDate);
+
+  boolean isResponsible();
+
+  void setResponsible(boolean responsible);
+
+}

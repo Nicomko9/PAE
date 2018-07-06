@@ -1,0 +1,86 @@
+package biz.objects;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
+import static util.Util.fillAddress;
+import static util.Util.fillCompany;
+import static util.Util.fillContact;
+import static util.Util.fillParticipation;
+import static util.Util.fillPresence;
+import static util.Util.fillUser;
+
+import java.time.LocalDate;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import biz.exceptions.BusinessException;
+
+public class PresenceBizTest {
+
+  private Presence presence1, presence2;
+  private Company company;
+  private Address address;
+  private User creator;
+  private Contact contact1, contact2;
+  private Participation participation;
+  private Je je;
+  
+  @Before
+  public void setUp() throws Exception {
+    presence1 = BusinessFactory.getPresence();
+    presence2 = BusinessFactory.getPresence();
+    company = BusinessFactory.getCompany();
+    address = BusinessFactory.getAddress();
+    creator = BusinessFactory.getUser();
+    contact1 = BusinessFactory.getContact();
+    contact2 = BusinessFactory.getContact();
+    participation = BusinessFactory.getParticipation();
+    je = BusinessFactory.getJe();
+    je.setDate(LocalDate.now());
+    fillAddress(address, 12, "commune 1", 500, "rue", 12, 1000);
+    fillUser(creator, "email@test.be", "zakaria", "lamrini", "zak", "password", 500);
+    fillCompany(company, address, "company 1", creator, 500);
+    fillContact(contact1, company, "email@test.be", "firs", "lastn", "034567", 500);
+    fillContact(contact2, company, "email@test.be", "zak", "lam", "034567", 501);
+    fillParticipation(participation, company, je, "confirmée", "facturée");
+    fillPresence(presence1, company, contact1, participation);
+    fillPresence(presence2, company, contact2, participation);
+  }
+
+  @Test
+  public void testHashCode1() {
+    assertNotEquals(presence1.hashCode(), presence2.hashCode());
+  }
+  
+  @Test
+  public void testHashCode2() {
+    presence2.setContact(contact1);
+    assertEquals(presence1.hashCode(), presence2.hashCode());
+  }
+
+  @Test
+  public void testEquals1() {
+    assertFalse(presence1.equals(presence2));
+  }
+  
+  @Test
+  public void testEquals2() {
+    Presence presence = BusinessFactory.getPresence();
+    fillPresence(presence, company, contact1, participation);
+    assertTrue(presence1.equals(presence));
+  }
+
+  @Test
+  public void testCheckConstraints1() {
+    presence1.checkConstraints();
+  }
+  
+  @Test (expected = BusinessException.class)
+  public void testCheckConstraints2() {
+    BusinessFactory.getPresence().checkConstraints();
+  }
+
+}

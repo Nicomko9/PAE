@@ -1,0 +1,104 @@
+﻿/* schema pae */
+/* drop schema pae cascade; */
+create schema pae;
+
+/* séquences de pk */
+/* drop sequence pae.pk_addresses; */
+create sequence pae.pk_addresses;
+/* drop sequence pae.pk_users; */
+create sequence pae.pk_users;
+/* drop sequence pae.pk_companies; */
+create sequence pae.pk_companies;
+/* drop sequence pae.pk_contacts; */
+create sequence pae.pk_contacts;
+
+/* table adresses */
+/* drop table pae.addresses cascade; */
+create table pae.addresses(
+	address_number int default nextval ('pae.pk_addresses'),
+	street varchar(100),
+	street_number int,
+	box int null,
+	zip_code int,
+	commune varchar(100),
+	constraint adress_pkey primary key(address_number)
+);
+
+/* table utilisateurs */
+/* drop table pae.users cascade; */
+create table pae.users(
+	user_number int default nextval ('pae.pk_users'),
+	login varchar(50),
+	pwd varchar(100),
+	lastname varchar(50),
+	firstname varchar(50),
+	email varchar(50),
+	inscription_date timestamp,
+	responsible boolean,
+	constraint utilisateur_pkey primary key(user_number)
+);
+
+/* insert utilisateurs pré-enregistrés */
+insert into pae.users(user_number, login, pwd, lastname, firstname, email, inscription_date, responsible)
+	values (default, 'benjam', 'azerty', 'Pierre', 'Benjamin', 'benjam@ipl.be', now(), true);
+insert into pae.users(user_number, login, pwd, lastname, firstname, email, inscription_date, responsible)
+	values (default, 'nico', 'azerty', 'Chris', 'Nico', 'nico@ipl.be', now(), false);
+insert into pae.users(user_number, login, pwd, lastname, firstname, email, inscription_date, responsible)
+	values (default, 'clem', 'azerty', 'Du Jardin', 'Clément', 'clem@ipl.be', now(), false);
+insert into pae.users(user_number, login, pwd, lastname, firstname, email, inscription_date, responsible)
+	values (default, 'thom', 'azerty', 'Ronsmans', 'Thomas', 'thom@ipl.be', now(), false);
+insert into pae.users(user_number, login, pwd, lastname, firstname, email, inscription_date, responsible)
+	values (default, 'zak', 'azerty', 'Lamrini', 'Zakaria', 'zak@ipl.be', now(), false);
+
+/* table entreprises */
+/* drop table pae.companies cascade; */
+create table pae.companies(
+	company_number int default nextval ('pae.pk_companies'),
+	company_name varchar(50),
+	creator int references pae.users(user_number),
+	address_number int references pae.addresses(address_number),
+	inscription_date timestamp,
+	last_participation_year int,
+	constraint entreprise_pkey primary key(company_number)
+);
+
+/* table personnes contacts */
+/* drop table pae.contacts cascade; */
+create table pae.contacts(
+	contact_number int default nextval ('pae.pk_contacts'),
+	company_number int references pae.companies(company_number),
+	lastname varchar(50),
+	firstname varchar(50),
+	email varchar(50),
+	phone varchar(20),
+	active boolean,
+	constraint contact_pkey primary key(contact_number)
+);
+
+/* table journees_entreprises */
+/* drop table pae.company_days cascade; */
+create table pae.company_days(
+	day_year int,
+	day_date date,
+	constraint company_day_pkey primary key(day_year)
+);
+
+/* table participations */
+/* drop table pae.participations cascade; */
+create table pae.participations(
+	participation_year int,
+	company_number int references pae.companies(company_number),
+	state varchar(10),
+	last_state varchar(10) null,
+	constraint participation_pkey primary key(participation_year, company_number)
+);
+
+/* table présences */
+/* drop table pae.presences cascade; */
+create table pae.presences(
+	participation_year int,
+	company_number int references pae.companies(company_number),
+	contact_number int references pae.contacts(contact_number),
+	constraint presence_pkey primary key(participation_year, company_number, contact_number)
+);
+

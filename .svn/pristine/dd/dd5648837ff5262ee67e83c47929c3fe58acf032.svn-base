@@ -1,0 +1,32 @@
+package dal.dao;
+
+import dal.dao.schema.UserSchema;
+import ucc.dto.UserDto;
+
+public interface UserDao extends UserSchema {
+
+  /**
+   * Persist a new user in database.
+   *
+   * @param userDto data to persist
+   * @return true on success, false otherwise
+   */
+  boolean create(UserDto userDto);
+
+  /**
+   * Find an user by his email.
+   *
+   * @param email supplied email
+   * @return UserDto on match, null otherwise
+   */
+  UserDto findByEmail(String email);
+
+  /**
+   * Find an user by his login.
+   *
+   * @param login supplied login
+   * @return UserDto on match, null otherwise
+   */
+  UserDto findByLogin(String login);
+
+}

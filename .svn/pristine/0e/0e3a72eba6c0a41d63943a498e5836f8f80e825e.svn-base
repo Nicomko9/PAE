@@ -1,0 +1,119 @@
+package biz;
+
+import java.util.Comparator;
+import java.util.List;
+
+import biz.dto.JeDto;
+import biz.exceptions.BusinessException;
+import biz.exceptions.ErrorsCode;
+import biz.objects.Je;
+import dal.DalFrontEndServices;
+import dal.dao.JeDao;
+import ihm.utils.DataValidator;
+import ihm.utils.Logger;
+
+/**
+ * Implementation of {@link JeUcc}.
+ */
+public class JeUccImpl implements JeUcc {
+
+  private DalFrontEndServices dal;
+
+  private JeDao jeDao;
+
+  public JeUccImpl(DalFrontEndServices dal, JeDao jeDao) {
+    this.dal = dal;
+    this.jeDao = jeDao;
+  }
+
+  /**
+   * Persists a JE.
+   *
+   * @param jeDto to persists.
+   * @return <code>true</code> if the {@link JeDto} has been set in the Database.
+   */
+  public boolean createNewJe(JeDto jeDto) {
+    try {
+      this.dal.startTransaction();
+      Je je = (Je) jeDto;
+      if (!DataValidator.validateDate(je.getDayDate())) {
+        Logger.log("JeUccImpl", "createNewJe", "Wrong date");
+        throw new BusinessException(ErrorsCode.BUSINESS_INVALID_DATE_FORMAT);
+      }
+      if (null != this.jeDao.findByYear(je.getDayYear())) {
+        Logger.log("JeUccImpl", "createNewJe", "another JE already exists for the year ");
+        throw new BusinessException(ErrorsCode.BUSINESS_ALREADY_JE_FOR_DATE);
+      }
+      je.prepareForInsert();
+      this.jeDao.create(je);
+      this.dal.commitTransaction();
+      return true;
+    } catch (BusinessException exception) {
+      Logger.log("JeUccImpl", "createNewJe", "Error inserting JE : " + exception.getErrorCode());
+      throw exception;
+    } catch (Exception exception) {
+      Logger.log("JeUccImpl", "createNewJe", "Error inserting JE : " + exception.getMessage());
+      this.dal.rollbackTransaction();
+
+      throw new BusinessException(ErrorsCode.UNDEFINED_ERROR);
+    }
+  }
+
+  /**
+   * Get All the JE.
+   *
+   * @return {@link List} of {@link JeDto}
+   * @throws IllegalArgumentException if there's an error with the query
+   */
+  public List<JeDto> getAllJe() {
+    try {
+      return this.jeDao.findAllJe();
+    } catch (Exception exception) {
+      Logger.log("JeUccImpl", "getAllJe", "Error querying JE");
+      throw new IllegalArgumentException(exception.getMessage());
+    }
+  }
+
+  /**
+   * Get all the previous JE's.
+   *
+   * @return {@link List} of {@link JeDto}
+   * @throws IllegalArgumentException if there's an error with the query
+   */
+  public List<JeDto> getPreviousJe() {
+    try {
+      List<JeDto> list = this.jeDao.findAllJe();
+
+      list.sort(new Comparator<JeDto>() {
+        @Override
+        public int compare(JeDto o1, JeDto o2) {
+          return o2.getDayDate().compareTo(o1.getDayDate());
+        }
+      });
+
+      if (list.size() >= 5) {
+        return list.subList(0, 5);
+      }
+      return list;
+    } catch (Exception exception) {
+      Logger.log("JeUccImpl", "getAllJe", "Error querying JE");
+      throw new IllegalArgumentException(exception.getMessage());
+    }
+  }
+
+  /**
+   * Get a JE by her Year.
+   *
+   * @param year of the JE
+   * @return {@link JeDto} that fits the good year.
+   */
+  public JeDto getJeByYear(int year) {
+    if (!DataValidator.validateInt(year)) {
+      throw new BusinessException(ErrorsCode.HTTP_ERROR_BAD_REQUEST);
+    }
+
+    return this.jeDao.findByYear(year);
+  }
+
+
+}

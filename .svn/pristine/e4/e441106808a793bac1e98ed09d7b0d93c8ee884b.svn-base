@@ -1,0 +1,32 @@
+package dal.dao.schema;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+
+public interface UserSchema {
+
+  String TABLE = "pae.users";
+
+  String FIELD_USER_LOGIN = "login";
+  String FIELD_USER_PASSWORD = "pwd";
+  String FIELD_USER_LAST_NAME = "lastname";
+  String FIELD_USER_FIRST_NAME = "firstname";
+  String FIELD_USER_EMAIL = "email";
+  String FIELD_USER_RESPONSIBLE = "responsible";
+  String FIELD_USER_SUBSCRIBE_DATE = "inscription_date";
+
+  List<String> FIELDS_MAP = Collections.unmodifiableList(new ArrayList<String>() {
+    {
+      add(FIELD_USER_LOGIN);
+      add(FIELD_USER_PASSWORD);
+      add(FIELD_USER_FIRST_NAME);
+      add(FIELD_USER_LAST_NAME);
+      add(FIELD_USER_EMAIL);
+      add(FIELD_USER_RESPONSIBLE);
+      add(FIELD_USER_SUBSCRIBE_DATE);
+    }
+  });
+
+}

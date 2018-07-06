@@ -1,0 +1,107 @@
+package dal.dao;
+
+import config.PluginFactory;
+import dal.DalBackEndServices;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import ucc.dto.UserDto;
+
+public class UserDaoImpl implements UserDao {
+
+  private static final String USER_FIND_QUERY = "SELECT " + String.join(",", FIELDS_MAP.keySet())
+      + " FROM " + TABLE + "  WHERE ";
+
+  private DalBackEndServices dalServices;
+
+  public UserDaoImpl(DalBackEndServices dalServices) {
+    this.dalServices = dalServices;
+  }
+
+  /**
+   * Create an instance of DTO user based on result set.
+   *
+   * @param rs a result set coming directly from database
+   * @return the dto object
+   * @throws SQLException if an error occurs during result set access
+   */
+  private static UserDto populateDto(ResultSet rs) throws SQLException {
+    UserDto userDto = PluginFactory.INSTANCE.getPluginFor(UserDto.class);
+
+    userDto.setLogin(rs.getString(FIELD_USER_LOGIN));
+    userDto.setPassword(rs.getString(FIELD_USER_PASSWORD));
+    userDto.setLastname(rs.getString(FIELD_USER_LAST_NAME));
+    userDto.setFirstname(rs.getString(FIELD_USER_FIRST_NAME));
+    userDto.setEmail(rs.getString(FIELD_USER_EMAIL));
+    userDto.setResponsible(rs.getBoolean(FIELD_USER_RESPONSIBLE));
+    userDto.setInscriptionDate(rs.getTimestamp(FIELD_USER_SUBSCRIBE_DATE).toLocalDateTime());
+
+    return userDto;
+  }
+
+  /**
+   * Return a pre-formated query with single field search based on true match.
+   *
+   * @param param the field to lookup
+   * @return the query
+   */
+  private static String getSimpleFindQuery(String param) {
+    if (!UserDao.FIELDS_MAP.containsKey(param)) {
+      throw new IllegalArgumentException("Illegal field for table " + TABLE);
+    }
+    return USER_FIND_QUERY + param + " = ?";
+  }
+
+
+  /**
+   * Find a single user based on login.
+   *
+   * @param login the value to lookup
+   * @return a UserDto instance
+   */
+  @Override
+  public UserDto findByLogin(String login) {
+    return findBy(FIELD_USER_LOGIN, login);
+  }
+
+  /**
+   * Find a single user based on email.
+   *
+   * @param email the value to lookup
+   * @return a UserDto instance
+   */
+  @Override
+  public UserDto findByEmail(String email) {
+    return findBy(FIELD_USER_EMAIL, email);
+  }
+
+  /**
+   * Find a user based on a couple of key<->value.
+   *
+   * @param key field to lookup
+   * @param value value to match
+   * @return a userDto instance
+   */
+  protected UserDto findBy(String key, String value) {
+    UserDto user;
+
+    if (!FIELDS_MAP.containsKey(key)) {
+      throw new IllegalArgumentException("You cannot lookup user based on " + key);
+    }
+
+    try (PreparedStatement stmt = this.dalServices.prepareStatement(getSimpleFindQuery(FIELD_USER_EMAIL))) {
+      stmt.setString(1, value);
+      ResultSet rs = stmt.executeQuery();
+
+      if (!rs.next()) {
+        throw new IllegalArgumentException("User not found");
+      }
+
+      user = populateDto(rs);
+    } catch (SQLException e) {
+      throw new IllegalArgumentException("Error querying user");
+    }
+
+    return user;
+  }
+}

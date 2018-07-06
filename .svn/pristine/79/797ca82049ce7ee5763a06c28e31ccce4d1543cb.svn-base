@@ -1,0 +1,27 @@
+package ucc;
+
+import ucc.dto.UserDto;
+
+public class UserUccImpl implements UserUcc {
+
+  @Override
+  public UserDto connect(UserDto userDto) {
+    System.out.println("UserUccImpl.connect");
+    // Faire requête à la Db
+
+    return userDto;
+  }
+
+  @Override
+  public String inscription(UserDto userDto) {
+    System.out.println("UserUccImpl.inscription");
+    // Ajouter user à la Db
+
+    // return "Login";
+    
+    // return "Email";
+
+    return "Ok";
+  }
+
+}

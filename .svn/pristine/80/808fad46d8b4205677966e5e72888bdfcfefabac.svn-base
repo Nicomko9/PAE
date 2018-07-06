@@ -1,0 +1,51 @@
+package biz;
+
+import java.time.LocalDateTime;
+
+import biz.dto.CompanyDto;
+import biz.exceptions.BusinessErrorException;
+import biz.exceptions.ErrorsCode;
+import biz.objects.Company;
+import dal.DalFrontEndServices;
+import dal.dao.CompanyDao;
+import ihm.utils.DataValidator;
+
+class CompanyUccImpl implements CompanyUcc {
+
+  private DalFrontEndServices dal;
+
+  private CompanyDao dao;
+
+  public CompanyUccImpl(DalFrontEndServices dal, CompanyDao dao) {
+    this.dao = dao;
+    this.dal = dal;
+  }
+
+  @Override
+  public boolean register(CompanyDto companyDto) {
+    //Validation Champs compadnyDto
+    if (!DataValidator.validateString(companyDto.getCompanyName())
+        || !DataValidator.validateString(companyDto.getAddress().getCommune())
+        || !DataValidator.validateString(companyDto.getAddress().getStreet())
+        || !DataValidator.validateInt(companyDto.getAddress().getStreetNumber())
+        || !DataValidator.validateInt(companyDto.getAddress().getZipCode())
+        || companyDto.getAddress().getBox() >= 0) {
+      throw new BusinessErrorException(ErrorsCode.BUSINESS_INCORRECT_INFORMATIONS);
+    }
+
+    Company comp = (Company) companyDto;
+    comp.setInscriptionDate(LocalDateTime.now());
+    try{
+      this.dal.startTransaction();
+      
+      /*if (null == this.dao.create(comp)) {
+        
+      }*/
+    } catch (Exception exce) {
+      this.dal.rollbackTransaction();
+      throw exce;
+    }
+    return true;
+  }
+
+}

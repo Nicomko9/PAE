@@ -1,0 +1,21 @@
+$(function() {
+	$("#dateChoice").hide();
+	
+	$("#startJe").click(function(){
+		console.log("Strat Je");
+		$("#no-je").hide();
+		$("#dateChoice").show();
+	});
+	
+	$("#date-choice-confirm").click(function(){
+		//switchContainer("container-Je")
+		$("#container-noJE").hide();
+		$("#btn-new-je").show(250);
+		$("#container-JE").show();
+	});
+	
+	$("#InviteEntreprise").click(function(){
+		$(this).html("Inviter");
+		$("#container-invitation").show(250);
+	});
+});

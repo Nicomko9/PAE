@@ -1,0 +1,9 @@
+package biz.objects;
+
+public class BusinessFactory {
+
+  public static UserBiz getUser() {
+    return new UserBizImpl();
+  }
+
+}

@@ -1,0 +1,115 @@
+package biz.ucc;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
+import static util.Util.COMMUNE;
+import static util.Util.COMPANY_NAME;
+import static util.Util.EMAIL;
+import static util.Util.FIRSTNAME;
+import static util.Util.LASTNAME;
+import static util.Util.LOGIN;
+import static util.Util.PASSWORD;
+import static util.Util.PHONE;
+import static util.Util.STREET;
+import static util.Util.STREET_NUMBER;
+import static util.Util.ZIP_CODE;
+import static util.Util.createAddress;
+import static util.Util.createCompany;
+import static util.Util.createContact;
+import static util.Util.createUser;
+import static util.Util.deleteTestRecord;
+import static util.Util.fillAddress;
+import static util.Util.fillCompany;
+import static util.Util.fillContact;
+import static util.Util.fillUser;
+
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import biz.ContactUcc;
+import biz.objects.Address;
+import biz.objects.Company;
+import biz.objects.Contact;
+import biz.objects.User;
+import config.AppConfig;
+
+public class ContactUccImplTest {
+
+  
+  private static AppConfig appConfig;
+  private static ContactUcc contactUcc;
+  private static Contact contact;
+  private static Company company;
+  private static Address address;
+  private static User creator;
+  private static int pkContact, pkCompany, pkAddress, pkCreator;
+  
+  @BeforeClass
+  public static void setUpBeforeClass() throws Exception {
+    appConfig = new AppConfig(AppConfig.APP_DEV);
+    if(!appConfig.load())
+      throw new Exception();
+    contactUcc = (ContactUcc) appConfig.newInstanceOf(ContactUcc.class);
+    
+    address = createAddress(appConfig);
+    pkAddress = address.getPk();
+    
+    creator = createUser(appConfig);
+    pkCreator = creator.getPk();
+    
+    company = createCompany(appConfig, address, creator);
+    pkCompany = company.getPk();
+
+    contact = createContact(appConfig, company);
+    pkContact = contact.getPk();
+  }
+  
+  @AfterClass
+  public static void tearDownAfterClass() throws Exception {
+    deleteTestRecord(appConfig);
+  }
+  
+  @Before
+  public void setUp() throws Exception {
+    fillAddress(address, 12, COMMUNE, pkAddress, STREET, STREET_NUMBER, ZIP_CODE);
+    fillUser(creator, EMAIL, FIRSTNAME, LASTNAME, LOGIN, PASSWORD, pkCreator);
+    fillCompany(company, address, COMPANY_NAME, creator, pkCompany);
+    fillContact(contact, company, EMAIL, FIRSTNAME, LASTNAME, PHONE, pkContact);
+  }
+
+  @Test
+  public void testCreateNewContact1() {
+    contactUcc.createNewContact(contact);
+  }
+  
+  @Test
+  public void testCreateNewContact2() {
+    contact.setEmail("");
+    contactUcc.createNewContact(contact);
+  }
+  
+  @Test
+  public void testCreateNewContact3() {
+    contact.setEmail("test.test@test.be");
+    contactUcc.createNewContact(contact);    
+   }
+  
+  @Test
+  public void testGetContactsForCompany1(){
+    contactUcc.getContactsForCompany("name_co_junit");
+  }
+  
+  @Test
+  public void testUpdate(){
+    fail();
+    // contactUcc.update(contact);
+  }
+  
+  @Test
+  public void testGetAllContact(){
+    assertFalse(contactUcc.getAllContact().isEmpty());
+  }
+
+}

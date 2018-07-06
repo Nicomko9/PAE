@@ -1,0 +1,8 @@
+package biz.objects;
+
+import biz.dto.ParticipationDto;
+
+
+public interface Participation extends ParticipationDto {
+
+}

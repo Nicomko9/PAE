@@ -1,0 +1,50 @@
+package dal.dao;
+
+import java.util.List;
+
+import biz.dto.CompanyDto;
+import biz.objects.Company;
+import dal.dao.schema.CompanySchema;
+
+public interface CompanyDao extends CompanySchema {
+
+  /**
+   * Persist a company into the table companies in database.
+   *
+   * @param company the {@link Company} to persist
+   * @return the value of the {@link Company} casted in {@link CompanyDto}
+   */
+  CompanyDto create(Company company);
+
+  /**
+   * Update a company already present in the database.
+   *
+   * @param company {@link Company} to persist
+   * @return the new value of the {@link Company} casted in {@link CompanyDto}
+   */
+  CompanyDto update(Company company);
+
+  /**
+   * Find a single company based on his pk.
+   *
+   * @param companyNumber the value to lookup
+   * @return the {@link CompanyDto} instance found in the research
+   */
+  CompanyDto findByPk(int pk);
+
+  /**
+   * Find a single company based on his name.
+   *
+   * @param name the value to lookup
+   * @return the {@link Company} instance found in the research
+   */
+  Company findByName(String name);
+
+  /**
+   * Get All the Companies.
+   *
+   * @return {@link List} of {@link CompanyDto}
+   */
+  List<CompanyDto> findAllCompanies();
+
+}

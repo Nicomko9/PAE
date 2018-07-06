@@ -1,0 +1,33 @@
+package biz.dto;
+
+import biz.objects.Company;
+import biz.objects.Je;
+import com.owlike.genson.annotation.JsonIgnore;
+
+public interface ParticipationDto extends AbstractDto {
+
+  @Override
+  @JsonIgnore
+  int getPk();
+
+  @Override
+  @JsonIgnore
+  void setPk(int primaryKey);
+
+  CompanyDto getCompany();
+
+  void setCompany(Company company);
+
+  JeDto getJe();
+
+  void setJe(Je je);
+
+  String getState();
+
+  void setState(String state);
+
+  String getLastState();
+
+  void setLastState(String lastState);
+
+}

@@ -1,0 +1,47 @@
+package mock.dao;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
+import biz.DtoFactory;
+import biz.dto.JeDto;
+import biz.objects.Je;
+import dal.dao.JeDao;
+
+public class JeDaoMock implements JeDao {
+
+  private DtoFactory dtoFactory;
+  
+  JeDaoMock(DtoFactory dtoFactory) {
+    this.dtoFactory = dtoFactory;
+  }
+  
+  @Override
+  public JeDto findByYear(int year) {
+    Je je = dtoFactory.getCompanyDay();
+    je.setDate(LocalDate.ofYearDay(year, 299));
+    return null;
+  }
+
+  @Override
+  public Je create(Je je) {
+    if(je == null) {
+      return null;
+    }
+    je.setDate(LocalDate.now());
+    return je;
+  }
+
+  @Override
+  public List<JeDto> findAllJe() {
+    List<JeDto> jes = new ArrayList<>();
+    Je je = (Je) dtoFactory.getCompanyDay();
+    for (int i = 0; i < 3; i++) {
+      je.setDate(LocalDate.now().minusYears(i));
+      jes.add(je);
+    }
+    return jes;
+  }
+
+}

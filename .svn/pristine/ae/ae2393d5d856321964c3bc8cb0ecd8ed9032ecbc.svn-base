@@ -1,0 +1,126 @@
+package biz;
+
+import biz.dto.AddressDto;
+import biz.exceptions.BusinessErrorException;
+import biz.exceptions.BusinessException;
+import biz.exceptions.ErrorsCode;
+import biz.objects.Address;
+import dal.DalFrontEndServices;
+import dal.dao.AddressDao;
+import ihm.utils.DataValidator;
+import ihm.utils.Logger;
+
+/**
+ * Implementation of the Address' Use Case Controller.
+ */
+class AddressUccImpl implements AddressUcc {
+
+  private DalFrontEndServices dal;
+
+  private AddressDao addressDao;
+
+  AddressUccImpl(DalFrontEndServices dal, AddressDao addressDao) {
+    this.dal = dal;
+    this.addressDao = addressDao;
+  }
+
+  /**
+   * Register a new address in the database.
+   *
+   * @param biz {@link AddressDto} to persist
+   * @return the addressDto with the information added in the DataBase
+   */
+  @Override
+  public AddressDto register(AddressDto addressDto) {
+    Logger.log("AddressUccImpl", "createAddress", "Creating address");
+
+    Address address = (Address) addressDto;
+    address.checkConstraints();
+
+    try {
+      this.dal.startTransaction();
+
+      addressDto = this.addressDao.create(address);
+      if (null == addressDto) {
+        throw new BusinessErrorException(ErrorsCode.INTERNAL_UNKNOWN_ERROR);
+      }
+
+      this.dal.commitTransaction();
+
+      return addressDto;
+    } catch (Exception exc) {
+      this.dal.rollbackTransaction();
+      throw exc;
+    }
+  }
+
+  /**
+   * Get an Address by its street, street number, zip code and commune.
+   *
+   * @param street of the Address
+   * @param streetNumber of the Address
+   * @param zipCode of the Address
+   * @param commune of the Address
+   * @return {@link AddressDto} that fits the good parameters
+   */
+  public AddressDto getAddress(String street, int streetNumber, int zipCode, String commune) {
+    if (!DataValidator.validateString(street)) {
+      throw new BusinessException(ErrorsCode.HTTP_ERROR_BAD_REQUEST);
+    }
+    if (!DataValidator.validateInt(streetNumber)) {
+      throw new BusinessException(ErrorsCode.HTTP_ERROR_BAD_REQUEST);
+    }
+    if (!DataValidator.validateInt(zipCode)) {
+      throw new BusinessException(ErrorsCode.HTTP_ERROR_BAD_REQUEST);
+    }
+    if (!DataValidator.validateString(commune)) {
+      throw new BusinessException(ErrorsCode.HTTP_ERROR_BAD_REQUEST);
+    }
+
+    return this.addressDao.findAddress(street, streetNumber, zipCode, commune);
+  }
+
+  /**
+   * Update an address already present in the database.
+   * 
+   * @param addressDto {@link AddressDto} to change
+   * @return {@link AddressDto} that has been updated in the database
+   */
+  @Override
+  public AddressDto update(AddressDto addressDto) {
+    Logger.log("AddressUccImpl", "update", "Updating address");
+
+    Address address = (Address) addressDto;
+    address.checkConstraints();
+
+    try {
+      this.dal.startTransaction();
+
+      addressDto = this.addressDao.update(address);
+
+      if (null == addressDto) {
+        Logger.log("AddressUccImpl", "update", "Throw Exception because of null");
+        throw new BusinessErrorException(ErrorsCode.INTERNAL_UNKNOWN_ERROR);
+      }
+
+      this.dal.commitTransaction();
+
+      return addressDto;
+    } catch (Exception exception) {
+      Logger.log("AddressUccImpl", "update", "Error updating address : " + exception.getMessage());
+      this.dal.rollbackTransaction();
+      throw new BusinessException(ErrorsCode.UNDEFINED_ERROR);
+    }
+  }
+
+  @Override
+  public AddressDto getByPk(int pk) {
+    try {
+      return this.addressDao.findByPk(pk);
+    } catch (IllegalArgumentException exce) {
+      Logger.log("AddressUccImpl", "getByPk", "~Error Querying Address~");
+      throw new IllegalArgumentException(exce.getMessage());
+    }
+  }
+
+}

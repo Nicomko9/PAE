@@ -1,0 +1,55 @@
+package biz;
+
+import biz.dto.AddressDto;
+import biz.dto.CompanyDto;
+import biz.dto.ContactDto;
+import biz.dto.UserDto;
+import biz.objects.BusinessFactory;
+import biz.objects.Je;
+
+/**
+ * Implementation of the Data Transfer Object Factory.
+ */
+class DtoFactoryImpl implements DtoFactory {
+
+  /**
+   * Give an empty User.
+   *
+   * @return empty {@link UserDto}
+   */
+  public UserDto getUser() {
+    return BusinessFactory.getUser();
+  }
+
+  /**
+   * Give an empty Address.
+   * 
+   * @return empty {@link AddressDto}
+   */
+  public AddressDto getAddress() {
+    return BusinessFactory.getAddress();
+  }
+
+  /**
+   * Give an empty Company.
+   * 
+   * @return empty {@link CompanyDto}
+   */
+  public CompanyDto getCompany() {
+    return BusinessFactory.getCompany();
+  }
+
+  /**
+   * Give an empty Contact.
+   * 
+   * @return empty {@link ContactDto}
+   */
+  public ContactDto getContact() {
+    return BusinessFactory.getContact();
+  }
+
+  public Je getCompanyDay() {
+    return BusinessFactory.getJe();
+  }
+
+}

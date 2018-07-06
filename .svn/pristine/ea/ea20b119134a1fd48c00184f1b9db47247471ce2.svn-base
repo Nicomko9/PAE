@@ -1,0 +1,34 @@
+package biz.exceptions;
+
+/**
+ * Business Exception.
+ */
+@SuppressWarnings("serial")
+public class BusinessException extends RuntimeException {
+
+  private int errorCode;
+  
+  /**
+   * Constructor.
+   *
+   * @param message message of the {@link Exception}
+   */
+  @Deprecated 
+  public BusinessException(String message) {
+    super(message);
+  }
+  
+  /**
+   * Constructor.
+   *
+   * @param errorCode the code error of the {@link Exception}
+   */
+  public BusinessException(int errorCode) {
+    this.errorCode = errorCode;
+  }
+  
+  public int getErrorCode() {
+    return errorCode;
+  }
+
+}

@@ -1,0 +1,19 @@
+package dal;
+
+import java.sql.PreparedStatement;
+
+/**
+ * Supply a common interface to communicate with database.
+ */
+public interface DalBackEndServices {
+
+
+  /**
+   * Prepare a statement, if not already cached.
+   *
+   * @param sql query to prepare
+   * @return a PreparedStatement based on given string
+   */
+  PreparedStatement prepareStatement(String sql);
+
+}

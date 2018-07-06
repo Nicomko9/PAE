@@ -1,0 +1,59 @@
+package biz.ucc;
+
+import static org.junit.Assert.*;
+
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import biz.JeUcc;
+import biz.objects.BusinessFactory;
+import biz.objects.Je;
+import config.AppConfig;
+import dal.dao.JeDao;
+
+public class JeUccImplTest {
+
+  private static AppConfig appConfig;
+  @SuppressWarnings("unused")
+  private static JeUcc jeUcc;
+  @SuppressWarnings("unused")
+  private static Je je;
+  
+  @BeforeClass
+  public static void setUpBeforeClass() throws Exception {
+    appConfig = new AppConfig(AppConfig.APP_DEV);
+    if(!appConfig.load())
+      throw new Exception();
+    jeUcc = (JeUcc) appConfig.newInstanceOf(JeUcc.class);
+    @SuppressWarnings("unused")
+    JeDao jeDao = (JeDao) appConfig.newInstanceOf(JeDao.class);
+    je = BusinessFactory.getJe();
+  }
+  
+  @Before
+  public void setUp() throws Exception {
+    
+  }
+  
+  @Test
+  public void testCreateNewJe() {
+    fail("Not yet implemented");
+  }
+
+  @Test
+  public void testGetAllJe() {
+    fail("Not yet implemented");
+  }
+
+  @Test
+  public void testGetPreviousJe() {
+    fail("Not yet implemented");
+  }
+
+  @Test
+  public void testGetJeByYear() {
+    fail("Not yet implemented");
+  }
+
+}

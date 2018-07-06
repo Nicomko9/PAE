@@ -1,0 +1,20 @@
+application.define('dashboard', function() {
+	return {
+		main : function() {
+			if (application.getUser().isResponsible()) {
+				application.require("template").loadView("contacts",
+						application.require("contacts").main);
+
+				// logger.log("dashboard.js", "main", "Superuser");
+				// application.require("je", function(view) {
+				// 	view.main();
+				// });
+			} else {
+				logger.log("dashboard.js", "main", "Vous n'êtes pas superuser");
+				application.require("je", function(view){
+					view.main();
+				});
+			}
+		}
+	};
+}());

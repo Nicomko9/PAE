@@ -1,0 +1,44 @@
+package ucc;
+
+import bizz.objects.UserBizz;
+import ucc.dto.UserDto;
+import utils.Logger;
+
+class UserUccImpl implements UserUcc {
+
+  private UserBizz user;
+
+  public UserUccImpl(UserBizz userBizz) {
+    this.user = userBizz;
+  }
+
+  public String getId() {
+    return "user";
+  }
+
+  /**
+   * Connect a new user.
+   *
+   * @param request the context, to allow access to request cookies & shit
+   * @param userDto a user with password and login
+   * @return UserDto user transport object
+   */
+  public UserDto connect(UserDto userDto) {
+    Logger.log("ucc", "UserUccImpl", "connect triggered");
+
+    return user.verifyPassword(userDto);
+  }
+
+  /**
+   * Register a new user into the application.
+   *
+   * @param userDto the user to persist
+   * @return a boolean to indicate whether or not it worked
+   */
+  @Override
+  public boolean subscribe(UserDto userDto) {
+    Logger.log("ucc", "UserUccImpl", "subscribe triggered");
+    return user.register(userDto);
+  }
+
+}

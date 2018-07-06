@@ -1,0 +1,58 @@
+package biz.objects;
+
+import static org.junit.Assert.*;
+import static util.Util.*;
+
+import org.junit.Before;
+import org.junit.Test;
+
+public class ContactBizTest {
+
+  private Contact contact1, contact2;
+  private Company company;
+  private Address address;
+  private User creator;
+  
+  @Before
+  public void setUp() throws Exception {
+    contact1 = BusinessFactory.getContact();
+    contact2 = BusinessFactory.getContact();
+    company = BusinessFactory.getCompany();
+    address = BusinessFactory.getAddress();
+    creator = BusinessFactory.getUser();
+    fillAddress(address, 12, "commune 1", 500, "rue", 12, 1000);
+    fillUser(creator, "email", "zakaria", "lamrini", "zak", "password", 500);
+    fillCompany(company, address, "company 1", creator, 500);
+    fillContact(contact1, company, "email", "prenom", "nom", "phone", 500);
+    fillContact(contact2, company, "email", "zakaria", "lamrini", "phone", 501);
+  }
+
+  @Test
+  public void testHashCode1() {
+    assertNotEquals(contact1.hashCode(), contact2.hashCode());
+  }
+  
+  @Test
+  public void testHashCode2() {
+    contact2.setPk(500);
+    assertEquals(contact1.hashCode(), contact2.hashCode());
+  }
+
+  @Test
+  public void testEquals1() {
+    assertFalse(contact1.equals(contact2));
+  }
+  
+  @Test
+  public void testEquals2() {
+    contact2.setPk(500);
+    assertTrue(contact1.equals(contact2));
+  }
+
+  @Test
+  public void testGetCompany() {
+    company.setCompanyName("nouvelle");
+    assertEquals("nouvelle", contact1.getCompany().getCompanyName());
+  }
+  
+}

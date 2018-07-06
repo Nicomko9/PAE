@@ -1,0 +1,185 @@
+package biz.objects;
+
+import java.time.LocalDateTime;
+
+import org.mindrot.jbcrypt.BCrypt;
+
+import com.owlike.genson.annotation.JsonIgnore;
+
+import biz.exceptions.BusinessException;
+import biz.exceptions.ErrorsCode;
+import ihm.utils.DataValidator;
+
+/**
+ * User's business object.
+ */
+class UserBiz extends BizObject implements User {
+
+  /**
+   * User's login.
+   */
+  private String login;
+  /**
+   * User's password.
+   */
+  private String password;
+  /**
+   * User's last name.
+   */
+  private String lastName;
+  /**
+   * User's first name.
+   */
+  private String firstName;
+  /**
+   * User's email.
+   */
+  private String email;
+  /**
+   * User's inscription date.
+   */
+  private LocalDateTime inscriptionDate;
+  /**
+   * User's responsibility.
+   */
+  private boolean responsible = false;
+
+  UserBiz() {
+  }
+
+  /**
+   * Compare password.
+   *
+   * @param password password to be compare to
+   * @return <code>true</code> in case of match
+   */
+  public boolean comparePassword(String password) {
+    return BCrypt.checkpw(password, this.password);
+  }
+
+  /**
+   * Check some Constraints.
+   *
+   * @throws BusinessException if of no respect of the constraints.
+   */
+  public void checkConstraints() throws BusinessException {
+    if (!DataValidator.validateString(login)
+        || !DataValidator.validateString(firstName)
+        || !DataValidator.validateString(lastName)
+        || !DataValidator.validateString(password)
+        || !DataValidator.validateEmail(email)) {
+      throw new BusinessException(ErrorsCode.BUSINESS_INVALID_USER);
+    }
+  }
+
+  /**
+   * Prepare the {@link User} to be insert in the database while setting his Inscription Date.
+   */
+  public void prepareForInsert() throws BusinessException {
+    this.checkConstraints();
+    this.setInscriptionDate(LocalDateTime.now());
+  }
+
+  @Override
+  public String toString() {
+    return "UserBiz [primaryKey=" + primaryKey + ", login=" + login + ", password=" + password
+        + ", lastName=" + lastName + ", firstName=" + firstName + ", email=" + email
+        + ", inscriptionDate=" + inscriptionDate + ", responsible=" + responsible + "]";
+  }
+  
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null || getClass() != obj.getClass()) {
+      return false;
+    }
+    User user = (User) obj;
+    return getLogin().equals(user.getLogin());
+  }
+
+  @Override
+  public int hashCode() {
+    return getLogin().hashCode();
+  }
+
+  /*
+   * Getters & setters
+   */
+
+  public String getLogin() {
+    return login;
+  }
+
+  public void setLogin(String login) {
+    this.login = login;
+  }
+
+  @JsonIgnore
+  public String getPassword() {
+    return this.password;
+  }
+
+  @JsonIgnore
+  public void setPassword(String password) {
+    if (password == null) {
+      this.password = null;
+    } else if (password.indexOf("$2a") == 0) {
+      this.password = password;
+    } else {
+      this.password = BCrypt.hashpw(password, BCrypt.gensalt());
+    }
+  }
+
+  public String getLastname() {
+    return lastName;
+  }
+
+  public void setLastname(String lastName) {
+    this.lastName = lastName;
+  }
+
+  public String getFirstname() {
+    return firstName;
+  }
+
+  public void setFirstname(String firstName) {
+    this.firstName = firstName;
+  }
+
+  public String getEmail() {
+    return email;
+  }
+
+  public void setEmail(String email) {
+    this.email = email;
+  }
+
+  public boolean isResponsible() {
+    return responsible;
+  }
+
+  public void setResponsible(boolean responsible) {
+    this.responsible = responsible;
+  }
+
+  public LocalDateTime getInscriptionDate() {
+    return inscriptionDate;
+  }
+
+  public void setInscriptionDate(LocalDateTime inscriptionDate) {
+    this.inscriptionDate = inscriptionDate;
+  }
+
+  @Override
+  public UserBiz clone() {
+    try {
+    UserBiz clone = (UserBiz) super.clone();
+    return clone;
+    } catch (CloneNotSupportedException exc) {
+      throw new InternalError();
+    }
+  }
+  
+}

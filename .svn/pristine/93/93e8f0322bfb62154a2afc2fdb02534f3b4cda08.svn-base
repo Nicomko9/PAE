@@ -1,0 +1,161 @@
+application.define("je",
+		function() {
+			// Autoload templating module
+			var template = application.require("template");
+
+			// Load a JE based on JSON object representation (previously loaded)
+			function displayJe(je) {
+				template.loadView("je.html", null, function() {
+					// Je not found
+					if (je === null) {
+						// Afficher la partie "JE not found"
+					} else {
+
+						$("span[data-source='je.date']").html(
+								je.dayDate.dayOfMonth + "/"
+										+ je.dayDate.monthValue + "/"
+										+ je.dayDate.year);
+						
+						if (je.dayYear == application.currentYear) {
+							$("#InviteEntreprise").click(function() {
+								$(this).html("Inviter");
+								$("#container-invitation").show(250);
+							});
+						} else {
+							$("#InviteEntreprise").hide();
+						}
+						// Afficher la partie content JE
+					}
+				});
+			}
+
+			return {
+				/**
+				 * Point d'entrée d'une JE (dashboard JE?)
+				 * 
+				 * @param module
+				 *            le module JE
+				 * @param context
+				 *            le context éventuellement passé en argument
+				 */
+				main : function(module, context) {
+					var annee = "";
+
+					if (typeof context == "undefined") {
+						annee = application.currentYear;
+					} else {
+						annee = context.year;
+					}
+
+					$.ajax("/app/je", {
+						data : {
+							year : annee
+						},
+						method : "POST",
+						dataType : "json"
+					}).done(function(data) {
+						// Pas encore de JE pour l'année en cours
+						if (data == null && annee == application.currentYear) {
+							application.require("je", "createJe", { year : annee });
+						}
+						// Une JE pour l'année en question ou pas de JE pour une
+						// ancienne année
+						else {
+							displayJe(data);
+
+						}
+					}).fail(function(xhr) {
+						errors.notify(xhr.JSONResponse);
+					});
+				},
+				/**
+				 * Vue création d'une JE (ihm side)
+				 */
+				createJe : function(module, context) {
+					template.loadView("dashboard.html", function() {
+						console.log("Loading dashboard");
+						console.log(context);
+						$("#no-je").fadeIn(0);
+						$("#no-je > [data-condition]").fadeOut(0);
+						$("#dateChoice").fadeOut(0);
+
+						var annee = -1;
+
+						if (typeof context != "undefined" && typeof context.year != "undefined") {
+							$("#create-je-years").html(
+									(application.currentYear - 1) + "-"
+									+ application.currentYear);
+							$("#no-je > [data-condition='current-year']").fadeIn(0);
+							annee = application.currentYear;
+						} else {
+							$("#no-je > [data-condition='select-year']").fadeIn(0);
+							// @fixme add control from date
+							for (var i = 0; i < 4; i++) {
+								$("#select-year").append("<option value='"+ (application.currentYear+i)
+										+ "'>" + (application.currentYear+i-1) + "-"
+										+ (application.currentYear+i) + "</option>");
+							}
+						}
+
+						$("#noJe-new").on("click", function() {
+							$("#no-je > [data-condition]").fadeOut(0);
+							if (annee === -1) {
+								annee = $("#select-year").val();
+							}
+
+							console.log("Handling annee " + annee);
+
+							application.require("utils/date-picker", function(
+									module) {
+								module.init("#new_je_date", function(pickadate) {
+									pickadate.set("min", new Date(
+											annee - 1, 8, 1));
+									pickadate.set("max", new Date(
+                		  annee, 11, 31));
+									pickadate.open(false);
+								});
+							});
+
+							$(this).hide(100, function() {
+								$("#dateChoice").fadeIn(100);
+							});
+						});
+
+
+					});
+				},
+				/**
+				 * Vue "sauvegarde" du formulaire de création
+				 */
+				saveJe : function() {
+					if (!application.getUser().isConnected()
+							|| !application.getUser().isResponsible()) {
+						alert("Vous devez etre administrateur");
+
+						return;
+					}
+
+					var date = $("#new_je_date").val();
+					var m = date.match(/(\d+)\s([^\s]+)\s(\d+)/);
+
+					date = m[1]
+							+ "/"
+							+ (jQuery.fn.pickadate.defaults.monthsFull
+									.indexOf(m[2]) + 1) + "/" + m[3];
+
+					$.ajax("/app/je/create", {
+						dataType : "json",
+						method : "POST",
+						data : {
+							date : date
+						}
+					}).done(function() {
+						console.log("Saved : goind to dashboard");
+						application.require("je", "main");
+					}).fail(function(xhr) {
+						console.log(xhr.responseText);
+						errors.notify(errors.translate(xhr.responseJSON));
+					});
+				}
+			};
+		}());

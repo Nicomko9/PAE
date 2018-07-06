@@ -1,0 +1,91 @@
+package ihm;
+
+
+import config.AppConfig;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+
+public class TemplateLoader {
+
+  public TemplateLoader(AppConfig config) {
+
+  }
+
+  public void compile() {
+    try (Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("web/index.html")))) {
+      loadPart(writer, "head.html");
+      writer.write("<body class=\"\">");
+
+      // Unconnected content
+      loadPart(writer, "unconnected-main.html");
+
+      // Application content
+      loadPart(writer, "connected-main.html");
+
+      loadInnerTemplate(writer, "blank.html");
+      loadInnerTemplate(writer, "contacts.html");
+      loadInnerTemplate(writer, "dashboard.html");
+      loadInnerTemplate(writer, "entreprise.html");
+      loadInnerTemplate(writer, "je.html");
+
+      // Load dynamically all pages
+
+      writer.write("</div></div></body>");
+      loadPart(writer, "footer.html");
+      writer.write("</html>");
+    } catch (IOException exception) {
+
+    }
+  }
+
+  private void loadInnerTemplate(Writer writer, String template) throws IOException {
+    String id = template.substring(0, template.length() - 5);
+    String str;
+
+    writer.write("<div class=\"container-fluid inner-template\" data-template=\""
+        + id + "\" style=\"display:none\">");
+
+    BufferedReader reader = null;
+
+    try {
+      reader = new BufferedReader(
+        new InputStreamReader(new FileInputStream("web/html/" + template), "UTF-8"));
+
+      while (null != (str = reader.readLine())) {
+        writer.write(str);
+      }
+    } finally {
+      if (reader != null) {
+        reader.close();
+      }
+    }
+
+    writer.write("</div>");
+  }
+
+  private void loadPart(Writer writer, String part) throws IOException {
+    BufferedReader reader = null;
+
+    try {
+      String str;
+      reader = new BufferedReader(
+          new InputStreamReader(new FileInputStream("web/html/parts/" + part), "UTF-8"));
+
+      while (null != (str = reader.readLine())) {
+        writer.write(str);
+      }
+    } finally {
+      if (reader != null) {
+        reader.close();
+      }
+    }
+  }
+
+
+}

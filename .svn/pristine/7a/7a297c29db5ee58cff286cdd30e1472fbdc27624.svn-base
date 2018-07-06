@@ -1,0 +1,785 @@
+application.define("je", function () {
+  // Autoload templating module
+  var template = application.require("template");
+
+  var $picker = $("#new-je-date").pickadate();
+  var datatable = $("#participations-table table").DataTable({
+    "columnDefs": [
+      {
+        "render": function ( data, type, row ) {
+          return "<h4><span class='label label-" + showEtatParticipation(data) + "</span></h4>";
+        },
+        "targets": 2
+      }, {
+        "render": function ( data, type, row ) {
+          return "<div class='btn-group btn-group-sm'>" + data + "</div>";
+        },
+        "targets": 3
+      }
+    ],
+    language : application.datatable.translations,
+    columns: [
+      null,
+      {
+        orderable: false,
+        searchable : false
+      },
+      {
+        className : 'text-center'
+      },
+      {
+        orderable: false,
+        className : "text-center",
+        searchable : false
+      }
+    ]
+  });
+
+  function showEtatParticipation(data){
+	  var str = "";
+	  switch(data){
+		  case "invitée":
+			  str += "default'>" + data;
+			  break;
+		  case "refusée":
+		  case "annulée":
+			  str += "danger'>" + data;
+			  break;
+		  case "confirmée":
+			  str += "info'>" + data;
+			  break;
+		  case "payée":
+			  str += "success	'>" + data;
+			  break;
+		  case "facturée":
+			  str += "primary'>" + data;
+			  break;
+	  }
+	  return str;
+  }
+  
+  function ajax2date(o) {
+    return new Date(o.year, o.monthValue, o.dayOfMonth);
+  }
+
+  function displayEtat(id, je, etat, lastState) {
+    var data = { "je" : je, "company" : id, "lastState" : lastState };
+    var str = "";
+
+    switch(etat) {
+      case "invitée":
+        data["state"] = "confirmée";
+        str += "<a data-view='je:updateParticipation' class='btn btn-default' data-context='" +
+            JSON.stringify(data) + "'>Confirmer</a>";
+        data["state"] = "refusée";
+        str += "<a data-view='je:updateParticipation' class='btn btn-default' data-context='" +
+            JSON.stringify(data) + "'>Refuser</a>";
+        break;
+      case "confirmée":
+        data["state"] = "facturée";
+        str += "<a data-view='je:updateParticipation'  data-context='" +
+            JSON.stringify(data) + "' class='btn btn-default'>Facturer</a>";
+        break;
+      case "facturée":
+        data["state"] = "payée";
+        str += "<a data-view='je:updateParticipation'  data-context='" +
+            JSON.stringify(data) + "' class='btn btn-default'>Payer</a>";
+        break;
+    }
+
+    if (etat != "invitée" && etat != "confirmée") {
+      str += "<a data-view='je:rollbackParticipation' data-context='" 
+    	  + JSON.stringify(data) + "' class='btn btn-default'>Etat précédent</a>";
+      console.log(data.lastState);
+    }
+
+    if (etat != "annulée" && etat != "invitée") {
+      str += "<a data-view='je:cancelParticipation' data-context='" +
+          JSON.stringify(data) + "' class='btn btn-default btn-danger'>"
+          + "Annuler</a>"
+    }
+
+    return str;
+  }
+
+  function updateRow(data) {
+    var row = datatable.row("[data-pk='" + data.company.pk + "']");
+
+    if (data.version === $(row.node()).data("version")) {
+      console.log("Déja a jour");
+    }
+
+    row.remove().draw();
+    insertRow(data);
+  }
+
+  function insertRow(data) {
+    if ($(datatable.row("[data-pk='" + data.company.pk + "']").node()).length != 0) {
+      updateRow(data);
+      return;
+    }
+
+    var row = datatable.row.add([
+        data.company.companyName,
+        "",
+        data.state,
+        displayEtat(data.company.pk, data.je.pk, data.state, data.lastState)
+    ]).draw().node();
+
+    var $row = $(row);
+    $row.attr("data-pk", data.company.pk);
+    $row.data("version", data.version);
+    $row.data("data", data);
+  }
+
+  // Load a JE based on JSON object representation (previously
+  // loaded)
+  function displayJe(je) {
+    logger.log("Je.js", "displayJe", "In");
+
+    if ($("#participations-table").data("year") != je.pk) {
+      datatable.clear().draw();
+      console.log("Erasing datatable, new content");
+    }
+
+    template.loadView("je.html", null, function () {
+      $("#launch-invites").hide(0);
+      $("#participations-table").data("year", je.pk);
+      loadParticipations(je.pk);
+
+      $("span[data-attribute='date-je']").html(je.dayDate.dayOfMonth + "/"
+          + je.dayDate.monthValue + "/"
+          + je.dayDate.year);
+
+      $("span[data-attribute='year-je']").html((je.pk - 1) + "-" + je.pk);
+
+      if (ajax2date(je.dayDate) < new Date()) {
+        $("#btn-invite").hide();
+      }
+    });
+  }
+
+  function exportCsv(data) {
+    logger.log("je.js", "exportCsv", "Exporting");
+    var csvContent = "data:text/csv;charset=utf-8,";
+    data.forEach(function (infoArray, index) {
+      dataString = infoArray.join(",");
+      csvContent += index < data.length ? dataString + "\n" : dataString;
+    });
+
+    var encodedUri = encodeURI(csvContent);
+    var link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "Entreprises_invitées.csv");
+    document.body.appendChild(link);
+
+    link.click();
+  }
+
+  function exportAllInvited() {
+    var listPk = [];
+
+    datatable.rows().iterator('row', function(context, index){
+      var node = $(this.row(index).node());
+
+      listPk.push(node.attr("data-pk"));
+    });
+
+    ajaxCsv(listPk);
+  }
+
+  function updateState() {
+    $.ajax({
+      url: "/app/participation/update",
+      method: "POST",
+      dataType: "JSON",
+      success: function (data) {
+        //faut passer l'année de la je avec comme nom annee
+        //faut passer le numero de l'entreprise de la participation companyPk
+      },
+      error: function (err) {
+      }
+    });
+  }
+
+  function modifyState() {
+    console.log('modify');
+    $(this).parent().append(
+        '<SELECT name="nom" size="1">' + +'<OPTION>refusée</OPTION>'
+        + '<OPTION>confirmée</OPTION>'
+        + '<OPTION>facturée</OPTION>'
+        + '<OPTION>payée</OPTION>'
+        + '</SELECT>'
+        + '<a data-view="updateState"><span class="glyphicon glyphicon-check"></span></a>')
+  }
+
+  var inviteTable = $("#popup-tab-invite").DataTable({ language : application.datatable.translations });
+
+  function showCompanyListForInvitation(data) {
+    inviteTable.clear().draw();
+
+    var n = false;
+    var listPk = [];
+
+    if (datatable.row().count() === 0) {
+      n = true;
+    } else {
+      datatable.rows().iterator('row', function(context, index){
+        var node = $(this.row(index).node());
+
+        listPk.push(node.attr("data-pk"));
+      });
+    }
+
+    for (var i in data) {
+      var o = data[i];
+      var dateInscription = ((o.inscriptionDate.dayOfMonth < 10) ? "0" +
+          o.inscriptionDate.dayOfMonth : o.inscriptionDate.dayOfMonth)
+          + "/" + ((o.inscriptionDate.monthValue < 10) ? "0" + o.inscriptionDate.monthValue
+       : o.inscriptionDate.monthValue) + "/"
+          + o.inscriptionDate.year;
+
+      var toAdd;
+
+      var c = false;
+      if (!n && listPk.indexOf(o.pk.toString()) !== -1) {
+        c = true;
+        toAdd = " checked='checked' disabled='disabled'/>";
+      } else if (n && ((o.lastParticipationYear != 0 &&
+          (o.lastParticipationYear) > application.currentYear - 5) || o.inscriptionDate.year == new Date().getFullYear())){
+        toAdd = " checked='checked' />";
+        c = true;
+      } else {
+        toAdd = " />"
+      }
+
+      var node = inviteTable.row.add([
+          o.companyName,
+          dateInscription,
+          o.lastParticipationYear,
+          "<input type='checkbox' name='invite' " + toAdd
+      ]).draw().node();
+
+      var $node = $(node);
+      $node.attr('data-pk', o.pk);
+      $node.attr('data-version', o.version);
+      $node.attr('data-checked', c);
+    }
+  }
+
+  function loadInvitations() {
+    logger.log("je.js", "loadInvitations()", "Loading");
+    $.ajax({
+      url: "/app/entreprise/listForInvite",
+      method: "POST",
+      dataType: "JSON",
+      success: function (data) {
+        showCompanyListForInvitation(data);
+      },
+      error: function (err) {
+        // TO DO
+      }
+    });
+  }
+
+  function loadParticipations(year) {
+    $("#participation-loading").show(250);
+    logger.log("je.js", "loadParticipations()", "List");
+    $.ajax({
+      url: "/app/participations",
+      method: "POST",
+      dataType: "JSON",
+      data: {
+        annee: year
+      },
+      success: function (data) {
+        if (data.length === 0 && ((year === application.currentYear
+            && ajax2date(data.je.dayDate) > new Date()) || year > application.currentYear)) {
+            // Need to invite
+            $("#manage-je").hide(0);
+            $("#launch-invites").show(0);
+        } else {
+          $("#participations-table").show(0);
+          $("#launch-invites").hide(0);
+          logger.log("je.js", "loadParticipations()", "Successfull !");
+          for(var k in data) {
+            insertRow(data[k]);
+          }
+          getContactPresence();
+        }
+      },
+      error: function (data) {
+        logger.log("je.js", "loadParticipations()", "Erreur");
+        application.errors.notify("Unable to download csv", "danger");
+      }
+    });
+  }
+  
+  function insertContactPresence(rowPk, data){
+	  logger.log("je.js", "insertContactPresence", "For company : " + rowPk);
+
+	  var elem = $("#invitedCompanies tbody").find("tr[data-pk=" + rowPk + "]");
+	  elem = elem.find("td:first").next("td");
+	  
+	  var nbContact = data.length;
+	  var str = ""
+	  var first = "<div class='col-xs-12'><span name='td-normal' class='text-muted'>";
+	  
+	  if(data.length !== 0){
+		  str += "<div name=" +
+	  		"'td-list' style='display:none'><table class='table " +
+	  		"table-condensed table-bordered'name='presence-table'>" +
+	  		"<thead class='thead-inverse'><tr><th class='text-center'>" +
+	  		"Nom</th><th class='text-center'>Mail</th><th class='text-center'>" +
+	  		"Présence</th></tr></thead><tbody>";
+		  var nbPresence = 0;
+		  for(var i in data){
+			  var o = data[i];
+			  var check = false;
+			  var value = "Sera présent";
+			  if (o.email !== ""){
+				  if(o.presences.length !== 0 && o.presences[0].participation.je.dayYear === 2018){
+					  nbPresence++;
+					  check = true;
+					  value = "Sera absent";
+				  }
+				  str += "<tr data-pk='" + o.pk + "' data-version='" + o.version + "'>" +
+				  		"<td>" + o.firstname + " " + o.lastname + "</td><td>" + o.email + 
+				  		"</td><td class='text-center'><button class='btn btn-primary'" +
+				  		"data-pk='" + o.pk + "' data-version='" + o.version +
+				  		"' data-view='je:changePresence'" +
+				  		" data-context='{\"check\" : \"" + check + "\", \"pk\" : \"" +
+				  		o.pk + "\" }'>" + value + "</button></td></tr>";
+			  }else {
+				  nbContact--;
+			  }
+		  }
+		  first += (nbPresence === 0) ? (nbContact + " contacts")
+				  :(nbPresence + " contacts présents");
+		  first += "</span><a class='pull-right fa " +
+	  		"fa-plus-circle' data-view='je:showPresence' data-context" +
+	  		"='{ \"pk\" : \"" + rowPk + "\" }'></a></div>";
+		  str += "</tbody></table><button name='update-presence' class='btn btn-primary pull-right'" +
+		  		" style='display:none'>Modifier</button></div>";
+	  }else {
+		  first += "Aucun contact pour cette entreprise</span></div>";
+	  }
+	  elem.append(first + str);
+  }
+  
+  function updatePresence(context){
+	  //TODO
+  }
+  
+  function getContactPresence(){
+	  $("#invitedCompanies tbody").find("tr").each(function(){
+		 var pk = $(this).data("pk");
+		 $.ajax({
+			 url : "/app/contact/listForCompany",
+			 method : "POST",
+			 data : {
+				 json : pk
+			 },
+			 dataType : "JSON",
+			 success : function(data){
+				 console.log(data);
+				 insertContactPresence(pk, data);
+			 },
+			 error : function (xhr){
+				 console.log("Erreur");
+			 }
+		 });
+	  });
+	  $("#participation-loading").hide(250);
+  }
+
+  function ajaxCsv(pks) {
+    $.ajax({
+      url : "/app/contacts/forCompanies",
+      method : "POST",
+      dataType : "JSON",
+      data : { json : JSON.stringify(pks) } ,
+      success : function (response) {
+        var csvData = [];
+
+        for (var k in response) {
+          var contact = response[k];
+
+          if (contact.email == "" || contact.email == null) {
+            continue;
+          }
+
+          csvData.push([
+            contact.company.companyName,
+            contact.firstname,
+            contact.lastname,
+            contact.email,
+            contact.phone
+          ]);
+        }
+
+        exportCsv(csvData);
+      }
+    });
+  }
+
+  function showParticipations(list) {
+    $("#participations-table tbody").html("");
+
+    if (list.length === 0) {
+      $("#participations-table tbody").append(
+          "<tr><td class='col-lg-2 col-md-2'></td>"
+          + "<td class='col-lg-4 col-md-4'></td>"
+          + "<td class='col-lg-2 col-md-2'></td>"
+          + "<td class='col-lg-2 col-md-2 text-center'>"
+          + "<button name='participation:cancel' class='btn btn-active'>"
+          + "Annuler participation</button>"
+          + "</td>" + "</tr>");
+    } else {
+      for (var i in list) {
+        var o = list[i];
+        var e = $("#participations-table tbody").append(
+            "<tr data-pk='" + o.company.pk + "' data-version='"
+            + o.company.version
+            + "'><td class='col-lg-2 col-md-2' data-toggle='company-name'>"
+            + o.company.companyName + "</td><td class='col-lg-5 col-md-5'></td>"
+            + "<td class='col-lg-3 col-md-3 text-center'>"
+            + "<span class='label label-info' data-attribute='state'>" + o.state + "</span></td>"
+            + "<td class='col-lg-2 col-md-2 text-center'>"
+            + "<div class='btn-group btn-group-sm'></div>"
+            + "</td>"
+            + "</tr>");
+        $("#participations-table tbody tr[data-pk='" + o.company.pk + "']").data("data", o);
+        displayEtat(o.company.pk, o.je.pk, o.state, o.lastState);
+      }
+    }
+    $("#participation-loading").hide(250);
+  }
+
+  function loadPresences(year) {
+    logger.log("je.js", "loadPresences()", "List");
+    $.ajax({
+      url: "/app/presences",
+      method: "POST",
+      dataType: "JSON",
+      data: {
+        annee: year
+      },
+      success: function (data) {
+        logger.log("je.js", "loadPresences()", "Successfull !");
+        showPresences(data);
+      },
+      error: function (data) {
+        logger.log("je.js", "loadPresences()", "Erreur");
+      }
+    });
+  }
+
+  function sendInvites(dl) {
+    logger.log("je.js", "sendInvite()", "Send");
+    if (!application.getUser().isConnected()
+        || !application.getUser().isResponsible()) {
+      notifications.notify(
+          "Vous devez être Administrateur", "danger");
+      return;
+    }
+
+    var n = false;
+    var listPk = [];
+
+    if (datatable.row().count() === 0) {
+      n = true;
+    }
+
+    var invites = [];
+
+    inviteTable.rows().iterator('row', function(context, index){
+      var node = $(this.row(index).node());
+
+      if (node.find("td:last input[type='checkbox']").is(":checked")) {
+        if (node.attr("data-checked") == "false" || n) {
+          invites.push(node.attr("data-pk"));
+        }
+      }
+    });
+
+    $.ajax({
+      url: "app/je/invite",
+      method: "POST",
+      dataType: "JSON",
+      data: {
+        year : $("#participations-table").data("year"),
+        json : JSON.stringify(invites)
+      },
+      success: function (data) {
+        logger.log("je.js", "sendInvites()",
+            "Succesfull");
+        application.require("utils/popups").unload("invitations");
+        mainPrivate({ year : $("#participations-table").data("year") });
+
+        if (dl) {
+          ajaxCsv(invites);
+        }
+      },
+      error: function (err) {
+        $("#popup-invitation-je").modal("hide");
+        notifications.notify("Erreur : " + errors.translate(err.JSONResponse), "danger");
+      }
+    });
+  }
+  
+  function createPrivate(){
+	  if (!application.getUser().isConnected() || !application.getUser().isResponsible()) {
+	        alert("Vous devez etre administrateur");
+	        return;
+	      }
+
+	      var date = $("#new-je-date").val();
+	      var m = date.match(/(\d+)\s([^\s]+)\s(\d+)/);
+
+	      date = m[1] + "/" + (jQuery.fn.pickadate.defaults.monthsFull
+	          .indexOf(m[2]) + 1) + "/" + m[3];
+
+	      $.ajax("/app/je/create", {
+	        dataType: "json",
+	        method: "POST",
+	        data: {
+	          date: date
+	        }
+	      }).done(function (data) {
+	        application.require("utils/popups").unload("launch-je");
+	        application.require("je", "main", { year : data.pk });
+	      }).fail(function (xhr) {
+	        logger.log("je.js", "saveJe()", xhr.responseText);
+	        errors.notify(errors.translate(xhr.responseJSON));
+	      });
+  }
+  
+  function selectDatePrivate(module, context){
+	  application.require("utils/popups").load("launch-je", {}, function(modal) {
+	        modal.setSize("md");
+	        modal.$.find("fieldset.year-choice").hide(0);
+	        modal.$.find("fieldset.date-choice").show(0);
+
+	        var year = typeof context.year != "undefined" ? context.year
+	            :modal.$.find("fieldset.year-choice select").val();
+
+	        modal.$.find("fieldset.date-choice input[type='date']").hide(0);
+
+	        var picker = $picker.pickadate("picker");
+	        picker.clear();
+	        picker.set("min",new Date(year - 1,8,1));
+	        picker.set("max",new Date(year,5,30));
+	        picker.open(false);
+	      });
+  }
+  
+  function showCreatePrivate(){
+	  application.require("utils/popups").load("launch-je", {},
+          function (modal) {
+            modal.setSize("md");
+            modal.$.find("fieldset.year-choice").show(0);
+            modal.$.find("fieldset.date-choice").hide(0);
+
+            if (modal.$.find("fieldset.year-choice").hasClass("error")) {
+              return;
+            }
+
+            var select = modal.$.find("fieldset.year-choice select");
+            select.html("");
+
+            for (var i = 1; i < 5; i++) {
+              if ($("#menu-je-futur").find(
+                      "[data-year='" + (application.currentYear + i)
+                      + "']").length == 0) {
+                select.append(
+                    "<option value='" + (application.currentYear + i) + "'>"
+                    + (application.currentYear + i - 1) + "-"
+                    + (application.currentYear + i)
+                    + "</option>"
+                );
+              }
+            }
+
+            if (select.find("option").length === 0) {
+              modal.$.find("fieldset.year-choice").addClass("error");
+              modal.$.find("fieldset.year-choice").html(
+                  "<div class='alert alert-warning'><strong>"
+                  + "Il y a déja des journées d'entreprise planifiée pour les 4 prochaines années !"
+                  + "</strong></div>"
+              );
+            }
+          });
+  }
+
+  /**
+   * Vérifier qu'une JE existe, et en fonction des dates, affiche un message
+   */
+  function mainPrivate(context){
+	  var annee = "";
+    $("#je-message").hide(0);
+
+    if (typeof context == "undefined") {
+      annee = application.currentYear;
+    } else {
+      annee = context.year;
+    }
+
+    $.ajax("/app/je", {
+      data: {
+        year: annee
+      },
+      method: "POST",
+      dataType: "json"
+    }).done(function (data) {
+      if (data == null) {
+        if (annee == application.currentYear) {
+          application.require("je", "showCreate", {
+            year : application.currentYear
+          });
+        } else if (annee > application.currentYear){
+           application.notifications.notify("Ce JE n'existe pas encore !", "warning");
+        } else {
+          application.notifications.notify("Ce JE n'existe pas !", "danger");
+        }
+      }
+      else {
+        if (data.pk < application.currentYear || ajax2date(data.dayDate) < new Date()) {
+          $("#je-message").show(0);
+          $("#je-message").find(".alert").html(
+              "<p>Cette journée d'entreprise est déja passée, certaines"
+              + " fonctionnalités ne fonctionneront pas ou seront désactivée !</p>"
+          );
+        }
+        displayJe(data);
+      }
+    }).fail(function (xhr) {
+      errors.notify(xhr.JSONResponse);
+    });
+  }
+
+  return {
+    invitetable : inviteTable,
+    main: function (module, context) {
+    	logger.log("je.js", "main", "");
+    	mainPrivate(context);
+    },
+    /**
+     * Vue création d'une JE (ihm side) - choix de l'année
+     */
+    showCreate: function () {
+    	logger.log("je.js", "showCreate", "");
+    	showCreatePrivate();
+    },
+    /**
+     * Vue création d'une JE - choix de la date
+     */
+    selectDate: function (module, context) {
+    	logger.log("je.js", "selectDate", "");
+    	selectDatePrivate(module, context);
+    },
+    /**
+     * Execute la création d'une JE
+     */
+    create : function () {
+    	logger.log("je.js", "create", "");
+    	createPrivate();
+    },
+    /**
+     * First invitations entreprises.
+     */
+    invite: function (module, context) {
+    	logger.log("je.js", "invite", "");
+    	sendInvites((typeof context.dl != "undefined") ? context.dl : false);
+    },
+    /**
+     * Load the possible invitation
+     */
+    inviteList: function (module, context) {
+      application.require("utils/popups").load("invitations", { "keep-form" : true }, function() {
+        $.ajax({
+          url: "/app/entreprise/listForInvite",
+          method: "POST",
+          dataType: "JSON",
+          success: function (data) {
+            showCompanyListForInvitation(data);
+          },
+          error: function (err) {
+            application.require("utils/popups").unload("invitations");
+            application.errors.notify(err.JSONResponse);
+          }
+        });
+      });
+    },
+    exportAllInvited : exportAllInvited,
+    updateParticipation : function (module, context) {
+    	logger.log("je.js", "udateParticipation()", "");
+      $.ajax({
+        url: "/app/participation/update",
+        method: "POST",
+        dataType: "JSON",
+        data : context,
+        success: function (data) {
+          updateRow(data);
+        },
+        error: function (err) {
+          console.log("error");
+          application.errors.notify(err.JSONResponse, "warning")
+        }
+      });
+    },
+    rollbackParticipation : function(module, context){
+    	logger.log("je.js", "rollbackParticipation()", "");
+    	$.ajax({
+    		url:"/app/participation/rollback",
+    		method:"POST",
+    		dataType:"JSON",
+    		data : context,
+    		success : function (data){
+    			updateRow(data);
+    		},
+    		error : function (data) {
+    			console.log("erreur");
+    			application.errors.notify(data.JSONResponse, "warning");
+    		}
+    	});
+    },
+    showPresence : function (module, context){
+    	var elem = $("#invitedCompanies tbody").find("tr[data-pk=" + context.pk + "]");
+   	  	elem = elem.find("td:first").next("td");
+   	  	
+   	  	$(elem).find("div[name='td-list']").toggle(250);
+   	  	$(elem).find("span[name='td-normal']").toggle();
+    },
+    updatePresence : function(module, context){
+    	var elem = $("#invitedCompanies tbody").find("tr[data-pk=" + context.pk + "]");
+   	  	elem = elem.find("td:first").next("td");
+   	  	
+   	  	$(elem).find("button[name='update-presence']").show();
+    },
+    changePresence : function(module, context){
+    	logger.log("je.js", "changePresence(module, context)", "");
+    	var check = context.check;
+    	// check = true -> Il est déjà present, il faut le rendre absent.
+    	// check = true -> Il est absent, il faut le rendre présent.
+    	var contactPk = context.pk;
+    	//TODO
+    },
+    cancelParticipation : function(module, context){
+    	logger.log("je.js", "rollbackParticipation()", "");
+    	$.ajax({
+    		url:"/app/participation/rollback",
+    		method:"POST",
+    		dataType:"JSON",
+    		data : context,
+    		success : function (data){
+    			updateRow(data);
+    		},
+    		error : function (data) {
+    			console.log("erreur");
+    			application.errors.notify(data.JSONResponse, "warning");
+    		}
+    	});
+    }
+  };
+}());

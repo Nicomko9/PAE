@@ -1,0 +1,33 @@
+package dal.dao;
+
+
+import biz.DtoFactory;
+import dal.DalBackEndServices;
+
+/**
+ * Abstract Dao object.
+ */
+abstract class AbstractDao {
+
+  /**
+   * {@link DalBackEndServices} object.
+   */
+  protected DalBackEndServices dal;
+
+  /**
+   * {@link DtoFactory} Object.
+   */
+  protected DtoFactory factory;
+
+  /**
+   * Constructor.
+   *
+   * @param dal Initiate the {@link DalBackEndServices}
+   * @param factory Initiate the {@link DtoFactory}
+   */
+  AbstractDao(DalBackEndServices dal, DtoFactory factory) {
+    this.dal = dal;
+    this.factory = factory;
+  }
+
+}

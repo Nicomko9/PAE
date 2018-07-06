@@ -1,0 +1,7 @@
+package bizz;
+
+public interface UserFactory {
+
+//  UserDto getUserDto();
+
+}

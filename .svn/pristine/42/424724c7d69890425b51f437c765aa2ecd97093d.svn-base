@@ -1,0 +1,6 @@
+package bizz.dto;
+
+
+abstract class AbstractDto {
+
+}

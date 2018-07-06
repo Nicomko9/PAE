@@ -1,0 +1,120 @@
+<html>
+<head>
+<link
+	href="startbootstrap-sb-admin-2-gh-pages/vendor/datatables-plugins/dataTables.bootstrap.css"
+	rel="stylesheet">
+<link
+	href="startbootstrap-sb-admin-2-gh-pages/vendor/datatables-responsive/dataTables.responsive.css"
+	rel="stylesheet">
+</head>
+<div name="page_title" class="row">
+	<div class="col-lg-12 col-md-12">
+		<h1 class="page-header">Contacts</h1>
+	</div>
+</div>
+<div class="row">
+	<div class="col-lg-10 col-md-10 col-lg-offset-1 col-md-offset-1">
+		<div class="panel panel-default">
+			<div class="panel-heading">Liste des personnes de contact du
+				système:</div>
+			<!-- /.panel-heading -->
+			<div class="panel-body">
+				<div class="table-responsive">
+					<table class="table table-bordered ">
+						<!-- table-striped table-bordered table-hover -->
+						<thead class="thead-inverse">
+							<tr>
+								<th>Entreprise</th>
+								<th>Contact</th>
+								<th>Email</th>
+								<th>Téléphone</th>
+								<th>Action</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td class="col-lg-2 col-md-2">vide</td>
+								<td class="col-lg-2 col-md-2">vide</td>
+								<td class="col-lg-3 col-md-3">vide</td>
+								<td class="col-lg-3 col-md-3">vide</td>
+								<td class="col-lg-2 col-md-2 text-center">
+									<button name="edit_contact" class="btn btn-active">
+										Editer</button>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="row">
+	<div class="col-lg-offset-9 col-md-offset-9 col-lg-2 col-md-2">
+		<button id="NewContact" class="btn btn-info btn-rigth"
+			data-toggle="modal" data-target="#popup-new-contact">
+			Nouveau contact</button>
+	</div>
+</div>
+<div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog"
+	aria-labelledby="titrePopUp" aria-hidden="true" id="popup-new-contact">
+	<div class="container-fluid">
+		<div class="row">
+			<div class="modal-dialog modal-lg">
+				<div class="modal-content">
+					<div class="col-lg-12 col-md-12">
+						<div class="panel panel-default">
+							<div class="panel-heading">Nouveau contact</div>
+							<div class="panel-body">
+								<form role="form" id="contact-form">
+									<fieldset>
+										<div class="row">
+											<div class="form-group col-lg-8 col-md-8">
+												<label for="entreprise-contact">Entreprise</label> <input
+													type="text" class="form-control" id="entreprise-contact"
+													name="entreprise-contact" placeholder="Entreprise S.A.">
+											</div>
+										</div>
+										<div class="row">
+											<div class="form-group">
+												<div class="col-lg-5 col-md-5">
+													<label for="lastname-contact">Nom</label> <input
+														type="text" class="form-control" id="lastname-contact"
+														name="lastname-contact" placeholder="Nom">
+												</div>
+												<div
+													class="col-lg-5 col-md-5 col-md-offset-1 col-lg-offset-1">
+													<label for="firstname-contact">Prénom</label> <input
+														type="text" class="form-control" id="firstname-contact"
+														name="firstname-contact" placeholder="Prénom">
+												</div>
+											</div>
+										</div>
+										<div class="row">
+											<div class="form-group">
+												<div class="col-lg-5 col-md-5">
+													<label for="tel-contact">N° téléphone</label> <input
+														type="text" class="form-control" id="tel-contact"
+														name="tel-contact" placeholder="0471/00.00.00">
+												</div>
+												<div
+													class="col-lg-5 col-md-5 col-lg-offset-1 col-md-offset-1">
+													<label for="email-contact">Email</label> <input type="text"
+														class="form-control" id="email-contact"
+														name="email-contact" placeholder="contact@entreprise.be">
+
+												</div>
+											</div>
+										</div>
+
+									</fieldset>
+								</form>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+</html>

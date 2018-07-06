@@ -1,0 +1,12 @@
+package ucc;
+
+
+import ucc.dto.UserDto;
+
+public interface DtoEmptyFactory {
+
+  DtoEmptyFactory INSTANCE = new DtoEmptyFactoryImpl();
+
+  UserDto getUser();
+
+}

@@ -1,0 +1,15 @@
+.btn-rigth {
+  float: right;
+}
+
+header {
+  margin: 0;
+  padding: 0;
+}
+
+#logo {
+  height: 150px;
+  margin-left: 20px;
+  width: 200px;
+}
+

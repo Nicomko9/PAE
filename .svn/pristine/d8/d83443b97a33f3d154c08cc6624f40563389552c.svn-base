@@ -1,0 +1,186 @@
+application.define("contacts", function() {
+	var companiesloaded = false;
+	function listContact(list){
+		$("#contact-table tbody").html("");
+
+		if(list.length === 0){
+			$("#contact-table tbody").append ("<tr><td class='col-lg-2 col-md-2'></td>"
+				+ "<td class='col-lg-2 col-md-2'></td>"
+				+ "<td class='col-lg-3 col-md-3'></td>"
+				+ "<td class='col-lg-3 col-md-3'></td>"
+				+ "<td class='col-lg-2 col-md-2 text-center'>"
+				+ "<button name='edit-contact' class='btn btn-active'>"
+				+ "Editer</button></td></tr>");
+		} else {
+			for(var i in list){
+				var o = list[i];
+				$("#contact-table tbody").append ("<tr><td class='col-lg-2 col-md-2'>"
+						+ o.company.companyName + "</td>"
+						+ "<td class='col-lg-2 col-md-2'>" + o.firstname 
+						+ " " + o.lastname + "</td>"
+						+ "<td class='col-lg-3 col-md-3'>" + o.email + "</td>"
+						+ "<td class='col-lg-3 col-md-3'>" + o.phone + "</td>"
+						+ "<td class='col-lg-2 col-md-2 text-center'>"
+						+ "<button name='edit-contact' class='btn btn-active'"
+						+ "data-toggle='modal' data-target='#popup-new-contact'>"
+						+ "Editer</button></td></tr>");
+			}
+		}
+	}
+	
+	function loadContact(){
+		console.log("contact - loadContact");
+		$.ajax({
+			url : "/app/contact/list",
+			method : "POST",
+			dataType : "JSON",
+			success: function(data){
+				listContact(data);
+				notifications.notify("Affichage des contacts", "info", "user");
+			},
+			error : 
+				function(){
+				console.log("Erreur");
+			}
+		});
+	}
+	function selectCompanies(list){
+		if(list.length === 0){
+			console.log("Pas d'entreprise");
+		} else {
+			for(var i in list){
+				var o = list[i];
+				$("#contact-form select").append("<option value='" + o.companyName 
+						+"'>" + o.companyName + "</option>");
+			}
+		}
+	}
+	
+	function loadCompaniesPopUp(){
+		$.ajax({
+			url : "/app/entreprise/list",
+			method : "POST",
+			dataType : "JSON",
+			success : 
+				function(data){
+					selectCompanies(data);
+			},
+			error : 
+				function(xhr){
+					console.log("erreur");
+			}
+		});
+	}
+	
+	function fillColor(){
+		$("#popup-new-contact").find("input").each(function(){
+			if($(this).val() !== ""){
+				$(this).css("background-color", "#FAFAD2");
+			}
+		});
+	}
+	
+	function fillPopup(cont){
+		cont = cont.parents("tr").find("td:first");
+		$("#popup-new-contact select option[value='" + cont.text() 
+				+ "']").prop('selected', true);
+		$("#popup-new-contact select").css("background-color", "#FAFAD2");
+		$("#popup-new-contact select").change(function(){
+			$("#popup-new-contact select").css("background-color", "");
+		});
+		cont = cont.next("td");
+		var first = cont.text().substr(0, cont.text().indexOf(' '));
+		$("#popup-new-contact #firstname-contact").val(first);
+		var last = cont.text().substr(cont.text().indexOf(' ')+1);
+		$("#popup-new-contact #lastname-contact").val(last);
+		cont = cont.next("td");
+		if(cont.text() !== ""){
+			$("#popup-new-contact #email-contact").val(cont.text());
+		}
+		cont = cont.next("td");
+		if(cont.text() !== ""){
+			$("#popup-new-contact #tel-contact").val(cont.text());
+		}
+		fillColor();
+	}
+	
+	function contactAjax(action, mess){
+		application.require("utils/forms", function(module) {
+			// Management of the form
+			var form = module.getForm("#contact-form");
+			if (form.validate(true)) {
+				console.log("Ajax");
+				$.ajax({
+					url : "/app/contact/" + action,
+					data : {
+						json : JSON.stringify(form.getValues())
+					},
+					method : "POST",
+					datatype : "json",
+					success : function(data) {
+						form.clean();
+						console.log("Success");
+						loadContact();
+						$("#popup-new-contact").modal('hide');
+						notifications.notify(mess, "success",
+								"user");
+					},
+					error : function(xhr) {
+						console.log()
+					}
+				});
+			}
+		});
+	};
+	
+	return {
+		main : function(module, context) {
+			loadContact();
+			$("#NewContact").click(function() {
+				application.require("utils/forms", function(module){
+					var form = module.getForm("#contact-form");
+					form.clean()
+				});
+				$("#btn-update-popup-contact").hide();
+				$("#btn-save-popup-contact").show();
+				$("#popup-new-contact div[class='panel-heading']")
+						.text("Nouveau contact");
+				$("#btn-save-popup-contact").click(function() {
+					application.require("contacts", "create");
+					
+				});
+			});
+			$(document).on("click", "#contact-table tbody button", function(){
+				application.require("utils/forms", function(module){
+					var form = module.getForm("#contact-form");
+					form.clean();
+				});
+				$("#btn-update-popup-contact").show();
+				$("#btn-save-popup-contact").hide();
+				$("#popup-new-contact div[class='panel-heading']")
+						.html("Modifier contact");
+				//Fill Popup
+				fillPopup($(this));
+				$("#btn-update-popup-contact").click(function() {
+					application.require("contacts", "update");
+					
+				});
+			});
+			/*
+			 * Load Companies for popup
+			 */
+			if(!companiesloaded){
+				loadCompaniesPopUp();
+				companiesloaded = true;
+			}
+		},
+		update : function() {
+			console.log("contacts - update");
+			contactAjax("update", "Contact modifié");
+		},
+		create : function() {
+			console.log("contacts - create");
+			contactAjax("create", "Contact créé");
+		},
+	};
+}());

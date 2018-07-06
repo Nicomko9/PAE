@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link href="bootstrap/css/bootstrap.css" rel="stylesheet">
+<link href="style.css" rel="stylesheet" />
+<title>Journify</title>
+</head>
+<body>
+	<div class="container">
+		<div class="row" id="Welcome">
+			<div
+				class="col-lg-4 col-md-4 col-sm-4 col-lg-offset-1 col-md-offset-1 col-sm-offset-1 ">
+				<div class="login-panel panel panel-default">
+					<div class="panel-heading text-center">
+						<h3 class="panel-title">Connexion</h3>
+					</div>
+					<div class="panel-body">
+						<form role="form" id="ConnForm">
+							<fieldset>
+								<div class="form-group">
+									<label for="connexion_login">Login</label> <input
+										class="form-control" placeholder="Login" id="connexion_login"
+										name="login" type="text" autofocus>
+								</div>
+								<div class="form-group">
+									<label for="connexion_password">Mot de Passe</label> <input
+										class="form-control" placeholder="Password"
+										id="connexion_password" name="password" type="password"
+										value="">
+								</div>
+								<div id="ConnFormAlert"
+									class="alert alert-danger alert-dismissable"
+									style="display: none">Tous les champs doivent être
+									remplis!</div>
+								<button id="BtnConn" class="btn btn-lg btn-success btn-rigth">Inscription</button>
+							</fieldset>
+						</form>
+					</div>
+				</div>
+			</div>
+
+			<div
+				class="col-lg-4 col-md-4 col-sm-4 col-lg-offset-2 col-md-offset-2 col-sm-offset-2">
+				<div class="login-panel panel panel-default">
+					<div class="panel-heading text-center">
+						<h3 class="panel-title">Inscription</h3>
+					</div>
+					<div class="panel-body">
+						<form role="form" id="InscForm">
+							<fieldset>
+								<div class="form-group">
+									<label for="subscribe_login"> Login</label> <input
+										class="form-control" placeholder="Login" id="subscribe_login"
+										name="login" type="text" autofocus>
+								</div>
+								<div class="form-group">
+									<label for="subscribe_nom">Nom</label> <input
+										class="form-control" id="subscribe_nom" name="nom" type="text"
+										placeholder="Nom" />
+								</div>
+								<div class="form-group">
+									<label for="subscribe_prenom"> Prenom</label> <input
+										class="form-control" id="prenom" name="prenom" type="text"
+										placeholder="Prenom" />
+								</div>
+								<div class="form-group">
+									<label for="subscribe_password"> Mot de Passe</label> <input
+										class="form-control" id="subscribe_password" name="password"
+										type="password" placeholder="Mot de passe" />
+								</div>
+								<div class="form-group">
+									<label for="subscribe_email"> Email</label> <input
+										class="form-control" id="subscribe_email" name="email"
+										type="text" placeholder="Email" />
+								</div>
+								<div id="InscFormAlert"
+									class="alert alert-danger alert-dismissable"
+									style="display: none">
+									Tous les champs doivent être
+									remplis!!
+								</div>
+								<button id="BtnIns" class="btn btn-lg btn-success btn-rigth">Inscription</button>
+							</fieldset>
+						</form>
+					</div>
+				</div>
+			</div>
+
+		</div>
+	</div>
+</body>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="script.js"></script>
+</html>

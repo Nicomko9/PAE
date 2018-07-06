@@ -1,0 +1,36 @@
+package biz.objects;
+
+import static util.Util.*;
+
+import java.time.LocalDate;
+
+import org.junit.*;
+
+public class JeBizTest {
+
+  private Je jeBiz1, jeBiz2;
+  private Company company;
+  private Address address;
+  private User creator;
+  private Contact contact;
+  
+  @Before
+  public void setUp() throws Exception {
+    jeBiz1 = BusinessFactory.getJe();
+    jeBiz2 = BusinessFactory.getJe();
+    jeBiz1.setDate(LocalDate.now());
+    jeBiz2.setDate(LocalDate.now().minusYears(1));
+    company = BusinessFactory.getCompany();
+    address = BusinessFactory.getAddress();
+    fillAddress(address, 12, "commune", 500, "rue", 12, 1000);
+    creator = BusinessFactory.getUser();
+    fillUser(creator, "email", "zakaria", "lamrini", "login", "pswd", 500);
+    fillCompany(company, address, "company name", creator, 500);
+    jeBiz1.addParticipation(company);
+    contact = BusinessFactory.getContact();
+    jeBiz2.addParticipation(company);
+    fillContact(contact, company, "email", "zak", "lam", "phone", 500);
+    jeBiz1.getParticipation(company);
+  }  
+
+}

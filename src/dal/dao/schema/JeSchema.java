@@ -1,0 +1,25 @@
+package dal.dao.schema;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * Schema of the table company_days in Database.
+ */
+public interface JeSchema extends GenericSchema {
+
+  String TABLE = SCHEMA + ".company_days";
+
+  String FIELD_COMPANY_DAYS_DAY_YEAR = "day_year";
+  String FIELD_COMPANY_DAYS_DAY_DATE = "day_date";
+
+  @SuppressWarnings("serial")
+  List<String> FIELDS_MAP = Collections.unmodifiableList(new ArrayList<String>() {
+    {
+      add(FIELD_COMPANY_DAYS_DAY_YEAR);
+      add(FIELD_COMPANY_DAYS_DAY_DATE);
+    }
+  });
+
+}

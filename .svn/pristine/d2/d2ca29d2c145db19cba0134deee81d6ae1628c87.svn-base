@@ -1,0 +1,33 @@
+package mock.dao;
+
+import java.util.List;
+
+import biz.dto.JeDto;
+import biz.objects.Je;
+import dal.dao.JeDao;
+import mock.DataBaseMock;
+
+public class JeDaoMock implements JeDao {
+
+  private DataBaseMock dataBaseMock;
+  
+  JeDaoMock() {
+    this.dataBaseMock = DataBaseMock.getInstance();
+  }
+  
+  @Override
+  public JeDto findByYear(int year) {
+    return dataBaseMock.getJeByYear(year);
+  }
+
+  @Override
+  public JeDto create(Je je) {
+    return dataBaseMock.addJe(je);
+  }
+
+  @Override
+  public List<JeDto> findAllJe() {
+    return dataBaseMock.getJes();
+  }
+
+}

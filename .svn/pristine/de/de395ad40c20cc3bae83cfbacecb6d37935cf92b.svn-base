@@ -1,0 +1,90 @@
+package mock.ucc;
+
+import static util.Util.BOX;
+import static util.Util.COMMUNE;
+import static util.Util.COMPANY_NAME;
+import static util.Util.EMAIL;
+import static util.Util.FIRSTNAME;
+import static util.Util.LASTNAME;
+import static util.Util.LOGIN;
+import static util.Util.PASSWORD;
+import static util.Util.STREET;
+import static util.Util.STREET_NUMBER;
+import static util.Util.ZIP_CODE;
+import static util.Util.fillAddress;
+import static util.Util.fillCompany;
+import static util.Util.fillUser;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import biz.AddressUcc;
+import biz.CompanyUcc;
+import biz.DtoFactory;
+import biz.UserUcc;
+import biz.dto.CompanyDto;
+import biz.objects.Address;
+import biz.objects.Company;
+import biz.objects.User;
+
+class CompanyUccMock implements CompanyUcc {
+
+  private DtoFactory dtoFactory;
+  private AddressUcc addressUcc;
+  private UserUcc userUcc;
+
+  public CompanyUccMock(DtoFactory dtoFactory, AddressUcc addressUcc, UserUcc userUcc) {
+    this.dtoFactory = dtoFactory;
+    this.addressUcc = addressUcc;
+    this.userUcc = userUcc;
+  }
+
+  @Override
+  public boolean register(CompanyDto biz) {
+    return biz != null;
+  }
+
+  @Override
+  public CompanyDto update(CompanyDto biz) {
+    if(biz == null) {
+      return null;
+    }
+    return biz;
+  }
+
+  @Override
+  public List<CompanyDto> getAllCompanies() {
+    List<CompanyDto> companies = new ArrayList<>();
+    Company company = (Company) dtoFactory.getCompany();
+
+    User user = (User) userUcc.getUserByLogin(LOGIN);
+
+    Address address = (Address) addressUcc.getAddress(STREET, STREET_NUMBER, ZIP_CODE, COMMUNE);
+
+    fillCompany(company, address, COMPANY_NAME, user, 0);
+    for (int i = 0; i < 5; i++) {
+      company.setPk(i);
+      company.setCompanyName(COMPANY_NAME+i);
+      companies.add(company);
+    }
+    return companies;
+  }
+
+  @Override
+  public Company getCompanyByName(String name) {
+    if(name == null) {
+      return null;
+    }
+
+    User user = (User) dtoFactory.getUser();
+    fillUser(user, EMAIL, FIRSTNAME, LASTNAME, LOGIN, PASSWORD, 1);
+
+    Address address = (Address) dtoFactory.getAddress();
+    fillAddress(address, BOX, COMMUNE, 1, STREET, STREET_NUMBER, ZIP_CODE);
+
+    Company company = (Company) dtoFactory.getCompany();
+    fillCompany(company, address, COMPANY_NAME, user, 1);
+    return company;
+  }
+
+}

@@ -1,0 +1,293 @@
+application.define("contacts", function() {
+	/**
+	 * Initialize datatable
+	 * @type {jQuery}
+	 */
+	var datatable = $("#contact-table").find("table:first").DataTable(
+			{ columns : [
+				{ className : "col-md-2 col-sm-2 col-xs-2" } ,
+				{ className : "col-md-2 col-sm-2 col-xs-2" } ,
+				{ className : "col-md-2 col-sm-2 col-xs-2" } ,
+				{ className : "col-md-2 col-sm-2 col-xs-2" } ,
+				{ className : "col-md-1 col-sm-1 col-xs-1 text-center" } ,
+				{ className : "col-md-3 col-sm-3 col-xs-3 text-center", sortable : false }
+			], language : application.datatable.translations,
+				"order": [[ 0, "asc"], [1, "asc"]]
+			}
+		);
+	
+	function listCompanies(preselect) {
+		return application.require("utils/ajax").create({
+			url : "/app/entreprise/list",
+			method : "POST",
+			dataType : "JSON",
+			success : function(data) {
+				$("#popup-entreprise-contact").html("");
+
+				for (var k in data) {
+					if (!data.hasOwnProperty(k))
+						continue;
+
+					$("#popup-entreprise-contact").append("<option value='" +
+							+ data[k]["pk"] + "'>" + data[k]["companyName"] + "</option>")
+				}
+				$("#popup-entreprise-contact").val(preselect);
+			},
+			error : function(data) {
+				logger.log("loader.js", "loadCompanies()", "Erreur");
+			}
+		});
+	}
+
+
+	function getContact(pk) {
+		var data = $("#contact-table").find("tbody tr[data-pk='"+ pk +"']").data("json");
+		return {
+			"pk"      : data.pk,
+			"version" : data.version,
+			"firstname"    : data.firstname,
+			"lastname" : data.lastname,
+			"phone" : data.phone,
+			"email"  : data.email,
+			"active" : data.active,
+			"company.pk"  : data.company.pk,
+			"company.name" : data.company.companyName
+		}
+	}
+	
+	
+	function getPresences(pk){
+		$("#contact-presences-table tbody tr:not(#popup-form-registration)").html("");
+		return application.require("utils/ajax").create({
+			url : "/app/presences/listForContact",
+			method : "POST",
+			data : { json : pk },
+			dataType : "JSON",
+			success : function (presences){
+				if(presences.length === 0){
+					insertPresence("<span class='text-muted'>Aucune participation</span>");
+				} else {
+					for(var i in presences){
+						if(presences[i].participation !== null)
+							insertPresence(presences[i].participation.je.dayYear);
+					}
+				}
+			},
+			error : function () {
+				insertPresence("Erreur de chargement des participations");
+			}
+		});
+	}
+	
+	function insertPresence(message){
+		$("#contact-presences-table tbody").append("<tr><td class='col-xs-12'>"
+				+ message + "</td></tr>;")
+	}
+	
+	function insertContact(contact) {
+		if ($(datatable.row("[data-pk='" + contact.pk + "']").node()).length != 0) {
+			updateContact(contact);
+			return;
+		}
+
+		var row = datatable.row.add([
+			contact.company.companyName,
+			contact.firstname + " " + contact.lastname,
+			contact.email,
+			contact.phone,
+			(contact.active) ? "<span class='label label-primary'>Actif</span>"
+					: "<span class='label label-default'>Inactif</span>",
+			"<div class='btn-group'> <button data-view='contacts:display' "
+			+ "class='btn btn-active' data-context='{ \"pk\" : \"" + contact.pk + "\" }'>Visualiser</button>"
+			+ "<button class='btn btn-primary' data-view='contacts:showEdit' "
+			+ "data-context='{ \"pk\" : \"" + contact.pk + "\" }'>Editer</button></div>"
+		]).draw().node();
+
+		var $row = $(row);
+		$row.attr("data-pk", contact.pk);
+		$row.data("pk", contact.pk);
+		$row.data("version", contact.version);
+		$row.data("json", contact);
+	}
+
+	function updateContact(contact) {
+		var row = datatable.row("[data-pk='" + contact.pk + "']");
+
+		if (contact.version === $(row.node()).data("version")) {
+			console.log("Déja a jour");
+		}
+
+		row.remove().draw();
+		insertContact(contact);
+	}
+
+	function listContact(){
+		$("#contact-loading").show(250);
+		application.require("utils/ajax").create({
+			url : "/app/contact/list",
+			method : "POST",
+			dataType : "JSON",
+			success : function (data) {
+				for (var k in data) {
+					if (!data.hasOwnProperty(k))
+						continue;
+
+					insertContact(data[k]);
+				}
+				$("#contact-loading").hide(250);
+			},
+			error : function(data) {
+				logger.log("loader.js", "loadContacts()", "Erreur");
+			}
+		});
+	}
+	
+	function updateContactFromPopup(module, context, $elem){
+		var form = application.require("utils/forms").getForm("#contact-form");
+
+		if (!form.validate(true)) {
+			console.log("Formulaire incomplet !");
+			return;
+		}
+
+		var values = form.getValues();
+
+		application.require("utils/ajax").create({
+			url: "/app/contact/update",
+			data: {
+				json: JSON.stringify(values)
+			},
+			method: "POST",
+			dataType: "JSON"
+		}).done(function(resp) {
+			updateContact(resp);
+			application.require("utils/popups").unload("contact");
+			notifications.notify("Modification réussie", "info", "user");
+		}).fail(function(xhr) {
+			if (xhr.responseJSON == 473) {
+				form.tagInput($("#popup-name-entreprise"), "danger",
+						errors.translate(xhr.repsonseJSON));
+			} else if(xhr.responseJSON == 409) { 
+				application.require("contacts", "showEdit", {
+					pk : form.find("input[name='pk']").val()
+				});
+				alerteForm("ContPopup", errors.translate(xhr.responseJSON));
+			} else {
+				alerteForm("ContPopup", errors.translate(xhr.responseJSON));
+			}
+		});
+	}
+	
+	function createContact(){
+		var form = application.require("utils/forms").getForm("#contact-form");
+
+		if (!form.validate(true)) {
+			console.log("Formulaire incomplet !");
+			return;
+		}
+
+		application.require("utils/ajax").create({
+			url: "/app/contact/create",
+			data: {
+				json: JSON.stringify(form.getValues())
+			},
+			method: "POST",
+			dataType: "JSON"
+		}).done(function(resp) {
+			insertContact(resp);
+			application.require("utils/popups").unload("contact");
+			notifications.notify("Ajout du contact réussi", "info", "user");
+		}).fail(function(xhr) {
+			if (xhr.responseJSON == 473) {
+				form.tagInput($("#popup-name-entreprise"), "danger",
+						errors.translate(xhr.repsonseJSON));
+			} else {
+				alerteForm("ContPopup", errors.translate(xhr.responseJSON));
+				//notifications.notify(errors.translate(xhr.responseJSON), "warning");
+			}
+		});
+	}
+
+	function displayContact(module, context){
+		var data = getContact(context.pk);
+		data["title"] = "Profil de : " + data["lastname"] + " " + data["firstname"];
+		application.require("utils/popups").load("contact", data, function (modal) {
+			$("#popup-entreprise-contact").html("<option value='" + data["company.pk"]
+					+ "'>" + data["company.name"] + "</option>");
+			modal.$.find(".panel-footer").hide(0);
+			modal.$.find("#contact-form input").each(function() { $(this).attr("disabled", "disabled"); });
+			modal.$.find("#contact-form select").each(function() { $(this).attr("disabled", "disabled"); });
+			$("#popup-entreprise-contact").val(data["company.pk"]);
+			if (data.active == true) {
+				modal.$.find(".state-inactive").hide(0);
+			} else {
+				modal.$.find(".state-inactive").show(0);
+			}
+			modal.$.find("#contact-active-row").hide(0);
+		}, getPresences(context.pk));
+	}
+	
+	function showCreateContact(){
+		application.require("utils/popups").load("contact", {
+			title : "Créer un nouveau contact",
+			"button-text" : "Créer"
+		}, function (modal) {
+			modal.$.find(".state-inactive").hide(0);
+			modal.$.find(".popup-confirm:first").attr("data-view", "contacts:create");
+			modal.$.find(".panel-footer").show(0);
+			modal.$.find("#contact-active-row").hide(0);
+			modal.$.find("input").each(function() { $(this).removeAttr("disabled"); });
+		}, listCompanies());
+	}
+	
+	function showEditContact(module, context){
+		var data = getContact(context.pk);
+
+		data["title"]  = "Profil de : " + data.lastname + " " + data.firstname;
+		data["button-text"] = "Modifier";
+
+		application.require("utils/popups").load("contact", data, function (modal) {
+			modal.$.find(".popup-confirm:first").attr("data-view", "contacts:update");
+			modal.$.find(".panel-footer").show(0);
+			modal.$.find("#contact-form input").each(function() { $(this).removeAttr("disabled"); });
+			modal.$.find("#contact-form select").each(function() { $(this).removeAttr("disabled"); });
+			modal.$.find("#contact-active-row").show(0);
+			if (data.active == true) {
+				modal.$.find(".state-inactive").hide(0);
+			} else {
+				modal.$.find(".state-inactive").show(0);
+			}
+		}, listCompanies(data["company.pk"]));
+	}
+	
+	return {
+		insertContact : insertContact,
+		main : function() {
+			logger.log("contact.js", "main", "");
+			$("div[data-template='je']").hide();
+			listContact();
+		},
+		showCreate : function(){
+			logger.log("contact.js", "showCreate", "");
+			showCreateContact();
+		},
+		showEdit : function (module, context) {
+			logger.log("contact.js", "showCreate", "");
+			showEditContact(module, context);
+		},
+		display : function (module, context) {
+			logger.log("contact.js", "display", "");
+			displayContact(module, context);
+		},
+		update : function(module, context, $elem){
+			logger.log("contact.js", "update", "");
+			$("#popup-cont-edit-loading").show();
+			updateContactFromPopup(module, context, $elem);
+		},
+		create : function() {
+			logger.log("contact.js", "create", "");
+			$("#popup-cont-create	-loading").show();
+			createContact();
+		}
+	};
+}());

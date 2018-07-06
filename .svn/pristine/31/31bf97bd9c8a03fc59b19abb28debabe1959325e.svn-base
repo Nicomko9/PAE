@@ -1,0 +1,12 @@
+package ucc;
+
+import ucc.dto.UserDto;
+
+public class UserUccImpl implements UserUcc {
+
+  public UserDto connect(UserDto userDto) {
+
+    return userDto;
+  }
+
+}

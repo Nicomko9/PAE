@@ -1,0 +1,152 @@
+application.define("search", function() {
+  var timeout = null;
+  var ajax    = null;
+
+  function show() {
+    $(".sidebar-search .autocomplete").dropdown().show();
+  }
+
+  function hide() {
+    $(".sidebar-search .autocomplete").dropdown().hide();
+  }
+
+  function launchSearch(val) {
+    if (val.length < 3) {
+      if (timeout != null) {
+        clearTimeout(timeout);
+        timeout = null;
+      }
+      if (ajax != null) {
+        ajax.abort();
+        ajax = null;
+      }
+
+      return;
+    }
+    show();
+    if (timeout != null) {
+      clearTimeout(timeout);
+    }
+    timeout = setTimeout(function() {
+      if (ajax != null) {
+        ajax.abort();
+        ajax = null;
+      }
+      simpleSearch(val);
+    }, 2000);
+  }
+
+  $(".sidebar-search input[name='app-search']:first").each(function() {
+    var elem = $(this);
+
+    $(this).val("");
+    elem.data('oldVal', "");
+
+    // Init changes watcher
+    elem.bind("propertychange change click keyup input paste", function(event){
+
+      // On change
+      if (elem.data('oldVal') != elem.val()) {
+        console.log("Change detected");
+
+        elem.data('oldVal', elem.val());
+
+        if (elem.val() == "") {
+          hide();
+        } else {
+          launchSearch(elem.val());
+        }
+      }
+    });
+
+    $(document).on("click", hide);
+  });
+
+  // Workaround
+  $(document).on("click", ".sidebar-search .result-set", function() {
+    console.log("Clicked");
+
+    var element = $(this).find("a:first");
+
+    var view = element.attr("data-view");
+    var context = element.attr("data-context");
+    var r = view.substr(0, view.indexOf(":"));
+    var v = view.substr(view.indexOf(":") + 1);
+
+    if (typeof context != "undefined") {
+      context = JSON.parse(context);
+    } else {
+      context = {};
+    }
+
+    application.require(r, v, context);
+  });
+
+  function simpleSearch(val) {
+    ajax = $.ajax({
+      "url" : "/app/search",
+      "method" : "POST",
+      "dataType" : "JSON",
+      "data" : { search : val },
+      "success" : function(data) {
+        $(".autocomplete .result-set").each(function() { $(this).remove() });
+        if (-1 != val.match(/^\d+$/)) {
+          var previous = ($("#previousJE a[data-year]").data("data"));
+          for (var k in previous) {
+            var je = previous[k];
+            if (je.dayYear <= application.currentYear && -1 != je.dayYear.toString().match("^"+je.dayYear+"\d*")) {
+              console.log("Adding " + je.dayYear);
+              $(".autocomplete li.divider:first").before("<li class='result-set'><a>JE "
+                  + je.dayYear + "</a></li>");
+            }
+          }
+        }
+
+        if (data.companies.length != 0) {
+          for (var i = 0; i < 3; i++) {
+            $(".autocomplete .divider:last").before(
+                "<li class='result-set'>"
+                + "<a href='#' data-view='entreprise:display' data-context='{ \"pk\" : "
+                + data.companies[i].pk + " }' >"
+                + data.companies[i].companyName
+                + "</a>"
+                + "</li>"
+            )
+          }
+
+          if (data.companies.length > 3) {
+            $(".autocomplete .divider:last").before(
+                "<li style='text-align: center' class='result-set'>"
+                + "<a>"
+                + "Afficher plus (" + data.companies.length + ")"
+                + "</a>"
+                + "</li>"
+            );
+          }
+        }
+        if (data.contacts.length != 0) {
+          for (var i = 0; i < 3; i++) {
+            $(".autocomplete").append(
+                "<li class='result-set'>"
+                + "<a href='#'>"
+                + data.contacts[i].firstname + " " + data.contacts[i].lastname
+                + "</a>"
+                + "</li>"
+            );
+          }
+
+          if (data.contacts.length > 3) {
+            $(".autocomplete").append(
+                "<li style='text-align: center' class='result-set'>"
+                + "<a href=''>"
+                + "Afficher plus (" + data.contacts.length + ")"
+                + "</a></li>"
+            );
+          }
+        }
+      }
+    });
+  }
+
+  return {};
+} ());

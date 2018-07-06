@@ -1,0 +1,10 @@
+package ucc;
+
+
+import ucc.dto.UserDto;
+
+interface DtoEmptyFactory {
+
+  UserDto getUser();
+
+}

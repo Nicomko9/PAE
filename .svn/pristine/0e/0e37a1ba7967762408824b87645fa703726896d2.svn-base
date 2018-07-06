@@ -1,0 +1,22 @@
+package biz;
+
+import java.util.List;
+
+import biz.dto.PresenceDto;
+import biz.objects.Je;
+
+class PresenceUccImpl implements PresenceUcc {
+
+  @Override
+  public PresenceDto register(PresenceDto presence) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public List<PresenceDto> getAllPresencesOf(Je je) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+}

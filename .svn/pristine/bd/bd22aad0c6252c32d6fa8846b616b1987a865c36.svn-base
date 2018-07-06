@@ -1,0 +1,20 @@
+package bizz.objects;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import ucc.dto.UserDto;
+
+public interface UserBizz {
+
+  boolean validateUser(UserDto userDto);
+
+  boolean register(UserDto userDto);
+
+  UserDto verifyPassword(UserDto userDto);
+
+  UserDto loadFromSession(HttpServletRequest request);
+
+  void saveToSession(HttpServletResponse response, UserDto userDto);
+
+  void cleanSession(HttpServletRequest request, HttpServletResponse response);
+}

@@ -1,0 +1,39 @@
+<div id="inner-popup-confirm" class="modal fade" tabindex="-1"
+	role="dialog" aria-hidden="true">
+	<div class="container-fluid">
+		<div class="row">
+			<div class="modal-dialog modal-lg clearfix">
+				<div class="modal-content">
+					<div class="panel panel-default">
+							<div class="panel-heading clearfix">
+								<div class="col-md-10 col-md-offset-1 text-center">
+									Demande de confirmation</div>
+								<div class="pull-right" data-dismiss="modal"
+									data-target="#popup-new-contact">
+									<i class="fa fa-times"></i>
+								</div>
+							</div>
+							<div class="panel-body text-center">
+								<p>Vous êtes sur le point d'effectuer l'action suivante :</p>
+								<p>
+									<strong> <span data-attribute="action"></span>
+									</strong>
+								</p>
+								<div class="col-md-12 checkbox">
+									<label> <input type="checkbox" id="confirm-box">
+										Ne plus demander la confirmation
+									</label>
+								</div>
+							</div>
+							<div class="panel-footer clearfix">
+								<div class="pull-right">
+									<a data-id="accept" href="#" class="btn btn-primary">Confirmer</a>
+									<a data-id="deny" href="#" class="btn btn-default">Annuler</a>
+								</div>
+							</div>
+				</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

@@ -1,0 +1,146 @@
+package dal.dao;
+
+
+import biz.DtoFactory;
+import biz.dto.JeDto;
+import biz.objects.Je;
+import dal.DalBackEndServices;
+import dal.dao.schema.JeSchema;
+import ihm.utils.Logger;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * {@link JeDao} implementation.
+ */
+public class JeDaoImpl extends AbstractDao implements JeDao, JeSchema {
+
+  /**
+   * Insert JE auto generated query.
+   */
+  private static final String JE_CREATE_QUERY =
+      "INSERT INTO " + TABLE + " (" + String.join(",", FIELDS_MAP) + ") VALUES ("
+          + String.join(",", Collections.nCopies(FIELDS_MAP.size(), "?")) + ")";
+
+  private static final String JE_FIND_ALL_QUERY = "SELECT * FROM " + TABLE;
+  /**
+   * A compiled expression finding all fields from the table company_days in database.
+   */
+  private static final String JE_FIND_QUERY = "SELECT * FROM " + TABLE + " WHERE ";
+
+  /**
+   * Constructor.
+   *
+   * @param dal services provider
+   * @param factory {@link DtoFactory} object
+   */
+  public JeDaoImpl(DalBackEndServices dal, DtoFactory factory) {
+    super(dal, factory);
+  }
+
+  /**
+   * Create an instance of DTO compay_day based on result set.
+   *
+   * @param rs {@link ResultSet} coming directly from database
+   * @return a {@link Je} object with the information of the {@link ResultSet}
+   * @throws SQLException if an error occurs during result set access
+   */
+  private Je populateDto(ResultSet rs) throws SQLException {
+    Je je = (Je) this.factory.getCompanyDay();
+    je.setDate(rs.getTimestamp(FIELD_COMPANY_DAYS_DAY_DATE));
+    return je;
+  }
+
+  /**
+   * Search a je for the given year.
+   *
+   * @param year : the integer that is the year searched
+   * @return a {@link Je} object with the information of the {@link ResultSet}
+   * @throws SQLException if an error occurs during result set access
+   */
+  public JeDto findByYear(int year) {
+    return findBy(FIELD_COMPANY_DAYS_DAY_YEAR, year);
+  }
+
+  private JeDto findBy(String key, int value) {
+    JeDto je;
+
+    if (!FIELDS_MAP.contains(key)) {
+      throw new IllegalArgumentException("You cannot lookup user based on " + key);
+    }
+    try {
+      PreparedStatement ps = this.dal.prepareStatement(JE_FIND_QUERY + key + "= ?");
+      ps.setInt(1, value);
+      ResultSet rs = ps.executeQuery();
+      if (!rs.next()) {
+        rs.close();
+        return null;
+      }
+      je = populateDto(rs);
+      rs.close();
+    } catch (SQLException sqle) {
+      Logger.log("JeDaoImpl", "findBy", sqle.getMessage());
+      throw new IllegalArgumentException("Error querying je : " + JE_FIND_QUERY);
+    }
+
+    return je;
+  }
+
+  /**
+   * Persist a je into the table company_days in database.
+   *
+   * @param je to persist
+   * @throws Exception the exception to launch
+   */
+  public JeDto create(Je je) {
+    try {
+      PreparedStatement stmt = this.dal.prepareStatement(JE_CREATE_QUERY);
+      stmt.setInt(1, je.getDayYear());
+      stmt.setTimestamp(2, Timestamp.valueOf(je.getDayDate().atStartOfDay()));
+      ResultSet rs = stmt.executeQuery();
+      
+      if (!rs.next()) {
+        rs.close();
+        return null;
+      }
+      
+      je = populateDto(rs);
+      
+      return je;
+    } catch (Exception exc) {
+      Logger.log("JeDaoImpl", "create",
+          "registration of " + je.getDayYear() + " failed : " + exc.getMessage());
+      return null;
+    }
+  }
+
+  /**
+   * Get all the company days from the database.
+   *
+   * @return a {@link JeDto} list of Je data transfer object with the information of the {@link
+   * ResultSet}
+   * @throws SQLException if an error occurs during result set access
+   */
+  public List<JeDto> findAllJe() {
+    List<JeDto> allJe = new ArrayList<JeDto>();
+    try {
+      PreparedStatement ps = this.dal.prepareStatement(JE_FIND_ALL_QUERY);
+      ResultSet rs = ps.executeQuery();
+
+      while (rs.next()) {
+        allJe.add(populateDto(rs));
+      }
+      rs.close();
+
+    } catch (SQLException sqle) {
+      Logger.log("JeDaoImpl", "findAllJe", sqle.getMessage());
+      throw new IllegalArgumentException("Error querying je : " + JE_FIND_ALL_QUERY);
+    }
+    return allJe;
+  }
+}

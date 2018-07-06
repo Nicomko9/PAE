@@ -1,0 +1,9 @@
+package biz;
+
+import biz.dto.CompanyDto;
+
+public interface CompanyUcc {
+
+  boolean register(CompanyDto companyDto);
+
+}

@@ -1,0 +1,15 @@
+package mock.dao;
+
+import biz.DtoFactory;
+import dal.dao.ParticipationDao;
+
+public class ParticipationDaoMock implements ParticipationDao {
+
+  @SuppressWarnings("unused")
+  private DtoFactory dtoFactory;
+  
+  ParticipationDaoMock(DtoFactory dtoFactory) {
+    this.dtoFactory = dtoFactory;
+  }
+  
+}

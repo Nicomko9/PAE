@@ -1,0 +1,30 @@
+  <div id="notification-area">
+  </div>
+  <!-- PopUp -->
+
+  </body>
+
+<script type="text/javascript" src="/jquery.js"></script>
+
+<script src="/startbootstrap-sb-admin-2-gh-pages/vendor/bootstrap/js/bootstrap.min.js"></script>
+<script src="/startbootstrap-sb-admin-2-gh-pages/vendor/metisMenu/metisMenu.min.js"></script>
+<script src="/startbootstrap-sb-admin-2-gh-pages/dist/js/sb-admin-2.js"></script>
+
+<script type="text/javascript" src="/script.js"></script>
+
+<script type="text/javascript" src="/js/template.js"></script>
+<script type="text/javascript" src="/js/connection.js"></script>
+<script type="text/javascript" src="/js/contacts.js"></script>
+<script type="text/javascript" src="/js/dashboard.js"></script>
+<script type="text/javascript" src="/js/entreprise.js"></script>
+<script type="text/javascript" src="/js/je.js"></script>
+<script type="text/javascript" src="/js/utils/forms.js"></script>
+<script type="text/javascript" src="/js/utils/date-picker.js"></script>
+
+<script>
+  $(function() {
+    application.load();
+  });
+</script>
+
+</html>

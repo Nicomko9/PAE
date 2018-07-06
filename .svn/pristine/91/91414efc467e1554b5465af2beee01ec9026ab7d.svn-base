@@ -1,0 +1,59 @@
+package biz.ucc;
+
+import static org.junit.Assert.*;
+
+import java.time.LocalDate;
+
+import org.junit.*;
+
+import biz.JeUcc;
+import biz.exceptions.BusinessException;
+import biz.objects.BusinessFactory;
+import biz.objects.Je;
+import config.AppConfig;
+import dal.dao.JeDao;
+
+public class JeUccImplTest {
+
+  private static AppConfig appConfig;
+  private static JeUcc jeUcc;
+  private static Je je;
+  
+  @BeforeClass
+  public static void setUpBeforeClass() throws Exception {
+    appConfig = new AppConfig(AppConfig.APP_DEV);
+    if(!appConfig.load())
+      throw new Exception();
+    jeUcc = (JeUcc) appConfig.newInstanceOf(JeUcc.class);
+    JeDao jeDao = (JeDao) appConfig.newInstanceOf(JeDao.class);
+    je = BusinessFactory.getJe();
+    je.setDate(LocalDate.now().minusYears(1));
+    jeDao.create(je);
+  }
+  
+  @Before
+  public void setUp() throws Exception {
+    je.setDate(LocalDate.now().minusYears(1));
+  }
+  
+  @Test (expected = BusinessException.class)
+  public void testCreateNewJe() {
+    jeUcc.createNewJe(je);
+  }
+
+  @Test
+  public void testGetAllJe() {
+    assertFalse(jeUcc.getAllJe().isEmpty());
+  }
+
+  @Test
+  public void testGetPreviousJe() {
+    assertFalse(jeUcc.getPreviousJe().isEmpty());
+  }
+
+  @Test
+  public void testGetJeByYear() {
+    //assertEquals(je, (Je)jeUcc.getJeByYear(LocalDate.now().minusYears(1).getYear()));
+  }
+
+}

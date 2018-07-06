@@ -1,0 +1,48 @@
+<div class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"
+	id="popup-invitation-je">
+	<div class="container-fluid">
+		<div class="row">
+			<div class="modal-dialog modal-lg clearfix">
+				<div class="modal-content">
+					<div class=" col-lg-12 col-md-12 ">
+						<div class=" panel panel-default">
+							<div class="panel-heading clearfix">
+								<div class="col-md-10 col-md-offset-1 text-center">
+									Invitations</div>
+								<div class="col-md-1" data-dismiss="modal"
+									data-target="#popup-invitation-je">
+									<i class="fa fa-times"></i>
+								</div>
+							</div>
+							<div class="panel-body">
+								<table class="table table-bordered" id="popup-tab-invite">
+									<div id="selected-entreprise-loading" style="display: none">
+										<i class="fa fa-spinner fa-spin"></i> Loading...
+									</div>
+									<thead class="thead-inverse">
+										<tr>
+											<th>Entreprise</th>
+											<th>Date inscription</th>
+											<th>Dernières participations</th>
+											<th>Inviter</th>
+										</tr>
+									</thead>
+									<tbody>
+
+									</tbody>
+								</table>
+								<div id="invitationFormAlert" class="col-xs-12"></div>
+								<div class="admin-block pull-right">
+									<button data-view="je:invite" class="btn btn-primary btn-right">Inviter</button>
+									<button data-view="je:invite" data-context='{ "dl" : true }'
+										class="btn btn-primary btn-right">Inviter & Télécharger</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+

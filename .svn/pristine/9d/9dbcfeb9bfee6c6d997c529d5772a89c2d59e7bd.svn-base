@@ -1,0 +1,67 @@
+package biz.objects;
+
+/**
+ * Abstract class for Business Object.
+ */
+abstract class BizObject implements Cloneable {
+
+  /**
+   * Value of the primary key of the Object Address.
+   */
+  protected int primaryKey;
+
+  /**
+   * Number of version of the Object in the database.
+   */
+  protected int version;
+
+  /**
+   * Get the number of version of the Object.
+   *
+   * @return {@link int} the number of version
+   */
+  public int getVersion() {
+    return version;
+  }
+
+  /**
+   * Update the number of version of the Object.
+   *
+   * @param version {@link int} the new number of version of the Object in the database
+   */
+  public void setVersion(int version) {
+    this.version = version;
+  }
+
+  public int getPk() {
+    return primaryKey;
+  }
+
+  public void setPk(int primaryKey) {
+    this.primaryKey = primaryKey;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    BizObject other = (BizObject) obj;
+    return primaryKey == other.primaryKey;
+  }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + primaryKey;
+    return result;
+  }
+
+}

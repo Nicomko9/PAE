@@ -1,0 +1,60 @@
+package mock.dao;
+
+import biz.dto.AbstractDto;
+import biz.dto.ParticipationDto;
+import biz.objects.Participation;
+import dal.dao.ParticipationDao;
+import java.util.List;
+import mock.DataBaseMock;
+
+public class ParticipationDaoMock implements ParticipationDao {
+
+  private DataBaseMock dataBaseMock;
+
+  ParticipationDaoMock(DataBaseMock dataBaseMock) {
+    this.dataBaseMock = dataBaseMock;
+  }
+
+  @Override
+  public ParticipationDto create(Participation participation) {
+    return dataBaseMock.addParticipation(participation);
+  }
+  
+  @Override
+  public AbstractDto insert(AbstractDto abstractDto) {
+    return create((Participation) abstractDto);
+  }
+
+  @Override
+  public ParticipationDto update(Participation participation) {
+    return dataBaseMock.updateParticipation(participation);
+  }
+  
+  @Override
+  public AbstractDto update(AbstractDto abstractDto) {
+    return update((Participation) abstractDto);
+  }
+
+  @Override
+  public List<ParticipationDto> findByYear(int year) {
+    return dataBaseMock.getParticipationByYear(year);
+  }
+
+  @Override
+  public List<ParticipationDto> findByCompanyNumber(int companyNumber) {
+    return dataBaseMock.getParticipationByCompanyNumber(companyNumber);
+  }
+
+  @Override
+  public List<ParticipationDto> findAllParticipationsForSelection() {
+    return dataBaseMock.getParticipationForSelection();
+  }
+
+  @Override
+  public ParticipationDto findByYearAndCompany(int year, int companyNumber) {
+    return dataBaseMock.getParticipationByYearAndCompanyNumber(year, companyNumber);
+  }
+
+  @Override
+  public void cacheClean() {}
+}

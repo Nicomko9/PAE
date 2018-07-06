@@ -1,0 +1,9 @@
+package bizz.factory;
+
+import ucc.dto.UserDto;
+
+public interface UserFactory {
+
+  UserDto getUserDto();
+
+}

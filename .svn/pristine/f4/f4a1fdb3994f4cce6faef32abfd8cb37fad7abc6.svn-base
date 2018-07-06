@@ -1,0 +1,72 @@
+package mock.dao;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static util.Util.*;
+
+import biz.DtoFactory;
+import biz.dto.CompanyDto;
+import biz.objects.Company;
+import dal.dao.CompanyDao;
+
+public class CompanyDaoMock implements CompanyDao {
+
+  private DtoFactory dtoFactory;
+  
+  CompanyDaoMock(DtoFactory dtoFactory) {
+    this.dtoFactory = dtoFactory;
+  }
+  
+  @Override
+  public CompanyDto create(Company company) {
+    if(company == null) {
+      return null;
+    }
+    company.setPk(5);
+    return company;
+  }
+
+  @Override
+  public CompanyDto update(Company company) {
+    if(company == null) {
+      return null;
+    }
+    company.setVersion(company.getVersion()+1);
+    return company;
+  }
+
+  @Override
+  public CompanyDto findByPk(int pk) {
+    if(pk < 0) {
+      return null;
+    }
+    Company company = (Company) dtoFactory.getCompany();
+    fillCompany(company, null, COMPANY_NAME, null, pk);
+    return company;
+  }
+
+  @Override
+  public Company findByName(String name) {
+    if(name == null) {
+      return null;
+    }
+    Company company = (Company) dtoFactory.getCompany();
+    fillCompany(company, null, name, null, 1);
+    return company;
+  }
+
+  @Override
+  public List<CompanyDto> findAllCompanies() {
+    List<CompanyDto> companies = new ArrayList<>();
+    Company company = (Company) dtoFactory.getCompany();
+    fillCompany(company, null, COMPANY_NAME, null, 0);
+    for (int i = 0; i < 5; i++) {
+      company.setPk(i);
+      company.setCompanyName(COMPANY_NAME+i);
+      companies.add(company);
+    }
+    return companies;
+  }
+
+}

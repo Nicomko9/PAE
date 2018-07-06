@@ -1,0 +1,24 @@
+.btn-rigth {
+	float: right;
+}
+
+header {
+	margin: 0;
+	padding: 0;
+}
+
+.sidebar{
+	margin-top: 0px;
+}
+
+#logo {
+	height: 150px;
+	margin-left: 20px;
+	width: 200px;
+}
+
+.fa {
+	padding-left: 10px;
+}
+
+

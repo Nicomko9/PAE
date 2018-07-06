@@ -1,0 +1,11 @@
+package ucc;
+
+import ucc.dto.UserDto;
+
+public interface UserUcc {
+
+  UserDto connect(UserDto userDto);
+
+  String inscription(UserDto userDto);
+
+}

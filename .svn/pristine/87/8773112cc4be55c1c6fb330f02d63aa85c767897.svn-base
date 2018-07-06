@@ -1,0 +1,86 @@
+<html>
+<head>
+<link
+	href="startbootstrap-sb-admin-2-gh-pages/vendor/datatables-plugins/dataTables.bootstrap.css"
+	rel="stylesheet">
+<link
+	href="startbootstrap-sb-admin-2-gh-pages/vendor/datatables-responsive/dataTables.responsive.css"
+	rel="stylesheet">
+
+</head>
+<div name="page_title" class="row">
+	<div class="col-lg-12 col-md-12">
+		<h1 class="page-header">Journée Entreprise</h1>
+	</div>
+</div>
+<div class="page-container" id="container-noJE">
+	<div class="row">
+		<div
+			class="col-lg-10 col-md-10 col-lg-offset-1 col-md-offset-1 panel panel-default">
+			<div class="panel-body">
+				<div class="row">
+					<div class="col-lg-12" style="text-align: center">
+						<p>Il n'y a pas encore de journée d'entreprise pour l'année
+							académique en cours.</p>
+					</div>
+					<div class="row">
+						<div class="col-lg-offset-5 col-md-offset-5 col-lg-2 col-md-2">
+							<button id="startJe"
+								class="btn btn-lg btn-info btn-rigth btn-primary">Lancer une JE</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="page-container" style="display: none" id="container-JE">
+
+
+	<div class="row">
+		<div class="col-lg-10 col-md-10 col-lg-offset-1 col-md-offset-1">
+			<div class="panel panel-default">
+				<div class="panel-heading">Journée entreprise : 00/00/0000</div>
+				<div class="panel-body">
+					<div class="row">
+						<div class="col-lg-12 col-md-12">
+							<h2>Entreprises invitées</h2>
+						</div>
+					</div>
+					<div class="table-responsive">
+						<table class="table table-bordered ">
+							<!-- table-striped table-bordered table-hover -->
+							<thead class="thead-inverse">
+								<tr>
+									<th>Entreprise</th>
+									<th>Personnes de Contact</th>
+									<th>Statut</th>
+									<th>Action</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td class="col-lg-2 col-md-2">vide</td>
+									<td class="col-lg-5 col-md-5">vide</td>
+									<td class="col-lg-2 col-md-2">vide</td>
+									<td class="col-lg-2 col-md-2 text-center">
+										<button name="cancel_participation" class="btn btn-danger">
+											Annuler participation</button>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-lg-offset-9 col-md-offset-9 col-lg-2 col-md-2">
+			<button id="InviteEntreprise"
+				class="btn btn-lg btn-info btn-rigth btn-primary">Inviter
+				entreprise</button>
+		</div>
+	</div>
+</div>
+</html>

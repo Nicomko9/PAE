@@ -1,0 +1,47 @@
+package mock.dao;
+
+import static util.Util.*;
+
+import biz.DtoFactory;
+import biz.dto.AddressDto;
+import biz.objects.Address;
+import dal.dao.AddressDao;
+
+class AddressDaoMock implements AddressDao {
+
+  private DtoFactory dtoFactory;
+  
+  AddressDaoMock(DtoFactory dtoFactory) {
+    this.dtoFactory = dtoFactory;
+  }
+  
+  @Override
+  public AddressDto create(Address address) {
+    if(address == null) {
+      return address;
+    }
+    address.setPk(2);
+    return address;
+  }
+
+  @Override
+  public AddressDto findAddress(String street, int streetNumber, int zipCode, String commune) {
+    if(street == null || streetNumber <= 0 || zipCode <= 0 || commune == null) {
+      return null;
+    }
+    Address address = (Address) dtoFactory.getAddress();
+    fillAddress(address, BOX, commune, 1, street, streetNumber, zipCode);
+    return address;
+  }
+
+  @Override
+  public AddressDto findByPk(String pk) {
+    if(pk == null) {
+      return null;
+    }
+    Address address = (Address) dtoFactory.getAddress();
+    fillAddress(address, BOX, COMMUNE, Integer.parseInt(pk), STREET, STREET_NUMBER, ZIP_CODE);
+    return address;
+  }
+
+}

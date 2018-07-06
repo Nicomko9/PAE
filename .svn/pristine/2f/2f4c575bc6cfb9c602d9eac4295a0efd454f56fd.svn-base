@@ -1,0 +1,54 @@
+package biz.objects;
+
+import java.util.List;
+import java.util.Map;
+
+import biz.dto.CompanyDto;
+import biz.dto.JeDto;
+import biz.exceptions.BusinessException;
+
+/**
+ * JE's business object.
+ */
+public interface Je extends JeDto {
+
+  /**
+   * Get the number of version of the Object.
+   *
+   * @return {@link int} the number of version
+   */
+  public int getVersion();
+  
+  /**
+   * Update the number of version of the Object.
+   *
+   * @param version {@link int} the new number of version of the Object in the database
+   */
+  void setVersion(int version);
+
+  
+  boolean addContact(Contact contact);
+  
+  boolean addCompany(Company company);
+  
+  List<Company> getCompanies();
+  
+  Map<CompanyDto, List<Contact>> getContactsByCompany();
+  
+  List<Contact> getContacts();
+  
+  /**
+   * Prepare the {@link Contact} to be insert in the database.
+   */
+  public void prepareForInsert();
+  
+  /**
+   * Check some Constraints.
+   *
+   * @throws BusinessException if of no respect of the constraints.
+   */
+  void checkConstraints() throws BusinessException;
+  
+  String toString();
+  
+}

@@ -1,0 +1,23 @@
+package biz.objects;
+
+import biz.dto.ContactDto;
+
+/**
+ * Contact's business object.
+ */
+public interface Contact extends ContactDto {
+
+  /**
+   * Get the primary key of the Object Contact in the database.
+   * 
+   * @return int the value of the primary key
+   */
+  int getPk();
+
+  /**
+   * Set the value of the primary key of a Contact Object.
+   * 
+   * @param primaryKey the new value of the primary key
+   */
+  void setPk(int primaryKey);
+}

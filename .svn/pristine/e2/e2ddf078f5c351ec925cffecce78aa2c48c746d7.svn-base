@@ -1,0 +1,113 @@
+<div name="page-title" class="row">
+	<div class="col-lg-12 col-md-12">
+		<h1 class="page-header">Journée Entreprise</h1>
+	</div>
+	<div class="page-container" id="container-JE">
+		<div class="row">
+			<div id="div-new-je" class="col-lg-10 col-lg-offset-1 admin-block">
+				<div class="col-lg-offset-10 col-md-offset-10 col-lg-2 col-md-2">
+					<a id="#" class="btn btn-info btn-rigth" data-view="je:createJe">
+						Lancer nouvelle JE </a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div id="invited-companies-table"
+		class="col-lg-10 col-md-10 col-lg-offset-1 col-md-offset-1">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				Journée entreprise : <span data-source="je.date"></span>
+			</div>
+			<div class="panel-body">
+				<div class="row">
+					<div class="col-lg-12 col-md-12">
+						<h2>Entreprises invitées</h2>
+					</div>
+				</div>
+				<div class="table-responsive">
+					<table class="table table-bordered table-hover">
+						<!-- table-striped table-bordered table-hover -->
+						<div id="invited-entreprise-loading" style="display: none">
+							<i class="fa fa-spinner fa-spin"></i> Loading...
+						</div>
+						<thead class="thead-inverse">
+							<tr>
+								<th>Entreprise</th>
+								<th>Personnes de Contact</th>
+								<th>Statut</th>
+								<th>Action</th>
+							</tr>
+						</thead>
+						<tbody>
+							<!--<tr>
+								<td class="col-lg-2 col-md-2">vide</td>
+								<td class="col-lg-5 col-md-5">vide</td>
+								<td class="col-lg-2 col-md-2">vide</td>
+								<td class="col-lg-2 col-md-2 text-center">
+									<button name="btn-cancel_participation" class="btn btn-danger">
+										Annuler participation</button>
+								</td>
+							</tr>-->
+						</tbody>
+					</table>
+				</div>
+				<a class="btn btn-info pull-right" id="btn-csv-all">Générer Csv
+					Complet <i class="fa fa-spinner fa-spin" id="csv-all-loading"
+					style="display: none"></i>
+				</a>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"
+	id="popup-invitation-je">
+	<div class="container-fluid">
+		<div class="row">
+			<div class="modal-dialog modal-lg clearfix">
+				<div class="modal-content">
+					<div class=" col-lg-12 col-md-12 ">
+						<div class=" panel panel-default">
+							<div class="panel-heading clearfix">
+								<div class="col-md-10 col-md-offset-1 text-center">
+									Invitations</div>
+								<div class="col-md-1" data-dismiss="modal"
+									data-target="#popup-invitation-je">
+									<i class="fa fa-times"></i>
+								</div>
+							</div>
+							<div class="panel-body">
+								<table class="table table-bordered" id="popup-tab-invite">
+									<div id="selected-entreprise-loading" style="display: none">
+										<i class="fa fa-spinner fa-spin"></i> Loading...
+									</div>
+									<thead class="thead-inverse">
+										<tr>
+											<th>Entreprise</th>
+											<th>Date inscription</th>
+											<th>Dernières participations</th>
+											<th>Inviter</th>
+										</tr>
+									</thead>
+									<tbody>
+
+									</tbody>
+								</table>
+								<div class="col-lg-2 col-md-2 admin-block pull-right">
+									<button id="btn-invite-entreprises" data-view="je:invite"
+										class="btn btn-info btn-right">Inviter</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="row">
+	<div
+		class="col-lg-offset-9 col-md-offset-9 col-lg-2 col-md-2 admin-block">
+		<button id="btn-invite" class="btn btn-info btn-rigth"
+			data-view="je:inviteList">Inviter entreprises</button>
+	</div>
+</div>

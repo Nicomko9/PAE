@@ -1,0 +1,12 @@
+package dal.dao;
+
+
+import biz.DtoFactory;
+import dal.DalBackEndServices;
+
+class CompanyDaoImpl extends AbstractDao implements CompanyDao {
+
+  public CompanyDaoImpl(DalBackEndServices dal, DtoFactory factory) {
+    super(dal, factory);
+  }
+}

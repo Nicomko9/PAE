@@ -1,0 +1,108 @@
+package dal;
+
+import config.AppConfig;
+import config.annotation.Service;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * Services for the communication with Database.
+ */
+class DalServices implements DalBackEndServices, DalFrontEndServices {
+
+  /**
+   * Instance of the connection to the Database.
+   */
+  private Connection connection;
+
+  /**
+   * Map with the {@link PreparedStatement}.
+   */
+  private Map<String, PreparedStatement> statementMap = new HashMap<>();
+
+  /**
+   * Constructor.
+   *
+   * @param appConfig Application Configuration
+   */
+  @Service()
+  public DalServices(AppConfig appConfig) {
+    try {
+      this.connection = DriverManager.getConnection(
+          appConfig.getProperty("db.driver", "jdbc:postgresql://")
+              + appConfig.getProperty("db.path") + "/" + appConfig.getProperty("db.db_name"),
+          appConfig.getProperty("db.login"),
+          appConfig.getProperty("db.password")
+      );
+
+    } catch (Exception exception) {
+      // TODO: handle exception
+      exception.printStackTrace();
+    }
+  }
+
+  /**
+   * Start transaction mode.
+   */
+  public void startTransaction() {
+    try {
+      this.connection.setAutoCommit(false);
+    } catch (SQLException exception) {
+      // Handle exception
+      exception.printStackTrace();
+    }
+  }
+
+  /**
+   * Commit the current transaction.
+   */
+  public void commitTransaction() {
+    try {
+      this.connection.commit();
+      this.connection.setAutoCommit(true);
+    } catch (SQLException exception) {
+      // Handle exception
+      exception.printStackTrace();
+    }
+  }
+
+  /**
+   * Roll back the current transaction.
+   */
+  public void rollbackTransaction() {
+    try {
+      this.connection.rollback();
+      this.connection.setAutoCommit(true);
+    } catch (SQLException exception) {
+      // Handle exception
+      exception.printStackTrace();
+    }
+  }
+
+  /**
+   * Prepare a {@link PreparedStatement} if not already cached.
+   *
+   * @param statement {@link String} query to prepare.
+   * @return a {@link PreparedStatement} based on the given {@link String}
+   */
+  public PreparedStatement prepareStatement(String statement) {
+    try {
+      if (this.statementMap.containsKey(statement)) {
+        return this.statementMap.get(statement);
+      }
+
+      PreparedStatement stmt = this.connection.prepareStatement(statement);
+      this.statementMap.put(statement, stmt);
+
+      return stmt;
+    } catch (SQLException exception) {
+      // Handle exception
+      return null;
+    }
+  }
+
+}

@@ -1,0 +1,267 @@
+package biz.objects;
+
+import biz.dto.CompanyDto;
+import biz.dto.ContactDto;
+import biz.dto.JeDto;
+import biz.exceptions.BusinessException;
+import biz.exceptions.ErrorsCode;
+import java.util.ArrayList;
+import java.util.List;
+
+class ParticipationBiz extends BizObject implements Participation {
+
+  /**
+   * Possible states of a participation.
+   */
+  public static String[] STATES =
+      {"invitée", "confirmée", "refusée", "facturée", "payée", "annulée"};
+  /**
+   * The Je of the participation.
+   */
+  private Je je;
+  /**
+   * The company that participates in the JE.
+   */
+  private Company company;
+
+  /**
+   * Contacts for this participations.
+   */
+  private List<Contact> contacts = new ArrayList<>();
+  /**
+   * The current state of the participation.
+   */
+  private int state = 0;
+
+  /**
+   * The state before the current the current state.
+   */
+  private int lastState = -1;
+
+  ParticipationBiz() {}
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((company == null) ? 0 : company.hashCode());
+    result = prime * result + ((je == null) ? 0 : je.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    ParticipationBiz other = (ParticipationBiz) obj;
+    if (company == null) {
+      if (other.company != null) {
+        return false;
+      }
+    } else if (!company.equals(other.company)) {
+      return false;
+    }
+    if (je == null) {
+      if (other.je != null) {
+        return false;
+      }
+    } else if (!je.equals(other.je)) {
+      return false;
+    }
+    return true;
+  }
+
+  public boolean addContact(Contact contact) {
+    if (!this.company.equals(contact.getCompany()) || contacts.contains(contact)) {
+      return false;
+    }
+    return contacts.add((Contact) contact.clone());
+  }
+
+  public boolean removeContact(Contact contact) {
+    return contacts.remove(contact);
+  }
+
+  public List<ContactDto> contacts() {
+    List<ContactDto> contacts = new ArrayList<>();
+    this.contacts.stream().forEach(c -> contacts.add((ContactDto) c.clone()));
+    return contacts;
+  }
+
+  public boolean confirm() {
+    if (state != 1) {
+      return false;
+    }
+    lastState = 0;
+    return true;
+  }
+
+  public boolean refuse() {
+    return state == 2;
+  }
+
+  public boolean invoice() {
+    return state == 3;
+  }
+
+  public boolean pay() {
+    return state == 4;
+  }
+
+  public void cancel() {
+    this.lastState = state;
+    state = 5;
+  }
+
+  public boolean isPayed() {
+    switch (state) {
+      case 4:
+        return true;
+      case 5:
+        return lastState == 4;
+      default:
+        return false;
+    }
+  }
+
+  /**
+   * Prepare the {@link Contact} to be insert in the database.
+   */
+  @Override
+  public void prepareForInsert() {
+    this.checkConstraints();
+  }
+
+  @Override
+  public void checkConstraints() throws BusinessException {
+    if (je == null || company == null) {
+      throw new BusinessException(ErrorsCode.BUSINESS_INVALID_PARTICIPATION);
+    }
+    je.checkConstraints();
+    company.checkConstraints();
+  }
+
+  public boolean rollback() {
+    if (this.state == 0) {
+      return false;
+    }
+
+    switch (this.state) {
+      case 5:
+        this.state = this.lastState;
+        this.lastState--;
+        break;
+      case 4:
+        this.state--;
+        this.lastState--;
+        break;
+      case 3:
+        this.state = 1;
+        this.lastState = 0;
+        break;
+      default:
+        this.state = 0;
+        this.lastState = -1;
+        break;
+    }
+
+    return true;
+  }
+
+  @Override
+  public int getPk() {
+    // throw new UnsupportedOperationException();
+    return -1;
+  }
+
+  @Override
+  public void setPk(int primaryKey) {
+    // throw new UnsupportedOperationException();
+  }
+
+  public CompanyDto getCompany() {
+    if (company == null) {
+      return null;
+    }
+    return (CompanyDto) company.clone();
+  }
+
+  public void setCompany(Company company) {
+    this.company = (company != null) ? (Company) company.clone() : null;
+  }
+
+  public JeDto getJe() {
+    if (je == null) {
+      return null;
+    }
+    return (JeDto) je.clone();
+  }
+
+  public void setJe(Je je) {
+    this.je = (je != null) ? (Je) je.clone() : null;
+  }
+
+  public String getState() {
+    return STATES[state];
+  }
+
+  @Deprecated
+  public void setState(String state) {
+    for (int i = 0; i < STATES.length; i++) {
+      if (STATES[i].equals(state)) {
+        this.state = i;
+      }
+    }
+  }
+
+  public String getLastState() {
+    return (lastState >= 0) ? STATES[lastState] : null;
+  }
+
+  public int getLastStateIndex() {
+    return this.lastState;
+  }
+
+  public int getStateIndex() {
+    return this.state;
+  }
+
+  @Deprecated
+  public void setLastState(String lastState) {
+    for (int i = 0; i < STATES.length; i++) {
+      if (STATES[i].equals(lastState)) {
+        this.lastState = i;
+
+        break;
+      }
+    }
+  }
+
+  @Override
+  public ParticipationBiz clone() {
+    try {
+      ParticipationBiz clone = (ParticipationBiz) super.clone();
+      clone.company = (company != null) ? (Company) company.clone() : null;
+      clone.je = (je != null) ? (Je) je.clone() : null;
+      return clone;
+    } catch (CloneNotSupportedException exception) {
+      throw new InternalError();
+
+    }
+  }
+
+  @Override
+  public String toString() {
+    return "ParticipationBiz [je=" + ((je != null) ? je.getDayYear() : null) + ", company="
+        + ((company != null) ? company.getCompanyName() : null) + ", state=" + getState()
+        + ", lastState=" + getLastState() + "]";
+  }
+
+}

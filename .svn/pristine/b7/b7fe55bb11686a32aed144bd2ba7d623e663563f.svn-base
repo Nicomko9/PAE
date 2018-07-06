@@ -1,0 +1,17 @@
+package ucc;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import ucc.dto.UserDto;
+
+public interface UserUcc extends UccInterface {
+
+  UserDto connect(HttpServletRequest request, HttpServletResponse response, UserDto userDto);
+
+  void disconnect(HttpServletRequest request, HttpServletResponse response);
+
+  boolean subscribe(UserDto userDto);
+
+  UserDto getUser(HttpServletRequest req);
+
+}

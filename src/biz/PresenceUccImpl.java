@@ -1,0 +1,140 @@
+package biz;
+
+import biz.dto.JeDto;
+import biz.dto.PresenceDto;
+import biz.exceptions.BusinessException;
+import biz.exceptions.ErrorsCode;
+import biz.exceptions.FatalException;
+import biz.exceptions.OptimisticLockException;
+import biz.objects.Je;
+import biz.objects.Presence;
+import dal.DalFrontEndServices;
+import dal.dao.PresenceDao;
+import ihm.utils.DataValidator;
+import ihm.utils.Logger;
+import java.util.ArrayList;
+import java.util.List;
+
+class PresenceUccImpl implements PresenceUcc {
+
+  private DalFrontEndServices dal;
+
+  private PresenceDao presenceDao;
+
+  private UnitOfWork uof;
+  
+  PresenceUccImpl(DalFrontEndServices dal, PresenceDao presenceDao, UnitOfWork uof) {
+    this.dal = dal;
+    this.presenceDao = presenceDao;
+    this.uof = uof;
+  }
+
+  @Override
+  public PresenceDto register(PresenceDto presenceDto) {
+    Presence presence = (Presence) presenceDto;
+    presence.checkConstraints();
+
+    try {
+      //this.dal.startTransaction();
+      this.uof.startTransaction();
+
+      //presenceDto = this.presenceDao.create(presence);
+      this.uof.insert(presence);
+
+      //this.dal.commitTransaction();
+      this.uof.commitTransaction();
+
+      presenceDto = (PresenceDto) this.uof.getInsertedObject();
+      
+      return presenceDto;
+    } catch (OptimisticLockException exception) {
+      this.uof.rollbackTransaction();
+      throw exception;
+    } catch (Exception exception) {
+      Logger.log("PresenceUcc", "register", "Exception : " + exception.getMessage(), Logger.ERROR);
+      //this.dal.rollbackTransaction();
+      this.uof.rollbackTransaction();
+
+      throw new FatalException();
+    }
+  }
+
+  @Override
+  public List<PresenceDto> register(List<PresenceDto> presencesDto) {
+    List<PresenceDto> presences = new ArrayList<>();
+
+    for (PresenceDto presenceDto : presencesDto) {
+      Presence presence = (Presence) presenceDto;
+      presence.checkConstraints();
+    }
+    
+    try {
+      //this.dal.startTransaction();
+      this.uof.startTransaction();
+
+      for (PresenceDto presenceDto : presencesDto) {
+
+        //presences.add(this.presenceDao.create(presence));
+        this.uof.insert(presenceDto);
+
+      }
+
+      //this.dal.commitTransaction();
+      this.uof.commitTransaction();
+
+      for (int i = 0; i < presencesDto.size(); i++) {
+        presences.add((PresenceDto) this.uof.getInsertedObject());
+      }
+      
+      return presences;
+    } catch (Exception exception) {
+      //this.dal.rollbackTransaction();
+      this.uof.rollbackTransaction();
+      throw new FatalException();
+    }
+  }
+
+  @Override
+  public List<PresenceDto> getPresencesForContact(int id) {
+
+    if (!DataValidator.validateInt(id)) {
+      throw new BusinessException(ErrorsCode.BUSINESS_INVALID_CONTACT);
+    }
+
+    try {
+
+      this.dal.startTransaction();
+
+      List<PresenceDto> presencesDto = this.presenceDao.findPresencesForContact(id);
+
+      this.dal.commitTransaction();
+
+      return presencesDto;
+    } catch (Exception exception) {
+      this.dal.rollbackTransaction();
+      throw new FatalException();
+    }
+  }
+
+  @Override
+  public List<PresenceDto> getAllPresencesOf(JeDto jeDto) {
+    Je je = (Je) jeDto;
+    je.checkConstraints();
+
+    try {
+
+      this.dal.startTransaction();
+
+      List<PresenceDto> presencesDto = presenceDao.findByYear(je.getDayYear());
+
+      this.dal.commitTransaction();
+
+      return presencesDto;
+    } catch (Exception exception) {
+      this.dal.rollbackTransaction();
+      throw new FatalException();
+    }
+
+  }
+
+}

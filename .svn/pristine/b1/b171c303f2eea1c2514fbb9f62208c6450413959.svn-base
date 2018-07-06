@@ -1,0 +1,87 @@
+package mock.ucc;
+
+import java.util.List;
+
+import biz.ParticipationUcc;
+import biz.dto.CompanyDto;
+import biz.dto.JeDto;
+import biz.dto.ParticipationDto;
+import biz.objects.Participation;
+import dal.dao.ParticipationDao;
+
+public class ParticipationUccMock implements ParticipationUcc {
+
+  private ParticipationDao participationDao;
+
+  ParticipationUccMock(ParticipationDao participationDao) {
+    this.participationDao = participationDao;
+  }
+
+  @Override
+  public ParticipationDto invite(ParticipationDto participationDto) {
+    Participation participation = (Participation) participationDto;
+    return participationDao.create(participation);
+  }
+
+  @Override
+  public ParticipationDto confirm(ParticipationDto participationDto) {
+    Participation participation = (Participation) participationDto;
+    //participation.confirm();
+    return participationDao.update(participation);
+  }
+
+  @Override
+  public ParticipationDto refuse(ParticipationDto participationDto) {
+    Participation participation = (Participation) participationDto;
+    //participation.refuse();
+    return participationDao.update(participation);
+  }
+
+  @Override
+  public ParticipationDto invoice(ParticipationDto participationDto) {
+    Participation participation = (Participation) participationDto;
+    //participation.invoice();
+    return participationDao.update(participation);
+  }
+
+  @Override
+  public ParticipationDto pay(ParticipationDto participationDto) {
+    Participation participation = (Participation) participationDto;
+    //participation.pay();
+    return participationDao.update(participation);
+  }
+
+  @Override
+  public ParticipationDto cancel(ParticipationDto participationDto) {
+    Participation participation = (Participation) participationDto;
+    //participation.cancel();
+    return participationDao.update(participation);
+  }
+
+  @Override
+  public List<ParticipationDto> getAllParticipationsOf(JeDto jeDto) {
+    return participationDao.findByYear(jeDto.getDayYear());
+  }
+
+  @Override
+  public List<ParticipationDto> getAllParticipationsOf(CompanyDto companyDto) {
+    return participationDao.findByCompanyNumber(companyDto.getPk());
+  }
+
+  @Override
+  public List<ParticipationDto> inviteCompanies(List<ParticipationDto> participations) {
+    for (int idx = 0; idx < participations.size(); idx++) {
+      ParticipationDto participationDto = participations.get(idx);
+      Participation participation = (Participation) participationDto;
+      participationDao.create(participation);
+    }
+    return participations;
+  }
+
+  @Override
+  public ParticipationDto returnToInvite(ParticipationDto participationDto) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+}

@@ -1,0 +1,17 @@
+package biz;
+
+
+import java.util.List;
+
+import biz.dto.JeDto;
+
+public interface JeUcc {
+
+  JeDto createNewJe(JeDto jeDto);
+
+  List<JeDto> getAllJe();
+
+  List<JeDto> getPreviousJe();
+
+  JeDto getJeByYear(int year);
+}

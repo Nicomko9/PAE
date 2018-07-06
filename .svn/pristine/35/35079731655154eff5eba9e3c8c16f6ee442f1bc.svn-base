@@ -1,0 +1,173 @@
+package biz.objects;
+
+import biz.dto.UserDto;
+import biz.exceptions.BusinessException;
+import com.owlike.genson.annotation.JsonIgnore;
+import java.time.LocalDateTime;
+import org.mindrot.jbcrypt.BCrypt;
+
+/**
+ * User's business object.
+ */
+class UserBiz extends BizObject implements User, UserDto {
+
+  /**
+   * Value of the primary key of the Object User.
+   */
+  private int primaryKey;
+
+  /**
+   * User's login.
+   */
+  private String login;
+  /**
+   * User's password.
+   */
+  private String password;
+  /**
+   * User's last name.
+   */
+  private String lastName;
+  /**
+   * User's first name.
+   */
+  private String firstName;
+  /**
+   * User's email.
+   */
+  private String email;
+  /**
+   * User's inscription date.
+   */
+  private LocalDateTime inscriptionDate;
+  /**
+   * User's responsibility.
+   */
+  private boolean responsible = false;
+
+  UserBiz() {
+  }
+
+  /**
+   * Compare password.
+   *
+   * @param password password to be compare to
+   * @return <code>true</code> in case of match
+   */
+  public boolean comparePassword(String password) {
+    return BCrypt.checkpw(password, this.password);
+  }
+
+  /**
+   * Check some Constraints.
+   *
+   * @throws BusinessException if of no respect of the constraints.
+   */
+  public void checkConstraints() throws BusinessException {
+    // Autres vérifications style taille des champs etc
+  }
+
+  /**
+   * Prepare the {@link User} to be insert in the database while setting his Inscription Date.
+   */
+  public void prepareForInsert() throws BusinessException {
+    this.checkConstraints();
+    this.setInscriptionDate(LocalDateTime.now());
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null || getClass() != obj.getClass()) {
+      return false;
+    }
+    User user = (User) obj;
+    return getLogin().equals(user.getLogin());
+  }
+
+  @Override
+  public int hashCode() {
+    return getLogin().hashCode();
+  }
+
+  /*
+   * Getters & setters
+   */
+
+  public String getLogin() {
+    return login;
+  }
+
+  public void setLogin(String login) {
+    this.login = login;
+  }
+
+  @JsonIgnore
+  public String getPassword() {
+    return this.password;
+  }
+
+  @JsonIgnore
+  public void setPassword(String password) {
+    if(password==null){
+      this.password = null;
+    }else if (password.indexOf("$2a") == 0) {
+      this.password = password;
+    } else {
+      this.password = BCrypt.hashpw(password, BCrypt.gensalt());
+    }
+  }
+
+  public String getLastname() {
+    return lastName;
+  }
+
+  public void setLastname(String lastName) {
+    this.lastName = lastName;
+  }
+
+  public String getFirstname() {
+    return firstName;
+  }
+
+  public void setFirstname(String firstName) {
+    this.firstName = firstName;
+  }
+
+  public String getEmail() {
+    return email;
+  }
+
+  public void setEmail(String email) {
+    this.email = email;
+  }
+
+  public boolean isResponsible() {
+    return responsible;
+  }
+
+  public void setResponsible(boolean responsible) {
+    this.responsible = responsible;
+  }
+
+  public LocalDateTime getInscriptionDate() {
+    return inscriptionDate;
+  }
+
+  public void setInscriptionDate(LocalDateTime inscriptionDate) {
+    this.inscriptionDate = inscriptionDate;
+  }
+
+  @Override
+  public int getPk() {
+    return primaryKey;
+  }
+
+  @Override
+  public void setPk(int primaryKey) {
+    this.primaryKey = primaryKey;
+  }
+
+}

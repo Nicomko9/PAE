@@ -1,0 +1,85 @@
+package biz.objects;
+
+import static org.junit.Assert.*;
+import static util.Util.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+import org.junit.*;
+
+import biz.exceptions.BusinessException;
+
+public class JeBizTest {
+
+  private Je jeBiz1, jeBiz2;
+  private Company company;
+  private Address address;
+  private User creator;
+  private Contact contact;
+
+  @Before
+  public void setUp() throws Exception {
+    jeBiz1 = BusinessFactory.getJe();
+    jeBiz2 = BusinessFactory.getJe();
+    jeBiz1.setDate(LocalDate.now());
+    jeBiz2.setDate(LocalDate.now().minusYears(1));
+    company = BusinessFactory.getCompany();
+    address = BusinessFactory.getAddress();
+    fillAddress(address, 12, "commune", 500, "rue", 12, 1000);
+    creator = BusinessFactory.getUser();
+    fillUser(creator, "email", "zakaria", "lamrini", "login", "pswd", 500);
+    fillCompany(company, address, "company name", creator, LocalDateTime.now(), 500);
+    jeBiz1.addParticipation(company);
+    contact = BusinessFactory.getContact();
+    jeBiz2.addParticipation(company);
+    fillContact(contact, company, "email", "zak", "lam", "phone", 500);
+  }
+
+  @Test
+  public void testEquals1() {    
+    assertFalse(jeBiz1.equals(jeBiz2));
+  }
+  
+  @Test
+  public void testEquals2() {
+    Je jeBiz = BusinessFactory.getJe();
+    jeBiz.setDate(jeBiz1.getDayDate());
+    assertTrue(jeBiz1.equals(jeBiz));
+  }
+  
+  @Test
+  public void testHashCode1() {
+    assertNotEquals(jeBiz1.hashCode(), jeBiz2.hashCode());
+  }
+  
+  @Test
+  public void testHashCode2() {
+    Je jeBiz = BusinessFactory.getJe();
+    jeBiz.setDate(jeBiz1.getDayDate());
+    assertEquals(jeBiz1.hashCode(), jeBiz.hashCode());
+  }
+  
+  @Test
+  public void testAddCompany1() {    
+    assertFalse(jeBiz1.addParticipation(company));
+  }
+  
+  @Test
+  public void testAddCompany2() {
+    company = BusinessFactory.getCompany();
+    fillCompany(company,(Address) company.getAddress(), company.getCompanyName()
+        ,(User) company.getCreator(), LocalDateTime.now(), 2);
+    assertTrue(jeBiz1.addParticipation(company));
+  }
+  
+  @Test
+  public void testCheckConstraints1() {
+    jeBiz1.checkConstraints();
+  }
+  
+  @Test (expected = BusinessException.class)
+  public void testCheckConstraints2() {
+    BusinessFactory.getJe().checkConstraints();
+  }
+
+}

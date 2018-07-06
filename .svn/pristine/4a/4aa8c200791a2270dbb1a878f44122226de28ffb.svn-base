@@ -1,0 +1,17 @@
+package dal.dao;
+
+
+import biz.dto.JeDto;
+import biz.objects.Je;
+import dal.dao.schema.JeSchema;
+import java.sql.SQLException;
+import java.util.List;
+
+public interface JeDao extends JeSchema {
+
+  JeDto findByYear(int year);
+
+  void create(Je je) throws Exception;
+  
+  List<JeDto> findAllJe() throws SQLException;
+}

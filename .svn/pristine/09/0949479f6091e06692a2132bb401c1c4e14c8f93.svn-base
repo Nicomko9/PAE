@@ -1,0 +1,12 @@
+package dal.dao;
+
+
+import biz.dto.CompanyDto;
+import biz.objects.Company;
+import dal.dao.schema.CompanySchema;
+
+public interface CompanyDao extends CompanySchema {
+
+  public CompanyDto create(Company comp);
+
+}

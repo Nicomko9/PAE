@@ -1,0 +1,10 @@
+package biz.objects;
+
+import biz.dto.ContactDto;
+
+/**
+ * Contact's business object.
+ */
+public interface Contact extends ContactDto {
+
+}

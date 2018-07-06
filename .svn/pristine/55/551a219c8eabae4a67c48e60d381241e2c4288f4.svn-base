@@ -1,0 +1,32 @@
+package biz.objects;
+
+import biz.dto.UserDto;
+import biz.exceptions.BusinessException;
+
+
+/**
+ * User's business object.
+ */
+public interface UserBiz extends UserDto {
+
+  /**
+   * Compare password.
+   * 
+   * @param password password to be compare to
+   * @return <code>true</code> in case of match
+   */
+  boolean comparePassword(String password);
+
+  /**
+   * Check some Constraints.
+   * 
+   * @throws BusinessException if of no respect of the constraints.
+   */
+  void checkConstraints() throws BusinessException;
+
+  /**
+   * Prepare the {@link UserBiz} to be insert in the database while setting his Inscription Date.
+   */
+  void prepareForInsert() throws BusinessException;
+
+}

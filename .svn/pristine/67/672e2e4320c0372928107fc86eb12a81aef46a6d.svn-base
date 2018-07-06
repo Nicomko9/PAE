@@ -1,0 +1,281 @@
+var inAnimation = false;
+
+/** Main function */
+$(function() {
+	checkConnection(loadApp, function() {
+		switchContainer("container-login");
+	});
+
+	$(document).on("click", "body#page_login #BtnConn", connection);
+	$(document).on("submit", "body#page_login #ConnForm", connection);
+	$(document).on("submit", "body#page_login #InscForm", signUp);
+	$(document).on("click", "body#page_login #BtnInsc", signUp);
+
+	$(document).on("click", "body#page_application #disconnect", logout);
+
+	$(document).on("click", "body#page_application a", function() {
+		var target = $(this).attr("data-target");
+		if (typeof target == "undefined" || target == "") {
+			return true;
+		}
+
+		loadView(target, "#page-wrapper");
+	});
+});
+
+function switchContainer(event) {
+	var display;
+
+	if (typeof event == "object") {
+		event.preventDefault();
+		display = $(this).attr("data-toggle");
+	} else {
+		display = event;
+	}
+
+	var id = "page_" + display.slice("container-".length);
+
+	if (inAnimation || $("body").attr("id") === id) {
+		return;
+	}
+
+	inAnimation = true;
+
+	$("body > .page-container:not(" + display + ")").hide(250);
+	$("#" + display).show(250, function() {
+		inAnimation = false;
+		$("body").attr("id", id);
+	});
+}
+
+function connection(event) {
+	event.preventDefault();
+	if (verifChampVide("Conn")) {
+		$("#BtnConn i").show();
+
+		$.ajax("/app/connection", {
+			data : {
+				"login" : $("#connexion_login").val(),
+				"password" : $("#connexion_password").val()
+			},
+			method : "POST",
+			dataType : 'json',
+			success : function(data) {
+				loadApp(data);
+			},
+			error : function(xhr) {
+				$("#BtnConn i").hide();
+				alerteForm("Conn", getErrorMessage(xhr.responseJSON));
+			}
+		});
+	}
+}
+
+function signUp(event) {
+	event.preventDefault();
+	if (verifChampVide("Insc")) {
+		$("#BtnInsc i").show();
+		var json = FORMtoJSON("Insc");
+		$.ajax("/app/signup", {
+			data : {
+				json : json
+			},
+			method : "POST",
+			dataType : "json",
+			success : function(data) {
+				if (data == false) {
+					alerteForm("Insc", "Error creating user");
+				} else {
+					loadApp(data);
+				}
+			},
+			error : function(xhr) {
+				console.log("Error signup");
+				$("#BtnInsc i").hide();
+				alerteForm("Insc", getErrorMessage(error.responseJSON));
+			}
+		});
+	}
+}
+
+function logout(event) {
+	event.preventDefault();
+	// Caché chargement :
+	$("#container-login").find("button").each(function() {
+		$(this).find("i").each(function() {
+			$(this).hide();
+		});
+	});
+	$.ajax("/app/disconnect", {
+		method : 'POST',
+		dataType : 'json',
+		success : function(e) {
+			console.log("Disconnected");
+			switchContainer("container-login");
+		},
+		error : function(e) {
+			alert("Internal error while disconnecting");
+			window.location.reload();
+		}
+	})
+}
+
+function loadApp(loadedUser) {
+	var user;
+
+	if (typeof loadedUser != "undefined") {
+		user = loadedUser;
+	}
+
+	$("[data-toggle='user.full_name']").html(
+			user.firstname + " " + user.lastname);
+	switchContainer("container-application");
+	loadView("dashboard.html");
+}
+
+function loadView(view, target) {
+	$.ajax("/html/" + view, {
+		dataType : "html"
+	}).done(function(html) {
+		if (target == null) {
+			console.log("target = null");
+			var i = $("div#page-wrapper");
+		} else {
+			var i = $("body#page_application " + target);
+		}
+		if (i.length == 0) {
+			console.log("Unable to insert " + view + " !");
+
+			return;
+		}
+
+		i.html(html);
+	}).fail(function() {
+		console.log("Unable to load view " + view);
+	})
+}
+
+function unhandledAjaxException(text) {
+
+}
+
+function checkConnection(connectedCallback, unconnectedCallback) {
+	$.ajax({
+		url : "/app/auth",
+		method : "GET",
+		dataType : 'json',
+		success : function(re) {
+			loadApp(re);
+		}
+	}).fail(function(re) {
+		console.log(getErrorMessage(re.responseJSON));
+		unconnectedCallback(re.responseJSON);
+	});
+}
+
+function FORMtoJSON(form) {
+	var o = {};
+
+	$("#" + form + "Form").find("input").each(function() {
+		if ($(this).attr('type') === 'checkbox') {
+			o[$(this).attr('name')] = $(this).is(':checked');
+		} else {
+			o[$(this).attr('name')] = $(this).val();
+		}
+	});
+
+	return JSON.stringify(o);
+}
+
+function verifChampVide(form) {
+	var ret = true;
+	$("#" + form + "Form").find("input").each(function() {
+		if ($(this).val() === "") {
+			alerteForm(form, "Tous les champs ne sont pas remplis!");
+			ret = false;
+		}
+	});
+	return ret;
+}
+
+function alerteForm(form, message) {
+	$("#" + form + "FormAlert")
+			.html(
+					"<div id='tmp' class='alert alert-danger alert-dismissable' "
+							+ "style='display:none'><button type='button' class='close' data-dismiss='alert'"
+							+ "aria-hidden='true'>&times;</button>"
+							+ "<p><strong>Attention</strong></br>" + message
+							+ "</p></div>");
+	$("#tmp").show(1000);
+	$("#Btn" + form + " i").hide();
+
+}
+
+/*
+ * util
+ */
+
+function getErrorMessage(code) {
+	var ret = "Erreur non gérée";
+	switch (code) {
+	case 0:
+		ret = "Erreur non-définie";
+		break;
+	case 200:
+		ret = "Ok";
+		break;
+	case 201:
+		ret = "Créé";
+		break;
+	case 400:
+		ret = "Mauvaise requête";
+		break;
+	case 401:
+		ret = "Non autorisé";
+		break;
+	case 404:
+		ret = "Page Fault";
+		break;
+	case 409:
+		ret = "Conflit";
+		break;
+	case 444:
+		ret = "Pas de Réponse";
+		break;
+	case 460:
+		ret = "Données non correctes";
+		break;
+	case 461:
+		ret = "Login utilisateur déjà utilisé";
+		break;
+	case 462:
+		ret = "Login trop long";
+		break;
+	case 463:
+		ret = "Format de l'email incorrect";
+		break;
+	case 464:
+		ret = "Password incorrect";
+		break;
+	case 465:
+		ret = "Login incorrect";
+		break;
+	case 466:
+		ret = "Email déjà utilisé";
+		break;
+	case 467:
+		ret = "Utilisateur déjà connecté";
+		break;
+	case 468:
+		ret = "Erreur Json";
+		break;
+	case 500:
+		ret = "Erreur server interne";
+		break;
+	case 503:
+		ret = "Service non disponible";
+		break;
+	}
+
+	return ret;
+}

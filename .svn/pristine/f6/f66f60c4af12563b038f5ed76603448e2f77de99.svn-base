@@ -1,0 +1,102 @@
+application.define('dashboard', function() {
+	return {
+		main : function() {
+			if (application.getUser().isResponsible()) {
+				application.require("je", function(view) {
+					view.main();
+				});
+			} else {
+				// Si pas responsable, what to do?
+				console.log("vous n'etes pas superuser");
+				application.require("je", function(view){
+					view.main();
+				});
+			}
+		}
+	};
+}());
+
+//
+// function loadingDash() {
+//
+// // Super-user or not ?
+// if (application.getUser().isResponsible()) {
+// // Is there an active Je
+// if (noJe()) {
+// $("#dateChoice").hide();
+// } else {
+// $("#container-noJE").hide();
+// $("#container-JE").show();
+// $("#btn-new-je").show(250);
+// }
+// // In every case A super-user must be capable of starting a JE
+// $("#newJe").on("click", function() {
+// clickNewJe()
+// });
+// $("#noJe-new").on("click", function() {
+// clickNewJe()
+// });
+// } else {
+// if (noJe()) {
+// $("#dateChoice").hide();
+// $("button").hide();
+// } else {
+// $("#container-noJE").hide();
+// $("#container-JE").show();
+// }
+// }
+//
+// $("#date-choice-confirm").click(function() {
+// newJe($("#je-date").val());
+// });
+//
+// $("#InviteEntreprise").click(function() {
+// $(this).html("Inviter");
+// $("#container-invitation").show(250);
+// });
+// }
+//
+// function clickNewJe() {
+// console.log("Click");
+// $("#container-JE").hide();
+// $("#container-noJE").show();
+// $("#no-je").hide();
+// $("#dateChoice").show();
+// }
+//
+// function noJe() {
+// // Ajax
+// $.ajax({
+// url : "/app/noJe",
+// method : "POST",
+// success : function(resp) {
+// if (resp.responseJSON === 200) {
+// return true;
+// } /*
+// * else if(resp.responseJSON === 401){ console.log("logout");
+// * logout(); alerteForm("Conn", "Session expirée"); }
+// */
+// else if (resp.responseJSON === 469) {
+// return false;
+// } else {
+// var mess = getErrorMessage(resp.responseJSON);
+// console.log("mess");
+// return false;
+// }
+// },
+// error : function(resp) {
+// console.log(getErrorMessage(resp.responseJSON));
+// return false;
+// }
+// });
+// }
+//
+// function newJe(date) {
+// // ajax
+//
+// // en cas de succès
+// $("#container-noJE").hide();
+// $("#btn-new-je").show(250);
+// $("#container-JE").show();
+//
+// }

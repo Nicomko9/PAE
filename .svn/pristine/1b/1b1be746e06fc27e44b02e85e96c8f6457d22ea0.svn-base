@@ -1,0 +1,9 @@
+package dal.dao.schema;
+
+
+interface GenericSchema {
+
+  String SCHEMA = "pae";
+  String FIELD_VERSION = "num_version";
+
+}

@@ -1,0 +1,21 @@
+package ucc;
+
+import ucc.dto.UserDto;
+
+public class UserUccImpl implements UserUcc {
+
+  @Override
+  public UserDto connect(UserDto userDto) {
+    System.out.println("UserUccImpl.connect");
+    // Faire requête à la Db
+
+    return userDto;
+  }
+
+  @Override
+  public boolean inscription(UserDto userDto) {
+    // TODO Auto-generated method stub
+    return false;
+  }
+
+}

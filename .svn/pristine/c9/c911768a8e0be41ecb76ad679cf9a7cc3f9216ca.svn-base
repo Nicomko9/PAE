@@ -1,0 +1,96 @@
+package biz.ucc;
+
+import static org.junit.Assert.*;
+import static util.Util.*;
+
+import org.junit.*;
+
+import biz.CompanyUcc;
+import biz.exceptions.BusinessException;
+import biz.objects.Address;
+import biz.objects.Company;
+import biz.objects.User;
+import config.AppConfig;
+
+public class CompanyUccImplTest {
+
+  private static AppConfig appConfig;
+  private static CompanyUcc companyUcc;
+  private static Company company;
+  private static Address address;
+  private static User creator;
+  private static int pkCompany, pkAddress, pkCreator;
+  
+  @BeforeClass
+  public static void setUpBeforeClass() throws Exception {
+    appConfig = new AppConfig(AppConfig.APP_DEV);
+    if(!appConfig.load())
+      throw new Exception();
+    companyUcc = (CompanyUcc) appConfig.newInstanceOf(CompanyUcc.class);
+    
+    address = createAddress(appConfig);
+    pkAddress = address.getPk();
+    
+    creator = createUser(appConfig);
+    pkCreator = creator.getPk();
+    
+    company = createCompany(appConfig, address, creator);
+    pkCompany = company.getPk();
+  }
+  
+  @AfterClass
+  public static void tearDownAfterClass() throws Exception {
+    deleteTestRecord(appConfig);
+  }
+  
+  @Before
+  public void setUp() throws Exception {
+    fillAddress(address, 12, COMMUNE, pkAddress, STREET, STREET_NUMBER, ZIP_CODE);
+    fillUser(creator, EMAIL, FIRSTNAME, LASTNAME, LOGIN, PASSWORD, pkCreator);
+    fillCompany(company, address, COMPANY_NAME, creator, pkCompany);
+  }
+
+  @Test (expected = BusinessException.class)
+  public void testRegister1() {
+    companyUcc.register(company);
+  }
+  
+  @Test (expected = BusinessException.class)
+  public void testRegister2() {
+    company.setCompanyName("");
+    companyUcc.register(company);
+  }
+  
+  @Test (expected = BusinessException.class)
+  public void testRegister3() {
+    company.setAddress(null);
+    companyUcc.register(company);
+  }
+
+  @Test
+  public void testRegister4() {
+    company.setCompanyName("name_junit");
+    assertNotNull(companyUcc.register(company));
+  }
+  
+  @Test
+  public void testUpdate() {
+    
+  }
+
+  @Test
+  public void testGetAllCompanies() {
+    assertFalse(companyUcc.getAllCompanies().isEmpty());
+  }
+  
+  @Test
+  public void testGetCompanyByName1(){
+    assertNull("company doesn' exist",companyUcc.getCompanyByName("andiaef"));
+  }
+  
+  @Test
+  public void testGetCompanyByName2(){
+    assertEquals(COMPANY_NAME,companyUcc.getCompanyByName(COMPANY_NAME).getCompanyName());
+  }
+
+}

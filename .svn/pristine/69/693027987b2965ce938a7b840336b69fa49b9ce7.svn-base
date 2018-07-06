@@ -1,0 +1,6 @@
+package dal.dao.schema;
+
+
+public interface JeSchema extends GenericSchema {
+
+}

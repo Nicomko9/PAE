@@ -1,0 +1,38 @@
+package ihm;
+
+import com.owlike.genson.Genson;
+import com.owlike.genson.GensonBuilder;
+import java.nio.charset.Charset;
+import java.text.SimpleDateFormat;
+
+class JsonUtil {
+
+  /**
+   * genson The genson object.
+   */
+  private Genson genson = new GensonBuilder().useIndentation(true)
+      .useDateFormat(new SimpleDateFormat("dd/MM/yyyy")).useConstructorWithArguments(true).create();
+
+
+  /**
+   * Encode an object into string.
+   *
+   * @param object the object to encode
+   * @return String the encoded string
+   */
+  public String encode(Object object) {
+    return genson.serialize(object);
+  }
+
+  /**
+   * Decode a string.
+   *
+   * @param str given string
+   * @param classType class to decode into
+   * @return Object deserialized  object
+   */
+  public Object decode(String str, Class<?> classType) {
+    return genson.deserialize(str.getBytes(Charset.forName("UTF-8")), classType);
+  }
+
+}

@@ -1,0 +1,181 @@
+package dal.dao;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.Collections;
+
+import biz.DtoFactory;
+import biz.dto.UserDto;
+import biz.objects.User;
+import dal.DalBackEndServices;
+import dal.dao.schema.UserSchema;
+import ihm.utils.Logger;
+
+/**
+ * Data Access object Class.
+ */
+public class UserDaoImpl extends AbstractDao implements UserDao, UserSchema {
+
+  /**
+   * Insert auto generated query.
+   */
+  private static final String USER_CREATE_QUERY =
+      "INSERT INTO " + TABLE + " (" + String.join(",", FIELDS_MAP) + ") VALUES ("
+          + String.join(",", Collections.nCopies(FIELDS_MAP.size(), "?")) + ") RETURNING *";
+
+  /**
+   * A compiled expression finding all fields from the table users in database.
+   */
+  private static final String USER_FIND_QUERY = "SELECT * FROM " + TABLE + "  WHERE ";
+
+  /**
+   * Constructor.
+   *
+   * @param dal services provider
+   * @param dtoFactory {@link DtoFactory} object
+   */
+  public UserDaoImpl(DalBackEndServices dal, DtoFactory dtoFactory) {
+    super(dal, dtoFactory);
+  }
+
+  /**
+   * Find a single user based on a login.
+   *
+   * @param login the value to lookup
+   * @return the {@link UserDto} instance found in the research
+   */
+  @Override
+  public UserDto findByLogin(String login) {
+    return findBy(FIELD_USER_LOGIN, login);
+  }
+
+  /**
+   * Find a single user based on a Primary Key.
+   *
+   * @param pk the primary key
+   * @return the {@link UserDto}
+   */
+  @Override
+  public UserDto findByPk(int pk) {
+    return findBy(FIELD_USER_PK, "" + pk);
+  }
+
+  /**
+   * Find a single user based on an email.
+   *
+   * @param email the value to lookup
+   * @return the {@link UserDto} instance found in the research
+   */
+  @Override
+  public UserDto findByEmail(String email) {
+    return findBy(FIELD_USER_EMAIL, email);
+  }
+
+
+  /**
+   * Persist a user into the table users in database.
+   *
+   * @param user the {@link User} to persist
+   * @return the value of the {@link User} casted in {@link UserDto}
+   */
+  @Override
+  public UserDto create(User user) {
+    try {
+      PreparedStatement stmt = this.dal.prepareStatement(USER_CREATE_QUERY);
+
+      stmt.setString(1, user.getLogin());
+      stmt.setString(2, user.getPassword());
+      stmt.setString(3, user.getFirstname());
+      stmt.setString(4, user.getLastname());
+      stmt.setString(5, user.getEmail());
+      stmt.setBoolean(6, false);
+      stmt.setTimestamp(7, Timestamp.valueOf(user.getInscriptionDate()));
+      stmt.setInt(8, 1);
+
+      ResultSet rs = stmt.executeQuery();
+
+      if (!rs.next()) {
+        rs.close();
+        return null;
+      }
+
+      user = populateDto(rs);
+
+//      rs.close();
+      return user;
+    } catch (Exception exc) {
+      exc.printStackTrace();
+      Logger.log("UserDaoImpl", "create",
+          "registration of " + user.getLogin() + " failed : " + exc.getMessage());
+      return null;
+    }
+  }
+
+  /**
+   * Find a user based on a couple of key<->value.
+   *
+   * @param key field to lookup
+   * @param value value to match
+   * @return the {@link UserDto} instance found in the research.
+   */
+  private UserDto findBy(String key, String value) {
+    UserDto user;
+
+    if (key != FIELD_USER_PK && !FIELDS_MAP.contains(key)) {
+      throw new IllegalArgumentException("You cannot lookup user based on " + key);
+    }
+
+    try {
+      PreparedStatement stmt = this.dal.prepareStatement(USER_FIND_QUERY + key + " = ?");
+
+      if (key.equals(FIELD_USER_PK)) {
+        stmt.setInt(1, Integer.parseInt(value));
+      } else {
+        stmt.setString(1, value);
+      }
+      ResultSet rs = stmt.executeQuery();
+
+      if (!rs.next()) {
+        rs.close();
+        return null;
+      }
+
+      user = populateDto(rs);
+
+//      rs.close();
+    } catch (SQLException sqle) {
+      Logger.log("UserDaoImpl", "findBy", sqle.getMessage());
+      throw new IllegalArgumentException(
+          "Error querying user : " + USER_FIND_QUERY + key + " = " + value);
+    }
+
+    return user;
+  }
+
+
+  /**
+   * Create an instance of DTO user based on result set.
+   *
+   * @param rs {@link ResultSet} coming directly from database
+   * @return a {@link User} object with the informations of the {@link ResultSet}
+   * @throws SQLException if an error occurs during result set access
+   */
+  private User populateDto(ResultSet rs) throws SQLException {
+    User user = (User) this.factory.getUser();
+
+    user.setPk(rs.getInt(FIELD_USER_PK));
+    user.setLogin(rs.getString(FIELD_USER_LOGIN));
+    user.setPassword(rs.getString(FIELD_USER_PASSWORD));
+    user.setLastname(rs.getString(FIELD_USER_LAST_NAME));
+    user.setFirstname(rs.getString(FIELD_USER_FIRST_NAME));
+    user.setEmail(rs.getString(FIELD_USER_EMAIL));
+    user.setResponsible(rs.getBoolean(FIELD_USER_RESPONSIBLE));
+    user.setInscriptionDate(rs.getTimestamp(FIELD_USER_SUBSCRIBE_DATE).toLocalDateTime());
+
+    return user;
+  }
+
+
+}

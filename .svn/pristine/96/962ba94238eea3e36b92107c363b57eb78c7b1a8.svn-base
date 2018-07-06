@@ -1,0 +1,11 @@
+package bizz.objects.interfaces;
+
+import bizz.dto.UserDto;
+
+public interface UserBizz extends UserDto {
+
+  int getPk();
+
+  void setPk(int userNumber);
+
+}

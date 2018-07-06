@@ -1,0 +1,24 @@
+package biz.objects;
+
+import java.util.List;
+import java.util.Map;
+
+import biz.dto.CompanyDto;
+import biz.dto.JeDto;
+
+/**
+ * JE's business object.
+ */
+public interface Je extends JeDto {
+
+  boolean addContact(Contact contact);
+  
+  boolean addCompany(Company company);
+  
+  List<Company> getCompanies();
+  
+  Map<CompanyDto, List<Contact>> getContactsByCompany();
+  
+  List<Contact> getContacts();
+  
+}

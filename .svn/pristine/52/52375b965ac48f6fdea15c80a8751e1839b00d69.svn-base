@@ -1,0 +1,58 @@
+package biz.impl;
+
+import static org.junit.Assert.*;
+
+import org.junit.Before;
+import org.junit.Test;
+
+public class CompanyBizTest {
+
+  @Before
+  public void setUp() throws Exception {}
+
+  @Test
+  public void testHashCode() {
+    fail("Not yet implemented");
+  }
+
+  @Test
+  public void testCompanyBiz() {
+    fail("Not yet implemented");
+  }
+
+  @Test
+  public void testEquals() {
+    fail("Not yet implemented");
+  }
+
+  @Test
+  public void testGetCompanyName() {
+    fail("Not yet implemented");
+  }
+
+  @Test
+  public void testSetCompanyName() {
+    fail("Not yet implemented");
+  }
+
+  @Test
+  public void testGetCreator() {
+    fail("Not yet implemented");
+  }
+
+  @Test
+  public void testSetCreator() {
+    fail("Not yet implemented");
+  }
+
+  @Test
+  public void testGetAddress() {
+    fail("Not yet implemented");
+  }
+
+  @Test
+  public void testGetLastParticipationYear() {
+    fail("Not yet implemented");
+  }
+
+}

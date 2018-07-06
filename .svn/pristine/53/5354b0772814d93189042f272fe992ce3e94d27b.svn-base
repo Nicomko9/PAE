@@ -1,0 +1,43 @@
+package dal.dao;
+
+import biz.dto.AddressDto;
+import biz.objects.Address;
+import dal.dao.schema.AddressSchema;
+
+public interface AddressDao extends AddressSchema, GenericDao {
+
+  /**
+   * Persist an address into the table addresses in database.
+   *
+   * @param address the {@link AddressDto} to persist
+   * @return the value of the {@link Address} casted in {@link AddressDto}
+   */
+  AddressDto create(Address address);
+
+  /**
+   * Find an address based on his street, street number, zip code and commune.
+   *
+   * @param street the street to match
+   * @param streetNumber the street number to match
+   * @param zipCode the postal code to match
+   * @param commune the commune to match
+   * @return the {@link AddressDto} instance found in the research
+   */
+  AddressDto findAddress(String street, int streetNumber, int zipCode, String commune);
+
+  /**
+   * Find a single address based on a Primary Key.
+   *
+   * @param pk the primary key
+   * @return the {@link AddressDto}
+   */
+  AddressDto findByPk(int pk);
+
+  /**
+   * Update an address already present in the database.
+   *
+   * @param address {@link Address} to persist
+   * @return the new value of the {@link Address} casted in {@link AddressDto}
+   */
+  AddressDto update(Address address);
+}

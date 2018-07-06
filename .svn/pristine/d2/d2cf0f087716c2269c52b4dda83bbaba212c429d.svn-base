@@ -1,0 +1,50 @@
+application.define("search", function() {
+  function show() {
+    $(".sidebar-search .autocomplete").dropdown().show();
+  }
+
+  function hide() {
+    $(".sidebar-search .autocomplete").dropdown().hide();
+  }
+
+  $(".sidebar-search input[name='app-search']:first").each(function() {
+    var elem = $(this);
+
+    $(this).val("");
+    elem.data('oldVal', "");
+
+    // Init changes watcher
+    elem.bind("propertychange change click keyup input paste", function(event){
+
+      // On change
+      if (elem.data('oldVal') != elem.val()) {
+        console.log("Change detected");
+
+        elem.data('oldVal', elem.val());
+
+        if (elem.val() == "") {
+          hide();
+        } else {
+          show();
+          simpleSearch(elem.val());
+        }
+      }
+    });
+
+    $(document).on("click", hide);
+  });
+
+  function simpleSearch(val) {
+    $.ajax({
+      "url" : "/app/search",
+      "method" : "POST",
+      "dataType" : "JSON",
+      "data" : { search : val },
+      "success" : function(data) {
+        console.log(data)
+      }
+    });
+  }
+
+  return {};
+} ());

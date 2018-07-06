@@ -1,0 +1,45 @@
+application.define("search", function() {
+  $(".sidebar-search input[name='app-search']:first").each(function() {
+    var elem = $(this);
+
+    $(this).val("");
+    elem.data('oldVal', "");
+
+    // Init changes watcher
+    elem.bind("propertychange change click keyup input paste", function(event){
+
+      // On change
+      if (elem.data('oldVal') != elem.val()) {
+        console.log("Change detected");
+
+        elem.data('oldVal', elem.val());
+
+        $(".sidebar-search .autocomplete").dropdown('toggle');
+      }
+    });
+
+    var hide = function(event) {
+      console.log(event.target);
+      // if (event.target !== e[0]) {
+      //   $(".sidebar-search .autocomplete").dropdown('toggle');
+      // }
+    };
+
+    $(".sidebar-search .autocomplete").on("show.bs.dropdown", function() {
+      console.log("Showing");
+      $(document).on("click", hide);
+    });
+
+    $(".sidebar-search .autocomplete").on("hide.bs.dropdown", function() {
+      console.log("Hidding");
+      $(document).off("click", hide);
+    });
+  });
+
+
+  return {
+    simpleSearch : function() {
+
+    }
+  };
+} ());

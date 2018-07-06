@@ -1,0 +1,23 @@
+package biz.objects;
+
+import biz.dto.CompanyDto;
+
+/**
+ * Company's business object.
+ */
+public interface Company extends CompanyDto {
+
+  /**
+   * Get the primary key of the Object Company in the database.
+   *
+   * @return int the value of the primary key
+   */
+  int getPk();
+
+  /**
+   * Set the value of the primary key of a Company Object.
+   *
+   * @param primaryKey the new value of the primary key
+   */
+  void setPk(int primaryKey);
+}

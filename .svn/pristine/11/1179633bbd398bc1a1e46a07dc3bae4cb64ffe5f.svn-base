@@ -1,0 +1,43 @@
+<div class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"
+	id="popup-invitation-je">
+	<div class="container-fluid">
+		<div class="row">
+			<div class="modal-dialog modal-lg clearfix">
+				<div class="modal-content">
+					<div class=" panel panel-default">
+							<div class="panel-heading clearfix">
+								<div class="col-md-10 col-md-offset-1 text-center">
+									Invitations</div>
+								<div class="pull-right" data-dismiss="modal"
+									data-target="#popup-invitation-je">
+									<i class="fa fa-times"></i>
+								</div>
+							</div>
+							<div class="panel-body">
+								<table class="table table-bordered" id="popup-tab-invite">
+									<thead class="thead-inverse">
+										<tr>
+											<th>Entreprise</th>
+											<th>Date inscription</th>
+											<th>Dernières participations</th>
+											<th>Inviter</th>
+										</tr>
+									</thead>
+									<tbody>
+
+									</tbody>
+								</table>
+								<div id="invitationFormAlert" class="col-xs-12"></div>
+								<div class="pull-right confirm-buttons">
+									<button data-view="je:invite" class="btn btn-primary btn-right">Inviter (<span class="count"></span>)</button>
+									<button data-view="je:invite" data-context='{ "dl" : true }'
+										class="btn btn-primary btn-right">Inviter (<span class="count"></span>) & Télécharger</button>
+								</div>
+							</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+

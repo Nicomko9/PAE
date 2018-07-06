@@ -1,0 +1,38 @@
+package biz.impl;
+
+import static org.junit.Assert.*;
+
+import org.junit.Before;
+import org.junit.Test;
+
+public class JeBizTest {
+
+  @Before
+  public void setUp() throws Exception {}
+
+  @Test
+  public void testJeBiz() {
+    fail("Not yet implemented");
+  }
+  
+  @Test
+  public void testGetCompanies() {
+    fail("Not yet implemented");
+  }
+
+  @Test
+  public void testGetContactMap() {
+    fail("Not yet implemented");
+  }
+
+  @Test
+  public void testGetContacts() {
+    fail("Not yet implemented");
+  }
+  
+  @Test
+  public void testCheckConstraints() {
+    fail("Not yet implemented");
+  }
+
+}

@@ -1,0 +1,357 @@
+application.define("je", function() {
+	// Autoload templating module
+	var template = application.require("template");
+
+	// Load a JE based on JSON object representation (previously
+	// loaded)
+	function displayJe(je) {
+		logger.log("Je.js", "displayJe", "In");
+		template.loadView("je.html", null, function() {
+			// Je not found
+			if (je === null) {
+				// Afficher la partie "JE not found"
+			} else {
+				$("span[data-source='je.date']").html(je.dayDate.dayOfMonth + "/"
+								+ je.dayDate.monthValue + "/"
+								+ je.dayDate.year);
+
+				if (je.dayYear != application.currentYear) {
+					$("#btn-invite").hide();
+				}
+				// Afficher la partie content JE
+			}
+		});
+	}
+
+	function showCompanyListForInvitation(data) {
+		console.log(data);
+		if (data.lenght === 0) {
+			$("#popup-tab-invite").html("<div class='text-center'>"
+					+ "<p>Aucunes entreprises disponibles</p></div>");
+			return;
+		}
+		var listPk = [];
+		$("#participations-table tbody").find("tr").each(function(){
+			listPk.push($(this).data("pk"));
+		});
+		$("#popup-tab-invite tbody").html("");
+		for ( var i in data) {
+			var o = data[i];
+			// TODO Regarder si la pk est dans l'autre liste
+			var dateInscription = o.inscriptionDate.dayOfMonth
+					+ "/" + o.inscriptionDate.monthValue + "/"
+					+ o.inscriptionDate.year;
+			var str = "<tr data-pk='"
+				+ o.pk + "' data-version='"	+ o.version	+ "'>"
+				+ "<td>" + o.companyName+ "</td><td>" + dateInscription
+				+ "</td><td>"+ o.lastParticipationYear
+				+ "</td><td><input type='checkbox' name='invite'";
+			/*if($.inArray(o.pk, listPk) !== -1){
+				str += "checked='checked' onclick='return false'";
+			}*/
+			str += "/></td></tr>";
+			$("#popup-tab-invite tbody").append(str);
+		}
+	}
+
+	function loadInvitations() {
+		logger.log("je.js", "loadInvitations()", "Loading");
+		$.ajax({
+			url : "/app/entreprise/listForInvite",
+			method : "POST",
+			dataType : "JSON",
+			success : function(data) {
+				showCompanyListForInvitation(data);
+			},
+			error : function(err) {
+				// TO DO
+			}
+		});
+	}
+
+	function loadParticipations(year) {
+		$("#participation-loading").show(250);
+		logger.log("je.js", "loadParticipations()", "List");
+		$.ajax({
+			url : "/app/participations",
+			method : "POST",
+			dataType : "JSON",
+			data : {
+				annee : year
+			},
+			success : function(data) {
+				logger.log("je.js", "loadParticipations()", "LoadParticipations successfull !");
+				showParticipations(data);
+			},
+			error : function(data) {
+				logger.log("je.js", "loadParticipations()",
+						"Erreur");
+			}
+		});
+	}
+
+	var participationsDataTable = null;
+
+	function showParticipations(list) {
+		$("#participations-table tbody").html("");
+
+		if (list.length === 0) {
+			$("#participations-table tbody").append("<tr><td class='col-lg-2 col-md-2'></td>"
+					+ "<td class='col-lg-4 col-md-4'></td>"
+					+ "<td class='col-lg-2 col-md-2'></td>"
+					+ "<td class='col-lg-2 col-md-2 text-center'>"
+					+ "<button name='participation:cancel' class='btn btn-active'>"
+					+ "Annuler participation</button>"
+					+ "</td>" + "</tr>");
+		} else {
+			for (var i in list) {
+				var o = list[i];
+				$("#participations-table tbody").append(
+						"<tr data-pk='" + o.company.pk + "' data-version='" + o.company.version
+						+ "'><td class='col-lg-2 col-md-2' data-toggle='company-name'>"
+						+ o.company.companyName + "</td><td class='col-lg-4 col-md-4'>"
+						+ "<span class='text-muted'>Pas encore de personne présente</span></td>"
+						+ "<td class='col-lg-2 col-md-2 text-center'>" + o.state + "</td>"
+						+ "<td class='col-lg-2 col-md-2 text-center'>"
+						+ "<button name='participation:cancel' class='btn btn-active'>"
+						+ "Annuler participation</button>"
+						+ "</td>"
+						+ "</tr>");
+			}
+
+			if (participationsDataTable == null) {
+				participationsDataTable = $("#participations-table table")
+					.DataTable({
+						columns : [ null, null, null, {
+							orderable : false
+						} ]
+					});
+			}
+
+		}
+		$("#participation-loading").hide(250);
+	}
+	
+	function loadPresences(year) {
+		logger.log("je.js", "loadPresences()", "List");
+		$.ajax({
+			url : "/app/presences",
+			method : "POST",
+			dataType : "JSON",
+			data : {
+				annee : year
+			},
+			success : function(data) {
+				//showPresences(data);
+				logger.log("je.js", "loadPresences()", "LoadPresences successfull !");
+			},
+			error : function(data) {
+				logger.log("je.js", "loadPresences()", "Erreur");
+			}
+		});
+	}
+
+	function sendInvites() {
+		logger.log("je.js", "sendInvite()", "Send");
+		if (!application.getUser().isConnected()
+				|| !application.getUser().isResponsible()) {
+			notifications.notify(
+					"Vous devez être Administrateur", "danger");
+			return;
+		}
+		var invites = [];
+		$("#popup-tab-invite tbody").find("tr").each(function() {
+			var check = $(this).find("td:last");
+			if (check.find("input:first")
+					.is(":checked")) {
+				console.log("OK - pk = " + $(this).data("pk"));
+				invites.push($(this).data("pk"));
+			}
+		});
+		console.log(invites);
+		$.ajax({
+			url : "app/je/invite",
+			method : "POST",
+			dataType : "JSON",
+			data : {
+				json : invites
+			},
+			success : function(data) {
+				logger.log("je.js", "sendInvites()",
+						"Succesfull");
+				$("#popup-invitation-je").modal("hide");
+				// TODO Update view of dashboard with the
+				// informations received from servlet
+				console.log(data);
+			},
+			error : function(err) {
+				$("#popup-invitation-je").modal("hide");
+				notifications.notify("Erreur : " + err.responseJSON, "danger");
+			}
+		});
+	}
+
+	return {
+		/**
+		 * Point d'entrée d'une JE (dashboard JE?)
+		 * 
+		 * @param module
+		 *            le module JE
+		 * @param context
+		 *            le context éventuellement passé en
+		 *            argument
+		 */
+		main : function(module, context) {
+			var annee = "";
+
+			if (typeof context == "undefined") {
+				annee = application.currentYear;
+			} else {
+				annee = context.year;
+			}
+
+			$.ajax("/app/je", {
+				data : {
+					year : annee
+				},
+				method : "POST",
+				dataType : "json"
+			}).done(
+				function(data) {
+					// Pas encore de JE pour l'année
+					// en cours
+					if (data == null
+							&& annee == application.currentYear) {
+						application.require("je", "createJe", {
+								year : annee
+							});
+					}
+					else {
+						displayJe(data);
+					}
+			}).fail(function(xhr) {
+				errors.notify(xhr.JSONResponse);
+			});
+
+			loadParticipations(annee);
+			loadPresences(annee);
+		},
+		exportCsv : function(data) {
+			logger.log("je.js", "exportCsv", "Exporting");
+			var csvContent = "data:text/csv;charset=utf-8,";
+			data.forEach(function(infoArray, index){
+
+				dataString = infoArray.join(",");
+				csvContent += index < data.length ? dataString+ "\n" : dataString;
+
+			});
+			var encodedUri = encodeURI(csvContent);
+			var link = document.createElement("a");
+			link.setAttribute("href", encodedUri);
+			link.setAttribute("download", "Entreprises_invitées.csv");
+			document.body.appendChild(link); 
+
+			link.click();
+		},
+		/**
+		 * Vue création d'une JE (ihm side)
+		 */
+		createJe : function(module, context) {
+			template.loadView("dashboard.html",function() {
+				logger.log("je.js","createJe()","Loading dashboard");
+				logger.log("je.js","createJe()", context);
+				$("#no-je").fadeIn(0);
+				$("#no-je > [data-condition]").fadeOut(0);
+				$("#date-choice").fadeOut(0);
+
+				var annee = -1;
+
+				if (typeof context != "undefined"
+						&& typeof context.year != "undefined") {
+					$("#create-je-years").html((application.currentYear - 1)
+											+ "-" + application.currentYear);
+					$("#no-je > [data-condition='current-year']").fadeIn(0);
+					annee = application.currentYear;
+				} else {
+					$("#no-je > [data-condition='select-year']").fadeIn(0);
+					// @fixme add control from
+					// date
+					for (var i = 0; i < 4; i++) {
+						$("#select-year").append("<option value='"
+							+ (application.currentYear + i)+ "'>"
+							+ (application.currentYear+ i - 1)+ "-"
+							+ (application.currentYear + i)+ "</option>");
+					}
+				}
+
+				$("#noJe-new").on("click",function() {
+					$("#no-je > [data-condition]").fadeOut(0);
+					if (annee === -1) {
+						annee = $("#select-year").val();
+					}
+					logger.log("je.js","createJe()","Handling annee "+ annee);
+					application.require("utils/date-picker",function(module) {
+						module.init("#new-je-date",function(pickadate) {
+							pickadate.set("min",new Date(annee - 1,8,1));
+							pickadate.set("max",new Date(annee,11,31));
+							pickadate.open(false);
+						});
+					});
+
+					$(this).hide(100,function() {
+						$("#date-choice").fadeIn(100);
+					});
+				});
+
+			});
+		},
+		/**
+		 * Vue "sauvegarde" du formulaire de création
+		 */
+		saveJe : function() {
+			if (!application.getUser().isConnected()
+					|| !application.getUser().isResponsible()) {
+				alert("Vous devez etre administrateur");
+				return;
+			}
+
+			var date = $("#new-je-date").val();
+			var m = date.match(/(\d+)\s([^\s]+)\s(\d+)/);
+
+			date = m[1]+ "/"+ (jQuery.fn.pickadate.defaults.monthsFull
+							.indexOf(m[2]) + 1) + "/" + m[3];
+
+			$.ajax("/app/je/create", {
+				dataType : "json",
+				method : "POST",
+				data : {
+					date : date
+				}
+			}).done(
+					function() {
+						logger.log("je.js", "saveJe()",
+								"Saved : going to dashboard");
+						application.require("je", "main");
+					}).fail(
+					function(xhr) {
+						logger.log("je.js", "saveJe()",
+								xhr.responseText);
+						errors.notify(errors
+								.translate(xhr.responseJSON));
+					});
+		},
+		/**
+		 * First invitations entreprises.
+		 */
+		invite : function() {
+			sendInvites()
+		},
+		/**
+		 * Load the possible invitation
+		 */
+		inviteList : function() {
+			loadInvitations();
+			$("#popup-invitation-je").modal("show");
+		}
+	};
+}());

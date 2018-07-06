@@ -1,0 +1,140 @@
+package config;
+
+import config.annotation.Service;
+import ihm.utils.Logger;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Parameter;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+
+/**
+ * App Configurator.
+ */
+
+public class AppConfig {
+
+  public static final String APP_DEV = "dev";
+  public static final String APP_PROD = "prod";
+  public static final String APP_MOCK = "mock";
+
+  private static Properties properties = new Properties();
+
+  private String environment;
+
+  private Map<Class<?>, Object> services = new HashMap<>();
+
+  /**
+   * Empty constructor for AppConfig.
+   */
+  public AppConfig(String environment) {
+    this.environment = environment;
+
+    this.services.put(AppConfig.class, this);
+  }
+
+  /**
+   * Get a property from configuration file.
+   *
+   * @param key lookup key
+   * @return the associated value
+   */
+  public String getProperty(String key) {
+    return properties.getProperty(key);
+  }
+
+  /**
+   * Get a property from configuration file, and a default value if not found.
+   *
+   * @param key lookup key
+   * @param defaultValue the value to return on miss
+   * @return defaultValue on miss, associated value on hit
+   */
+  public String getProperty(String key, String defaultValue) {
+    return properties.getProperty(key, defaultValue);
+  }
+
+  /**
+   * Load a class and create a new instance from a className with a property get from the
+   * configuration file.
+   *
+   * @param className type of the class
+   * @return instance of the new class
+   * @throws Exception exception
+   */
+  @SuppressWarnings("unchecked")
+  public <T> T newInstanceOf(Class<T> className) throws Exception {
+    if (this.services.containsKey(className)) {
+      try {
+        return (T) this.services.get(className);
+      } catch (ClassCastException exception) {
+        Logger.log("AppConfig", "newInstanceOf", "Invalid cache entry for class" + className);
+      }
+    }
+
+    try {
+      Class<?> impl = Class.forName(properties.getProperty("plugin."
+          + className.getName(), className.getName()));
+
+      Constructor<?>[] constructors = impl.getDeclaredConstructors();
+
+      for (Constructor<?> constructor : constructors) {
+        try {
+          constructor.setAccessible(true);
+
+          int index = 0;
+          Object[] params = new Object[constructor.getParameterCount()];
+          for (Parameter param : constructor.getParameters()) {
+            params[index] = newInstanceOf(param.getType());
+            index++;
+          }
+
+          Object instance = constructor.newInstance(params);
+
+          Service annotation = constructor.getAnnotation(Service.class);
+
+          if (annotation != null && annotation.shared()) {
+            this.services.put(className, instance);
+          }
+
+          return (T) instance;
+        } catch (Exception exc) {
+          Logger.log("AppConfig", "newInstanceOf",
+              "Skipping constructor - error happened : " + exc.getMessage() + " "
+                  + exc.getStackTrace()[0].getFileName() + ":"
+                  + exc.getStackTrace()[0].getLineNumber());
+        }
+      }
+
+      // No constructor match
+      throw new IllegalArgumentException("[" + this.environment + "] You cannot load plugin for '"
+          + className.getName() + "' : problem finding constructor");
+    } catch (Throwable exception) {
+      Logger.log("appConfig", "newInstanceOf", exception.getMessage());
+
+      throw exception;
+    }
+  }
+
+  /**
+   * Load the configurations of the App.
+   *
+   * @return <code>true</code> if loading is clear or return <code>false</code> if loading failed
+   */
+  public boolean load() {
+    String configurationFile = "conf/" + this.environment + ".properties";
+    try (FileInputStream file = new FileInputStream(configurationFile)) {
+      properties.load(file);
+
+      return true;
+    } catch (IOException exception) {
+      Logger.log("AppConfig", "load", "Internel system error : exiting application");
+      exception.printStackTrace();
+
+      return false;
+    }
+  }
+
+}

@@ -1,0 +1,242 @@
+application.define("search", function() {
+  var jes = application.require("objects/jes");
+
+  var timeout = null;
+  var ajax    = null;
+
+  var search = [];
+  var searchResults = {};
+
+  function show() {
+    $(".sidebar-search .autocomplete").show();
+  }
+
+  function hide() {
+    $(".sidebar-search .autocomplete").hide();
+  }
+
+  function launchSearch(val) {
+    if (val.length < 2) {
+      if (timeout != null) {
+        clearTimeout(timeout);
+        timeout = null;
+      }
+      if (ajax != null) {
+        ajax.abort();
+        ajax = null;
+      }
+
+      return;
+    }
+    show();
+    if (timeout != null) {
+      clearTimeout(timeout);
+    }
+    timeout = setTimeout(function() {
+      if (ajax != null) {
+        ajax.abort();
+        ajax = null;
+      }
+      simpleSearch(val);
+    }, 500);
+  }
+
+  $(".sidebar-search input[name='app-search']:first").each(function() {
+    var elem = $(this);
+
+    $(this).val("");
+    elem.data('oldVal', "");
+
+    // Init changes watcher
+    elem.bind("propertychange change click keyup input paste", function(event){
+
+      // On change
+      if (elem.data('oldVal') != elem.val()) {
+        console.log("Change detected");
+
+        elem.data('oldVal', elem.val());
+
+        if (elem.val() == "") {
+          hide();
+        } else {
+          launchSearch(elem.val());
+        }
+      }
+    });
+
+    $(document).on("click", hide);
+  });
+
+  function simpleSearch(val) {
+    $(".autocomplete .result-set").each(function() { $(this).remove() });
+    ajax = $.ajax({
+      "url" : "/app/search",
+      "method" : "POST",
+      "dataType" : "JSON",
+      "data" : { search : val },
+      "success" : function(data) {
+        if (-1 != val.match(/^(\d|\/|.)+$/)) {
+          var exp = val.replace(/\./, "/");
+          var list = jes.all().filter(function(e) {
+            return (jes.dateFormat(e.dayDate)).match(new RegExp(exp)) != null;
+          });
+
+          if (list.length == 0) {
+            $(".autocomplete li.divider:first").before("<li class='result-set'>"
+                + "<a>Aucune JE correspondante</a></li>");
+          } else {
+            for (var k in list) {
+              // Max 5 : refine
+              if (k == 5) { break; }
+              $(".autocomplete li.divider:first").before(
+                  "<li class='result-set'><a>JE "
+                  + highlight(jes.dateFormat(list[k].dayDate), exp)
+                  + "</a></li>"
+              );
+            }
+          }
+        }
+
+        search = val.split("\w+");
+        searchResults = data;
+
+        var companies = application.require("objects/companies");
+
+        if (data.companies.length != 0) {
+          var i;
+          for (i = 0; (i < 3 && i < data.companies.length); i++) {
+            companies.set(data.companies[i]);
+            $(".autocomplete .divider:last").before(
+                "<li class='result-set'>"
+                + "<a href='#' data-view='entreprise:display' data-context='{ \"pk\" : "
+                + data.companies[i].pk + " }' >"
+                + highlight(data.companies[i].companyName)
+                + "</a>"
+                + "</li>"
+            );
+          }
+
+          for (i; i < data.companies.length; i++) {
+            companies.set(data.companies[i]);
+          }
+
+          if (data.companies.length > 3) {
+            $(".autocomplete .divider:last").before(
+                "<li style='text-align: center' class='result-set'>"
+                + "<a data-view='search:fullSearch'>"
+                + "Afficher plus (" + data.companies.length + ")"
+                + "</a>"
+                + "</li>"
+            );
+          }
+        }
+
+
+        var contacts = application.require("objects/contacts");
+
+        if (data.contacts.length != 0) {
+          i = 0;
+          for (; (i < 3 && data.contacts.length); i++) {
+            contacts.set(data.contacts[i]);
+            $(".autocomplete").append(
+                "<li class='result-set'>"
+                + "<a href='#' data-view='contacts:display' data-context='{ \"pk\" : "
+                + data.contacts[i].pk + " }' >"
+                + highlight(data.contacts[i].firstname + " " + data.contacts[i].lastname)
+                + "</a>"
+                + "</li>"
+            );
+          }
+
+          for (i; i < data.contacts.length; i++) {
+            contacts.set(data.contacts[i]);
+          }
+
+          if (data.contacts.length > 3) {
+            $(".autocomplete").append(
+                "<li style='text-align: center' class='result-set'>"
+                + "<a data-view='search:fullSearch' data-context='{ view : \"contacts\" }'>"
+                + "Afficher plus (" + data.contacts.length + ")"
+                + "</a></li>"
+            );
+          }
+        }
+      }
+    });
+  }
+
+  function displayContactHeader() {
+    return "<td>Nom & prénom</td><td>Entreprise</td>"
+        + "<td>Email</td><td>Telephone</td><td></td>";
+  }
+
+  function displayCompanyHeader() {
+    return "<td>Entreprise</td><td>Adresse</td><td></td>";
+  }
+
+  function highlight(str, exp) {
+    if (typeof exp != "undefined") {
+      console.log("replacing");
+      str = str.replace(exp, "<span style='font-weight : bold'>" + exp + "</span>");
+    } else {
+      for (var s in search) {
+        str = str.replace(s, "<span style='font-weight : bold'>" + s + "</span>");
+      }
+    }
+
+    return str;
+  }
+
+  function displayContact(data) {
+    return "<tr>"
+        + "<td>" + highlight(data.firstname + " " + data.lastname) + "</td>"
+        + "<td>" + highlight(data.company.companyName) + "</td>"
+        + "<td>" + highlight(data.email) + "</td>"
+        + "<td>" + highlight(data.phone) + "</td>"
+        + "<td>" +
+        + "<a href='#' data-view='contacts:display' data-context='{ \"pk\" : \""
+        + data.pk + "\" } '></a>"
+        + " </td>"
+        + "</tr>";
+  }
+
+  function displayCompany(data) {
+    return "<tr>"
+        + "<td>" + highlight(data.companyName) + "</td>"
+        + "<td>" + formatAdress(data.address) + "</td>"
+        + "<td>"
+        + "<a href='#' data-view='company:display' data-context='{ \"pk\" : \""
+        + data.pk + "\" } '></a>"
+        + "</td>"
+        + "</tr>";
+  }
+
+  function formatAdress(address) {
+    var boite = "";
+    if(address.box !== 0) {
+      boite = "boite " + address.box;
+    }
+
+    return highlight(address.street) + ", " + address.streetNumber + " "
+        + boite + ", " + address.zipCode + ", " + highlight(address.commune);
+  }
+
+  return {
+    fullSearch : function(module, context) {
+      application.require("template").loadView("search", null, function() {
+        $("[data-template='search'] [data-attribute='view']").html(context.view);
+        $("[data-template='search'] table thead tr:first").html(
+            (context.view == "company") ? displayCompanyHeader() : displayContactHeader()
+        );
+
+        var body =  $("[data-template='search'] table tbody");
+        body.html("");
+
+        for (var k in data[context.view]) {
+          var o = data[context.view][k];
+          body.append((context.view == "company") ? displayCompany(o) : displayContact(o))
+        }
+      })
+    }
+  };
+} ());

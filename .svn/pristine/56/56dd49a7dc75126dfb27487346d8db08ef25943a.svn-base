@@ -1,0 +1,26 @@
+package biz.objects;
+
+/**
+ * Abstract class for Business Object.
+ */
+abstract class BizObject {
+
+  /**
+   * Number of version of the Object in the database.
+   */
+  protected int version;
+
+  /**
+   * Get the number of version of the Object.
+   * 
+   * @return {@link int} the number of version
+   */
+  abstract int getVersion();
+
+  /**
+   * Update the number of version of the Object.
+   * 
+   * @param version {@link int} the new number of version of the Object in the database
+   */
+  abstract void setVersion(int version);
+}

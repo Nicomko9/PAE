@@ -1,0 +1,88 @@
+application.define("utils/ajax", function() {
+  var loading = 0;
+
+  var defaults = {
+    method   : "POST",
+    dataType : "JSON"
+  };
+
+  function merge(query) {
+    for (var k in defaults) {
+      if (typeof query[k] == "undefined") {
+        query[k] = defaults[k];
+      }
+    }
+
+    return query;
+  }
+
+  function startLoading() {
+    ++loading;
+    if (loading == 1) {
+      $("#loading-status").fadeIn(200);
+    }
+  }
+
+  function stopLoading() {
+    if (loading > 0) {--loading;}
+    if (loading == 0) {
+      setTimeout(function() {
+        if (loading == 0) {
+          $("#loading-status").fadeOut(500);
+        }
+      }, 300);
+    }
+  }
+
+  function errorHandler(handler, context) {
+    return function(xhr) {
+      console.log("Handling error code " + xhr.JSONResponse);
+
+      if (typeof handler != "undefined") {
+        if (handler(xhr)) {
+          return;
+        }
+      }
+
+      switch (xhr.JSONResponse) {
+        // Handle all unhandled previous error code
+      	case 409:
+    	  //Optimistic lock
+    	  //break;
+        default:
+          if (typeof context == "undefined" || context == "") {
+            errors.notify(errors.translate(xhr.JSONResponse), "danger");
+          } else if (context instanceof jQuery) {
+            context.html("<div class='alert alert-warning'> "
+                + errors.translate(xhr.JSONResponse)
+                + "</div>"
+            );
+          }
+          break;
+      }
+    }
+  }
+
+  return {
+    /**
+     * Create an ajax request object
+     * @param url url to call if not defined, pulled from conf
+     * @param conf configurations (classical $.ajax({})
+     * @param context where to inject error message
+     * @param handler specific errors handler, return true to ignore default handler
+     * @returns {*}
+     */
+    create : function(url, conf, context, handler) {
+      if (typeof url != "string") {
+        conf = url;
+        url  = conf.url;
+        delete conf.url;
+      }
+
+      startLoading();
+
+      return $.ajax(url, merge(conf)).fail(errorHandler(handler, context)).always(stopLoading);
+    },
+    stopLoading : stopLoading
+  }
+} ());

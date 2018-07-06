@@ -1,0 +1,50 @@
+package util;
+
+import java.time.LocalDateTime;
+
+import biz.objects.Address;
+import biz.objects.Company;
+import biz.objects.Contact;
+import biz.objects.User;
+
+public interface Util {
+  
+  public static void fillUser(User user, String email, String firstname, String lastname, String login, String password, int pk){
+    user.setEmail(email);
+    user.setFirstname(firstname);
+    user.setInscriptionDate(LocalDateTime.now());
+    user.setLastname(lastname);
+    user.setLogin(login);
+    user.setPassword(password);
+    user.setPk(pk);
+  }
+  
+  public static void fillAddress(Address address, int box, String commune, int primaryKey, String street, int streetNumber, int zipCode){
+      address.setBox(box);
+      address.setCommune(commune);
+      address.setPk(primaryKey);
+      address.setStreet(street);
+      address.setStreetNumber(streetNumber);
+      address.setZipCode(zipCode);
+  }
+  
+  public static void fillCompany(Company company, Address address, String companyName, User creator, int primaryKey){
+    company.setAddress(address);
+    company.setCompanyName(companyName);
+    company.setCreator(creator);
+    company.setInscriptionDate(LocalDateTime.now());
+    company.setLastParticipationYear(LocalDateTime.now().getYear());
+    company.setPk(primaryKey);
+  }
+  
+  public static void fillContact(Contact contact, Company company, String email, String firstname, String lastname, String phone, int primaryKey){
+    contact.setActive(true);
+    contact.setCompany(company);
+    contact.setEmail(email);
+    contact.setFirstname(firstname);
+    contact.setLastname(lastname);
+    contact.setPhone(phone);
+    contact.setPk(primaryKey);
+  }
+  
+}

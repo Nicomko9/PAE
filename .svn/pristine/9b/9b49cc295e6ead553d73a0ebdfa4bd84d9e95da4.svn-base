@@ -1,0 +1,33 @@
+package dal.dao;
+
+
+import biz.dto.UserDto;
+import biz.objects.UserBiz;
+
+public interface UserDao {
+
+  /**
+   * Persist a user into the table users in database.
+   *
+   * @param user the {@link UserBiz} to persist
+   * @return the value of the {@link UserBiz} casted in {@link UserDto}
+   */
+  UserDto create(UserBiz user);
+
+  /**
+   * Find a single user based on a login.
+   *
+   * @param login the value to lookup
+   * @return the {@link UserDto} instance found in the research
+   */
+  UserDto findByLogin(String login);
+
+  /**
+   * Find a single user based on an email.
+   *
+   * @param email the value to lookup
+   * @return the {@link UserDto} instance found in the research
+   */
+  UserDto findByEmail(String email);
+
+}

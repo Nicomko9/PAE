@@ -1,0 +1,97 @@
+package bizz.objects;
+
+import java.time.LocalDateTime;
+
+public class UserBizzImpl extends BizzObject implements UserBizz {
+
+  private int userNumber;
+  private String login;
+  private String password;
+  private String lastname;
+  private String firstname;
+  private String email;
+  private LocalDateTime inscriptionDate;
+  private boolean responsible;
+
+  public UserBizzImpl() {
+  }
+
+  @Override
+  public String getLogin() {
+    return login;
+  }
+
+  @Override
+  public void setLogin(String login) {
+    this.login = login;
+  }
+
+  public String getPassword() {
+    return password;
+  }
+
+  public void setPassword(String password) {
+    this.password = password;
+  }
+
+  @Override
+  public String getLastname() {
+    return lastname;
+  }
+
+  @Override
+  public void setLastname(String lastname) {
+    this.lastname = lastname;
+  }
+
+  @Override
+  public String getFirstname() {
+    return firstname;
+  }
+
+  @Override
+  public void setFirstname(String firstname) {
+    this.firstname = firstname;
+  }
+
+  @Override
+  public String getEmail() {
+    return email;
+  }
+
+  @Override
+  public void setEmail(String email) {
+    this.email = email;
+  }
+
+  @Override
+  public LocalDateTime getInscriptionDate() {
+    return inscriptionDate;
+  }
+
+  @Override
+  public void setInscriptionDate(LocalDateTime inscriptionDate) {
+    this.inscriptionDate = inscriptionDate;
+  }
+
+  @Override
+  public boolean isResponsible() {
+    return responsible;
+  }
+
+  @Override
+  public void setResponsible(boolean responsible) {
+    this.responsible = responsible;
+  }
+
+  @Override
+  public int getPk() {
+    return userNumber;
+  }
+
+  @Override
+  public void setPk(int userNumber) {
+    this.userNumber = userNumber;
+  }
+
+}

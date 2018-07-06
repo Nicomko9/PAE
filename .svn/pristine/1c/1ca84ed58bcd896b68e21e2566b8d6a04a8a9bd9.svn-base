@@ -1,0 +1,14 @@
+package biz;
+
+import java.util.List;
+
+import biz.dto.PresenceDto;
+import biz.objects.Je;
+
+public interface PresenceUcc {
+
+  PresenceDto register(PresenceDto presence);
+  
+  List<PresenceDto> getAllPresencesOf(Je je);
+  
+}

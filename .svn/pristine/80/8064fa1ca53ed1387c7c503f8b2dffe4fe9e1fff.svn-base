@@ -1,0 +1,63 @@
+package dal.dao;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Collections;
+
+import biz.DtoFactory;
+import biz.dto.CompanyDto;
+import biz.objects.Contact;
+import dal.DalBackEndServices;
+import dal.dao.schema.ContactSchema;
+
+/**
+ * Contact's Data Access Object Class.
+ */
+class ContactDaoImpl extends AbstractDao implements ContactDao, ContactSchema {
+
+  /**
+   * Insert Contact auto generated query.
+   */
+  @SuppressWarnings("unused")
+  private static final String CONTACT_CREATE_QUERY =
+      "INSERT INTO " + TABLE + " (" + String.join(",", FIELDS_MAP) + ") VALUES ("
+          + String.join(",", Collections.nCopies(FIELDS_MAP.size(), "?")) + ")";
+
+  /**
+   * A compiled expression finding all fields from the table contacts in database.
+   */
+  @SuppressWarnings("unused")
+  private static final String CONTACT_FIND_QUERY =
+      "SELECT " + String.join(",", FIELDS_MAP) + " FROM " + TABLE + " WHERE ";
+
+  /**
+   * Constructor.
+   * 
+   * @param dal services provider
+   * @param factory {@link DtoFactory} object
+   */
+  public ContactDaoImpl(DalBackEndServices dal, DtoFactory factory) {
+    super(dal, factory);
+  }
+
+  /**
+   * Create an instance of DTO contact based on result set.
+   * 
+   * @param rs {@link ResultSet} coming directly from database
+   * @return a {@link Contact} object with the informationnof the {@link ResultSet}
+   * @throws SQLException if an error occurs during result set access
+   */
+  @SuppressWarnings("unused")
+  private Contact populateDto(ResultSet rs) throws SQLException {
+    Contact contact = (Contact) this.factory.getContact();
+
+    contact.setCompany((CompanyDto) rs.getObject(FIELD_CONTACT_COMPANY));
+    contact.setLastname(rs.getString(FIELD_CONTACT_LASTNAME));
+    contact.setFirstname(rs.getString(FIELD_CONTACT_FIRSTNAME));
+    contact.setEmail(rs.getString(FIELD_CONTACT_EMAIL));
+    contact.setPhone(rs.getString(FIELD_CONTACT_PHONE));
+    contact.setActive(rs.getBoolean(FIELD_CONTACT_ACTIVE));
+
+    return contact;
+  }
+}

@@ -1,0 +1,5 @@
+package dal.dao.schema;
+
+public interface ContactSchema extends GenericSchema {
+
+}

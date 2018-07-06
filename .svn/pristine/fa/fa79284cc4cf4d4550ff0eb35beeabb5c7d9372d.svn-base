@@ -1,0 +1,220 @@
+package dal.dao;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import biz.DtoFactory;
+import biz.dto.ParticipationDto;
+import biz.objects.Company;
+import biz.objects.Je;
+import biz.objects.Participation;
+import dal.DalBackEndServices;
+import dal.dao.schema.JeSchema;
+import ihm.utils.Logger;
+
+public class ParticipationDaoImpl extends AbstractDao implements ParticipationDao {
+
+  /**
+   * Insert Participation auto generated query.
+   */
+  private static final String PARTICIPATION_CREATE_QUERY =
+      "INSERT INTO " + TABLE + " (" + FIELD_PARTICIPATION_YEAR + ","
+          + FIELD_PARTICIPATION_COMPANY_NUMBER + "," + String.join(",", FIELDS_MAP) + ") VALUES ("
+          + String.join(",", Collections.nCopies(FIELDS_MAP.size() + 2, "?")) + ") RETURNING *";
+
+  /**
+   * A compiled expression finding all fields from the table participations of a JE in database.
+   */
+  private static final String PARTICIPATION_FIND_QUERY = "SELECT * FROM " + TABLE + " WHERE ";
+
+  /**
+   * A compiled expression finding all fields from the table participations of a JE in database.
+   */
+  private static final String PARTICIPATION_FIND_ALL_QUERY = "SELECT * FROM " + TABLE;
+
+  /**
+   * Update Participation auto generated query.
+   */
+  private static final String PARTICIPATION_UPDATE_QUERY =
+      "UPDATE " + TABLE + " SET (" + String.join(",", FIELDS_MAP) + ") = ("
+          + String.join(",", Collections.nCopies(FIELDS_MAP.size(), "?")) + ") WHERE "
+          + FIELD_PARTICIPATION_YEAR + " = ? AND " + FIELD_PARTICIPATION_COMPANY_NUMBER
+          + " = ? returning *";
+
+  private CompanyDao companyDao;
+  private JeDao jeDao;
+  
+  public ParticipationDaoImpl(DalBackEndServices dal, DtoFactory factory, CompanyDao companyDao,
+      JeDao jeDao) {
+    super(dal, factory);
+    this.companyDao = companyDao;
+    this.jeDao = jeDao;
+  }
+
+  @Override
+  public ParticipationDto create(Participation participation) {
+    Logger.log("ParticipationDaoImpl", "create", "Creating participation");
+
+    try {
+      PreparedStatement stmt = this.dal.prepareStatement(PARTICIPATION_CREATE_QUERY);
+
+      stmt.setInt(1, participation.getJe().getDayYear());
+      stmt.setInt(2, participation.getCompany().getPrimaryKey());
+      stmt.setString(3, participation.getState());
+      stmt.setString(4, participation.getLastState());
+
+      Logger.log("ParticipationDaoImpl", "create", "Participation Saved");
+
+      ResultSet rs = stmt.executeQuery();
+
+      if (!rs.next()) {
+        rs.close();
+        return null;
+      }
+
+      participation = populateDto(rs);
+
+      return participation;
+    } catch (Exception exc) {
+      exc.printStackTrace();
+      Logger.log("ParticipationDaoImpl", "create",
+          "registration of : " + participation.getCompany().getCompanyName() + " for the JE "
+              + participation.getJe().getDayYear() + " failed : " + exc.getMessage());
+      return null;
+    }
+  }
+
+  @Override
+  public ParticipationDto update(Participation participation) {
+    Logger.log("ParticipationDaoImpl", "update", "Updating participation");
+    try {
+      PreparedStatement stmt = this.dal.prepareStatement(PARTICIPATION_UPDATE_QUERY);
+      stmt.setString(1, participation.getState());
+      System.out.println(participation.getLastState());
+      stmt.setString(2, participation.getLastState());
+      // stmt.setInt(3, participation.getVersion()+1);
+      stmt.setInt(3, participation.getJe().getDayYear());
+      stmt.setInt(4, participation.getCompany().getPrimaryKey());
+      // stmt.setInt(6, participation.getVersion());
+
+      ResultSet rs = stmt.executeQuery();
+
+      if (!rs.next()) {
+        rs.close();
+        // probleme version
+      }
+
+      participation = populateDto(rs);
+
+      Logger.log("ParticipationDaoImpl", "update", "Participation Saved");
+      return participation;
+    } catch (Exception exc) {
+      Logger.log("ContactDaoImpl", "update", "Failed : " + exc.getMessage());
+      return null;
+    }
+  }
+
+  @Override
+  public List<ParticipationDto> findByYear(int year) {
+    List<ParticipationDto> participations = new ArrayList<>();
+
+    try {
+      PreparedStatement stmt =
+          this.dal.prepareStatement(PARTICIPATION_FIND_QUERY + FIELD_PARTICIPATION_YEAR + " = ?");
+
+      stmt.setInt(1, year);
+      ResultSet rs = stmt.executeQuery();
+
+      while (rs.next()) {
+        participations.add(populateDto(rs));
+      }
+      rs.close();
+
+      return participations;
+    } catch (SQLException sqle) {
+      Logger.log("ParticipationDaoImpl", "findByYear", sqle.getMessage());
+      return null;
+    }
+  }
+
+
+  @Override
+  public List<ParticipationDto> findByCompanyNumber(int companyNumber) {
+    List<ParticipationDto> participations = new ArrayList<>();
+
+    try {
+      PreparedStatement stmt = this.dal
+          .prepareStatement(PARTICIPATION_FIND_QUERY + FIELD_PARTICIPATION_COMPANY_NUMBER + " = ?");
+
+      stmt.setInt(1, companyNumber);
+      ResultSet rs = stmt.executeQuery();
+
+      while (rs.next()) {
+        participations.add(populateDto(rs));
+      }
+      rs.close();
+
+      return participations;
+    } catch (SQLException sqle) {
+      Logger.log("ParticipationDaoImpl", "findByCompanyNumber", sqle.getMessage());
+      return null;
+    }
+  }
+
+  /**
+   * Create an instance of DTO participation based on result set.
+   *
+   * @param rs {@link ResultSet} coming directly from database
+   * @return a {@link Participation} object with the information of the {@link ResultSet}
+   * @throws SQLException if an error occurs during result set access
+   */
+  private Participation populateDto(ResultSet rs) throws SQLException {
+    Participation participation = (Participation) this.factory.getParticipation();
+
+    Company company =
+        (Company) companyDao.findByPk(rs.getInt(FIELD_PARTICIPATION_COMPANY_NUMBER));
+    participation.setCompany(company);
+
+    Je je =
+        (Je) jeDao.findByYear(rs.getInt(FIELD_PARTICIPATION_YEAR));
+    participation.setJe(je);
+
+    participation.setState(rs.getString(FIELD_PATICIPATION_STATE));
+    participation.setLastState(rs.getString(FIELD_PARTICIPATION_LAST_STATE));
+    // participation.setVersion(rs.getInt(FIELD_VERSION));
+    return participation;
+  }
+
+  @Override
+  public List<ParticipationDto> findAllParticipationsForSelection() {
+    List<ParticipationDto> participations = new ArrayList<>();
+    try {
+      PreparedStatement stmt =
+          this.dal.prepareStatement(PARTICIPATION_FIND_ALL_QUERY + " par, " + JeSchema.TABLE 
+              + " je " + " WHERE par." + FIELD_PARTICIPATION_YEAR + " = je." 
+              + JeSchema.FIELD_COMPANY_DAYS_DAY_YEAR + " AND ((DATE_PART('year',current_date)-par."
+              + FIELD_PARTICIPATION_YEAR + ")*12 + ((DATE_PART('month',current_date) - "
+              + "DATE_PART('month'," + " je." + JeSchema.FIELD_COMPANY_DAYS_DAY_DATE 
+              + "))))<48 AND (par." + FIELD_PATICIPATION_STATE + "='payée' OR par."
+              + FIELD_PARTICIPATION_LAST_STATE + "='payée')");
+
+      ResultSet rs = stmt.executeQuery();
+
+      System.out.println(stmt.toString());
+      while (rs.next()) {
+        participations.add(populateDto(rs));
+      }
+      rs.close();
+
+      return participations;
+    } catch (SQLException sqle) {
+      Logger.log("ParticipationDaoImpl", "findAllParticipationForSelection", sqle.getMessage());
+      return null;
+    }
+  }
+
+}

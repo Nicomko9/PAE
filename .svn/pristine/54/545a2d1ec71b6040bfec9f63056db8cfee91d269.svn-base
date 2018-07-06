@@ -1,0 +1,21 @@
+package biz.objects;
+
+import biz.dto.ParticipationDto;
+import biz.exceptions.BusinessException;
+
+
+public interface Participation extends ParticipationDto {
+
+  /**
+   * Prepare the {@link Contact} to be insert in the database.
+   */
+  public void prepareForInsert();
+  
+  /**
+   * Check some Constraints.
+   *
+   * @throws BusinessException if of no respect of the constraints.
+   */
+  void checkConstraints() throws BusinessException;
+
+}

@@ -1,0 +1,10 @@
+package config;
+
+
+public interface DependencyManager {
+
+  DependencyManager INSTANCE = (DependencyManager) AppConfig.INSTANCE;
+
+  <T> T getClassForName(Class<T> className);
+
+}

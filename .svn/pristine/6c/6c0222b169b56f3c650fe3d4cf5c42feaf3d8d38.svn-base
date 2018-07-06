@@ -1,0 +1,182 @@
+package util;
+
+import java.sql.PreparedStatement;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+import biz.objects.Address;
+import biz.objects.BusinessFactory;
+import biz.objects.Company;
+import biz.objects.Contact;
+import biz.objects.Je;
+import biz.objects.Participation;
+import biz.objects.Presence;
+import biz.objects.User;
+import config.AppConfig;
+import dal.DalBackEndServices;
+import dal.DalFrontEndServices;
+import dal.dao.AddressDao;
+import dal.dao.CompanyDao;
+import dal.dao.ContactDao;
+import dal.dao.JeDao;
+import dal.dao.ParticipationDao;
+import dal.dao.PresenceDao;
+import dal.dao.UserDao;
+
+public interface Util {
+
+  int BOX = 12;
+  String COMMUNE = "commune_junit";
+  String STREET = "rue_junit";
+  int STREET_NUMBER = 12;
+  int ZIP_CODE = 1000;
+
+  String EMAIL = "prenom.nom@test.be";
+  String FIRSTNAME = "prenom";
+  String LASTNAME = "nom";
+  String LOGIN = "login_junit";
+  String PASSWORD = "motdepasse";
+
+  String COMPANY_NAME = "name_company_junit";
+
+  String PHONE = "phone_junit";
+
+  public static void deleteTestRecord(AppConfig appConfig) throws Exception{
+    DalFrontEndServices dalFront = appConfig.newInstanceOf(DalFrontEndServices.class);
+    DalBackEndServices dalBack = appConfig.newInstanceOf(DalBackEndServices.class);
+
+    String[] queries = {
+        "UPDATE pae.companies SET creator = NULL, address_number = NULL WHERE company_name LIKE '%_junit';",
+        "UPDATE pae.contacts SET company_number = NULL WHERE phone LIKE '%_junit';",
+        "DELETE FROM pae.users u WHERE u.login LIKE '%_junit';",
+        "DELETE FROM pae.companies c WHERE c.company_name LIKE '%_junit';",
+        "DELETE FROM pae.contacts c WHERE c.phone LIKE '%_junit';", 
+    "DELETE FROM pae.addresses a WHERE a.street LIKE '%_junit';"};
+
+    try {
+      dalFront.startTransaction();
+      PreparedStatement stmt;
+
+      for (int i = 0; i < queries.length; i++) {
+        stmt = dalBack.prepareStatement(queries[i]);
+        stmt.execute();
+      }
+
+      dalFront.commitTransaction();
+    } catch (Exception exc) {
+      dalFront.rollbackTransaction();
+    }
+  }
+
+  public static Address createAddress(AppConfig appConfig) throws Exception {
+    AddressDao addressDao = (AddressDao) appConfig.newInstanceOf(AddressDao.class);
+    Address address = BusinessFactory.getAddress();
+    fillAddress(address, BOX, COMMUNE, 500, STREET, STREET_NUMBER, ZIP_CODE);
+    address = (Address) addressDao.create(address);
+    return address;
+  } 
+
+  public static User createUser(AppConfig appConfig) throws Exception {
+    User user = BusinessFactory.getUser();
+    fillUser(user, EMAIL, FIRSTNAME, LASTNAME, LOGIN, PASSWORD, 500);
+    UserDao userDao = (UserDao) appConfig.newInstanceOf(UserDao.class);
+    user = (User) userDao.create(user);
+    return user;
+  }
+
+  public static Company createCompany(AppConfig appConfig, Address address, User creator) throws Exception {
+    Company company = BusinessFactory.getCompany();
+    fillCompany(company, address, COMPANY_NAME, creator, LocalDateTime.now(), 500);
+    CompanyDao companyDao = (CompanyDao) appConfig.newInstanceOf(CompanyDao.class);
+    company = (Company) companyDao.create(company);
+    return company;
+  }
+
+  public static Contact createContact(AppConfig appConfig, Company company) throws Exception {
+    Contact contact = BusinessFactory.getContact();    
+    fillContact(contact, company, EMAIL, FIRSTNAME, LASTNAME, PHONE, 500);
+    ContactDao contactDao = (ContactDao) appConfig.newInstanceOf(ContactDao.class);
+    contact = (Contact) contactDao.create(contact);
+    return contact;
+  }
+
+  public static Je createJe(AppConfig appConfig) throws Exception {
+    Je je = BusinessFactory.getJe();
+    JeDao jeDao = appConfig.newInstanceOf(JeDao.class);
+    je = (Je) jeDao.findByYear(LocalDate.now().getYear());
+    if(je == null){
+      je = BusinessFactory.getJe();
+      je.setDate(LocalDate.now());
+      je = (Je) jeDao.create(je);
+    }
+    return je;
+  }
+
+  public static Participation createParticipation(AppConfig appConfig, Company company, Je je, String lastState, String state) throws Exception {
+    Participation participation = BusinessFactory.getParticipation();
+    fillParticipation(participation, company, je, lastState, state);
+    ParticipationDao participationDao = appConfig.newInstanceOf(ParticipationDao.class);
+    participation = (Participation) participationDao.create(participation);
+    return participation;
+  }
+
+  public static Presence createPresence(AppConfig appConfig, Company company, Contact contact, Participation participation) throws Exception {
+    Presence presence = BusinessFactory.getPresence();
+    fillPresence(presence, company, contact, participation);
+    PresenceDao presenceDao = appConfig.newInstanceOf(PresenceDao.class);
+    presence = (Presence) presenceDao.create(presence);
+    return presence;
+  }
+
+  public static void fillUser(User user, String email, String firstname, String lastname, String login, String password, int pk) {
+    user.setEmail(email);
+    user.setFirstname(firstname);
+    user.setInscriptionDate(LocalDateTime.now());
+    user.setLastname(lastname);
+    user.setLogin(login);
+    user.setPassword(password);
+    user.setPk(pk);
+  }
+
+  public static void fillAddress(Address address, int box, String commune, int primaryKey, String street, int streetNumber, int zipCode) {
+    address.setBox(box);
+    address.setCommune(commune);
+    address.setPk(primaryKey);
+    address.setStreet(street);
+    address.setStreetNumber(streetNumber);
+    address.setZipCode(zipCode);
+  }
+
+  public static void fillCompany(Company company, Address address, String companyName, User creator, LocalDateTime inscriptionDate, int primaryKey) {
+    company.setAddress(address);
+    company.setCompanyName(companyName);
+    company.setCreator(creator);
+    company.setInscriptionDate(inscriptionDate);
+    //company.setLastParticipationYear(LocalDateTime.now().getYear());
+    company.setPk(primaryKey);
+  }
+
+  public static void fillContact(Contact contact, Company company, String email, String firstname, String lastname, String phone, int primaryKey) {
+    contact.setActive(true);
+    contact.setCompany(company);
+    contact.setEmail(email);
+    contact.setFirstname(firstname);
+    contact.setLastname(lastname);
+    contact.setPhone(phone);
+    contact.setPk(primaryKey);
+  }
+
+  public static void fillParticipation(Participation participation, Company company, Je je, String lastState, String state) {
+    participation.setCompany(company);
+    participation.setJe(je);
+    participation.setLastState(lastState);
+    participation.setState(state);
+  }
+
+  public static void fillPresence(Presence presence, Company company, Contact contact, Participation participation) {
+    presence.setCompany(company);
+    presence.setContact(contact);
+    presence.setParticipation(participation);
+  }
+
+}

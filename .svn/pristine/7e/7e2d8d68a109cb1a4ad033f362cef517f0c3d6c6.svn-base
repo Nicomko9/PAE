@@ -1,0 +1,114 @@
+package ihm;
+
+
+import config.AppConfig;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+
+public class TemplateLoader {
+
+  public TemplateLoader(AppConfig config) {
+
+  }
+
+  public void compile() {
+    try (Writer writer = new BufferedWriter(new OutputStreamWriter(
+        new FileOutputStream("web/index.html")))) {
+      loadPart(writer, "head.html");
+      writer.write("<body class=\"\">");
+
+      // Unconnected content
+      loadPart(writer, "unconnected-main.html");
+
+      // Application content
+      loadPart(writer, "connected-main.html");
+
+      loadInnerTemplate(writer, "blank");
+      loadInnerTemplate(writer, "contacts");
+      loadInnerTemplate(writer, "dashboard");
+      loadInnerTemplate(writer, "entreprise");
+      loadInnerTemplate(writer, "je");
+      loadInnerTemplate(writer, "search");
+
+      writer.write("</div><div id=\"popup-collection\">");
+
+      loadInnerPopup(writer, "company");
+      loadInnerPopup(writer, "contact");
+
+      // Load dynamically all pages
+
+      writer.write("</div></div></body>");
+      loadPart(writer, "footer.html");
+      writer.write("</html>");
+    } catch (IOException exception) {
+
+    }
+  }
+
+  private void loadInnerPopup(Writer writer, String popup) throws IOException {
+    String str;
+
+    writer.write("<div class=\"template-popup\" data-template=\""  + popup + "\">");
+
+    inject(writer, "web/html/popups/" + popup + ".html");
+
+    writer.write("</div>");
+  }
+
+  private void loadInnerTemplate(Writer writer, String template) throws IOException {
+    String str;
+
+    writer.write("<div class=\"container-fluid inner-template\" data-template=\""
+        + template + "\" style=\"display:none\">");
+
+   inject(writer, "web/html/pages/" + template + ".html");
+
+    writer.write("</div>");
+  }
+
+  private void inject(Writer writer, String path) throws IOException {
+    BufferedReader reader = null;
+    String str;
+
+    try {
+      System.out.println("Injecting template " + path);
+      reader = new BufferedReader(new InputStreamReader(new FileInputStream(path), "UTF-8"));
+
+      while (null != (str = reader.readLine())) {
+        writer.write(str);
+      }
+    } catch (Exception exception) {
+      System.out.println("Exception detected reading templates : " + exception.getMessage());
+    } finally {
+      if (reader != null) {
+        reader.close();
+      }
+    }
+  }
+
+  private void loadPart(Writer writer, String part) throws IOException {
+    BufferedReader reader = null;
+
+    try {
+      String str;
+      reader = new BufferedReader(
+          new InputStreamReader(new FileInputStream("web/html/parts/" + part), "UTF-8"));
+
+      while (null != (str = reader.readLine())) {
+        writer.write(str);
+      }
+    } finally {
+      if (reader != null) {
+        reader.close();
+      }
+    }
+  }
+
+
+}

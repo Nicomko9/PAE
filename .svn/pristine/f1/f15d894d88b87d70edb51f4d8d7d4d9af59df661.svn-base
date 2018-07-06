@@ -1,0 +1,76 @@
+package mock.ucc;
+
+import static util.Util.COMPANY_NAME;
+import static util.Util.EMAIL;
+import static util.Util.FIRSTNAME;
+import static util.Util.LASTNAME;
+import static util.Util.PHONE;
+import static util.Util.fillCompany;
+import static util.Util.fillContact;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import biz.CompanyUcc;
+import biz.ContactUcc;
+import biz.DtoFactory;
+import biz.dto.ContactDto;
+import biz.objects.Company;
+import biz.objects.Contact;
+
+class ContactUccMock implements ContactUcc {
+
+  private DtoFactory dtoFactory;
+  private CompanyUcc companyUcc;
+  
+  ContactUccMock(DtoFactory dtoFactory, CompanyUcc companyUcc) {
+    this.dtoFactory = dtoFactory;
+    this.companyUcc = companyUcc;
+  }
+  
+  @Override
+  public boolean createNewContact(ContactDto contactDto) {
+    return contactDto != null;
+  }
+
+  @Override
+  public List<ContactDto> getAllContact() {
+    List<ContactDto> contacts = new ArrayList<>();
+    Contact contact = (Contact) dtoFactory.getContact();
+    
+    Company company = companyUcc.getCompanyByName(COMPANY_NAME);
+    
+    fillContact(contact, company, EMAIL, FIRSTNAME, LASTNAME, PHONE, 0);
+    for (int i = 0; i < 5; i++) {
+      contact.setPk(i);
+      contacts.add(contact);
+    }
+    return contacts;
+  }
+
+  @Override
+  public List<ContactDto> getContactsForCompany(String companyName) {
+    List<ContactDto> contacts = new ArrayList<>();
+    if(companyName == null) {
+      return contacts; 
+    }
+    Contact contact = (Contact) dtoFactory.getContact();
+    Company company = (Company) dtoFactory.getCompany();
+    fillCompany(company, null, companyName, null, 1);
+    fillContact(contact, company, EMAIL, FIRSTNAME, LASTNAME, PHONE, 0);
+    for (int i = 0; i < 3; i++) {
+      contact.setPk(i);
+      contacts.add(contact);
+    }
+    return contacts;
+  }
+
+  @Override
+  public ContactDto update(ContactDto biz) {
+    if(biz == null){
+      return null;
+    }
+    return biz;
+  }
+
+}

@@ -1,0 +1,93 @@
+package ihm;
+
+
+import config.AppConfig;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import javax.servlet.http.HttpServletResponse;
+
+public class TemplateLoader {
+
+  public TemplateLoader(AppConfig config) {
+
+  }
+
+  /**
+   * Load application's main template.
+   *
+   * @param response response to fill in
+   * @throws IOException on write error
+   */
+  public void load(HttpServletResponse response) throws IOException {
+    response.setCharacterEncoding("UTF-8");
+
+    System.out.println("Loading template");
+    loadPart(response, "head.html");
+    response.getWriter().write("<body class=\"\">");
+
+    // Unconnected content
+    loadPart(response, "unconnected-main.html");
+
+    // Application content
+    loadPart(response, "connected-main.html");
+
+    loadInnerTemplate(response, "blank.html");
+    loadInnerTemplate(response, "contacts.html");
+    loadInnerTemplate(response, "dashboard.html");
+    loadInnerTemplate(response, "entreprise.html");
+    loadInnerTemplate(response, "je.html");
+
+    // Load dynamically all pages
+
+    response.getWriter().write("</div></div></body>");
+    loadPart(response, "footer.html");
+    response.getWriter().write("</html>");
+  }
+
+  private void loadInnerTemplate(HttpServletResponse response, String template) throws IOException {
+    String id = template.substring(0, template.length() - 5);
+    String str;
+
+    response.getWriter().write("<div class=\"container-fluid inner-template\" data-template=\""
+        + id + "\" style=\"display:none\">");
+
+    BufferedReader reader = null;
+
+    try {
+      reader = new BufferedReader(
+        new InputStreamReader(new FileInputStream("web/html/" + template), "UTF-8"));
+
+      while (null != (str = reader.readLine())) {
+        response.getWriter().print(str);
+      }
+    } finally {
+      if (reader != null) {
+        reader.close();
+      }
+    }
+
+    response.getWriter().write("</div>");
+  }
+
+  private void loadPart(HttpServletResponse response, String part) throws IOException {
+    BufferedReader reader = null;
+
+    try {
+      String str;
+      reader = new BufferedReader(
+          new InputStreamReader(new FileInputStream("web/html/parts/" + part), "UTF-8"));
+
+      while (null != (str = reader.readLine())) {
+        response.getWriter().print(str);
+      }
+    } finally {
+      if (reader != null) {
+        reader.close();
+      }
+    }
+  }
+
+
+}

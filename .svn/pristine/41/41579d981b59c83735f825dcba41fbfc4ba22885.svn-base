@@ -1,0 +1,15 @@
+package mock.ucc;
+
+import biz.DtoFactory;
+import biz.ParticipationUcc;
+
+public class ParticipationUccMock implements ParticipationUcc {
+
+  @SuppressWarnings("unused")
+  private DtoFactory dtoFactory;
+  
+  ParticipationUccMock(DtoFactory dtoFactory) {
+    this.dtoFactory = dtoFactory;
+  }
+  
+}

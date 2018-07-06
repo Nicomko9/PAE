@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head lang="fr">
+<title>Journify</title>
+<meta charset="utf-8">
+<link
+	href="/startbootstrap-sb-admin-2-gh-pages/vendor/bootstrap/css/bootstrap.min.css"
+	rel="stylesheet">
+<link
+	href="/startbootstrap-sb-admin-2-gh-pages/vendor/metisMenu/metisMenu.min.css"
+	rel="stylesheet">
+
+<link href="/startbootstrap-sb-admin-2-gh-pages/dist/css/sb-admin-2.css"
+	rel="stylesheet">
+<link
+	href="/startbootstrap-sb-admin-2-gh-pages/vendor/font-awesome/css/font-awesome.min.css"
+	rel="stylesheet" type="text/css">
+<link
+	href="/startbootstrap-sb-admin-2-gh-pages/vendor/datatables-plugins/dataTables.bootstrap.css"
+	rel="stylesheet">
+<link
+	href="/startbootstrap-sb-admin-2-gh-pages/vendor/datatables-responsive/dataTables.responsive.css"
+	rel="stylesheet">
+
+<link rel="stylesheet"
+	href="/lib/pickadate.js/lib/themes/classic.date.css">
+<link href="/style.css" rel="stylesheet" />
+</head>

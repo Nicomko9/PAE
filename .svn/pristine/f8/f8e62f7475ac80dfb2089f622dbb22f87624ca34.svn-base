@@ -1,0 +1,38 @@
+<div name="page-title" class="row">
+	<div class="col-lg-12 col-md-12">
+		<div class="row">
+			<div class="pull-right">
+				<a id="btn-new-contact" class="title-btn btn btn-primary btn-rigth"
+					data-view="contacts:showCreate"> Nouveau contact</a>
+			</div>
+			<h1 class="page-header">Contacts</h1>
+		</div>
+	</div>
+</div>
+<div class="row">
+	<div id="contact-table">
+		<!--class="col-lg-10 col-md-10 col-lg-offset-1 col-md-offset-1">-->
+		<!--<div class="panel panel-default">-->
+		<div>
+			<!--<div class="panel-heading">Liste des contacts du système:</div>-->
+			<div class="panel-body">
+				<div class="">
+					<table class="table table-bordered table-condensed table-hover">
+						<thead class="thead-inverse">
+							<tr>
+								<th>Entreprise</th>
+								<th>Contact</th>
+								<th>Email</th>
+								<th>Téléphone</th>
+								<th>Actif</th>
+								<th></th>
+							</tr>
+						</thead>
+						<tbody>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

@@ -1,0 +1,51 @@
+<div id="popup-launch-je" class="modal fade in" tabindex="-1" role="dialog"
+	aria-hidden="true">
+	<div class="container-fluid admin-block">
+		<div class="row">
+			<div class="modal-dialog modal-lg clearfix">
+				<div class="modal-content">
+					<div class=" col-lg-12 col-md-12 ">
+						<div class=" panel panel-default">
+							<div class="panel-heading clearfix">
+								<div class="col-md-10 col-md-offset-1 text-center">Lancer
+									une nouvelle Journée Entreprise</div>
+								<div class="pull-right" data-dismiss="modal"
+									data-target="#popup-launch-je">
+									<i class="fa fa-times"></i>
+								</div>
+							</div>
+							<div class="panel-body">
+								<fieldset class="year-choice">
+									<legend>Choix de l'année académique</legend>
+									<div class="col-sm-6 col-sm-offset-3">
+										<form class="form-inline">
+											<div class="form-group">
+												<select name="pk" class="form-control">
+												</select>
+											</div>
+											<a data-view="je:selectDate" class="btn btn-default"> Go
+												! </a>
+										</form>
+									</div>
+								</fieldset>
+								<fieldset class="date-choice">
+									<legend>Choix de la date</legend>
+									<form>
+										<div class="col-lg-offset-2 col-md-offset-2 col-lg-8 col-md-8">
+											<input id="new-je-date" name="new-je-date"
+												class="form-control" type="date" title="Date de la JE" />
+										</div>
+										<button data-view="je:create" id="btn-date-choice-confirm"
+												class="btn btn-info btn-block">Confirmer</button>
+												
+									</form>
+								</fieldset>
+								<div class="col-xs-12" id="DateChoiceFormAlert"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

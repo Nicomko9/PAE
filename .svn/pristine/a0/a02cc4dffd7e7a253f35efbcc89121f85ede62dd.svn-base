@@ -1,0 +1,65 @@
+package biz.ucc;
+
+import static org.junit.Assert.*;
+import static util.Util.*;
+
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import biz.AddressUcc;
+import biz.objects.Address;
+import biz.objects.BusinessFactory;
+import config.AppConfig;
+
+public class AddressUccImplTest {
+
+  private static AppConfig appConfig;
+  private static AddressUcc addressUcc;
+  private static Address address;
+  private static int pkAddress;
+  
+  @BeforeClass
+  public static void setUpBeforeClass() throws Exception {
+//    appConfig = new AppConfig(AppConfig.APP_DEV);
+//    if(!appConfig.load())
+//      throw new Exception();
+//    addressUcc = (AddressUcc) appConfig.newInstanceOf(AddressUcc.class);
+//    
+//    address = createAddress(appConfig);
+//    pkAddress = address.getPk();
+  }
+  
+  @AfterClass
+  public static void tearDownAfterClass() throws Exception {
+//    deleteTestRecord(appConfig);
+  }
+  
+  @Before
+  public void setUp() throws Exception {
+//    fillAddress(address, 12, COMMUNE, pkAddress, STREET, STREET_NUMBER, ZIP_CODE);
+  }
+
+  @Test
+  public void testRegister1() {
+//    assertTrue(addressUcc.register(BusinessFactory.getAddress()));
+  }
+  
+  @Test
+  public void testRegister2() {
+//    address.setCommune("commune_nouvelle_junit");
+//    assertTrue(addressUcc.register(address));
+  }
+
+  @Test
+  public void testGetAddress1() {
+//    assertNull("Address doesn't exist", addressUcc.getAddress("rue", 1, 1, "commune"));
+  }
+  
+  @Test
+  public void testGetAddress2() {
+//    assertEquals(STREET, addressUcc.getAddress(STREET, STREET_NUMBER, ZIP_CODE, COMMUNE).getStreet());
+  }
+  
+}

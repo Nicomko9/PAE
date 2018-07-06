@@ -1,0 +1,128 @@
+package biz.objects;
+
+/**
+ * Address's business object.
+ */
+class AddressBiz extends BizObject implements Address {
+
+  /**
+   * Value of the primary key of the Object Address.
+   */
+  private int primaryKey;
+
+  /**
+   * Address' street.
+   */
+  private String street;
+
+  /**
+   * Address' street number.
+   */
+  private int streetNumber;
+
+  /**
+   * Address' box.
+   */
+  private int box;
+
+  /**
+   * Address' postal code.
+   */
+  private int zipCode;
+
+  /**
+   * Address' commune.
+   */
+  private String commune;
+
+  AddressBiz() {
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    AddressBiz other = (AddressBiz) obj;
+    return primaryKey == other.primaryKey;
+  }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + primaryKey;
+    return result;
+  }
+
+  /*
+   * Getters & setters.
+   */
+
+  @Override
+  public String getStreet() {
+    return street;
+  }
+
+  @Override
+  public void setStreet(String street) {
+    this.street = street;
+  }
+
+  @Override
+  public int getStreetNumber() {
+    return streetNumber;
+  }
+
+  @Override
+  public void setStreetNumber(int streetNumber) {
+    this.streetNumber = streetNumber;
+  }
+
+  @Override
+  public int getBox() {
+    return box;
+  }
+
+  @Override
+  public void setBox(int box) {
+    this.box = box;
+  }
+
+  @Override
+  public int getZipCode() {
+    return zipCode;
+  }
+
+  @Override
+  public void setZipCode(int zipCode) {
+    this.zipCode = zipCode;
+  }
+
+  @Override
+  public String getCommune() {
+    return commune;
+  }
+
+  @Override
+  public void setCommune(String commune) {
+    this.commune = commune;
+  }
+
+  @Override
+  public int getPk() {
+    return primaryKey;
+  }
+
+  @Override
+  public void setPk(int primaryKey) {
+    this.primaryKey = primaryKey;
+  }
+
+}

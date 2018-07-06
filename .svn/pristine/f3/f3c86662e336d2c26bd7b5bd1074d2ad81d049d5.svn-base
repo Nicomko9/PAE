@@ -1,0 +1,10 @@
+package biz.objects;
+
+import org.junit.Before;
+
+public class ParticipationBizTest {
+
+  @Before
+  public void setUp() throws Exception {}
+
+}

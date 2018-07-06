@@ -1,0 +1,52 @@
+
+<div class="page-container" id="container-noJE">
+	<div name="page-title" class="row">
+		<div class="col-lg-12 col-md-12">
+			<h1 class="page-header">Journée Entreprise</h1>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-lg-10 col-md-10 col-lg-offset-1 col-md-offset-1">
+			<div class="panel panel-default">
+				<div class="panel-body">
+					<div class="row">
+						<div id="no-je">
+							<div data-condition="current-year" class="col-lg-12" style="text-align: center">
+								<p>Il n'y a pas encore de journée d'entreprise pour l'année
+									académique <span id="create-je-years"></span>.</p>
+							</div>
+							<div data-condition="select-year" class="col-lg-12" style="text-align: center">
+								<p>
+									Sélectionnez une année pour laquelle créer une JE
+								</p>
+								<div class="form-group">
+									<form action="" class="col-md-2 col-md-offset-5">
+										<select class="form-control" name="select-year" id="select-year">
+
+										</select>
+									</form>
+								</div>
+							</div>
+							<div class="col-lg-offset-5 col-md-offset-5 col-lg-2 col-md-2">
+								<button id="noJe-new" class="btn btn-info ">Créer une JE</button>
+							</div>
+						</div>
+						<div id="date-choice">
+							<div class="col-lg-12" style="text-align: center">
+								<p>Choisissez une date pour la Journée d'entreprise à créer.</p>
+							</div>
+							<form action="" data-view="je:saveJe">
+                <div id="je-date" class="col-lg-offset-4 col-md-offset-4 col-lg-4 col-md-4">
+                  <input id="new-je-date" name="new-je-date" class="form-control" type="date" />
+                </div>
+                <div class="col-lg-offset-4 col-md-offset-4 col-lg-4 col-md-4">
+                  <button id="btn-date-choice-confirm" class="btn btn-info btn-block">Confirmer</button>
+                </div>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

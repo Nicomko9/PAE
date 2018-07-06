@@ -1,0 +1,20 @@
+package biz.objects;
+
+import biz.dto.AddressDto;
+
+public interface Address extends AddressDto {
+
+  /**
+   * Get the primary key of the Object Address in the database.
+   *
+   * @return int the value of the primary key
+   */
+  int getPk();
+
+  /**
+   * Set the value of the primary key of a Address Object.
+   *
+   * @param primaryKey the new value of the primary key
+   */
+  void setPk(int primaryKey);
+}

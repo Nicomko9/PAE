@@ -1,0 +1,8 @@
+package dal.dao;
+
+
+import dal.dao.schema.ParticipationSchema;
+
+public interface ParticipationDao extends ParticipationSchema {
+
+}

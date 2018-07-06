@@ -1,0 +1,91 @@
+package ihm;
+
+
+import config.AppConfig;
+import java.io.File;
+import java.io.IOException;
+import javax.servlet.http.HttpServletResponse;
+
+public class ResourcesLoader {
+
+  public static final String JS = "js";
+  public static final String CSS = "css";
+  public static final String HTML = "html";
+
+
+  /**
+   * Build a new ResourcesLoader.
+   *
+   * @param config application's configurations
+   */
+  public ResourcesLoader(AppConfig config) {
+    // Later, cache control
+  }
+
+  /**
+   * Load a resource.
+   *
+   * @param resp response to load resource into
+   * @param type type of resource
+   * @param path path to resource
+   * @throws IOException in case a write-error
+   */
+  public void load(HttpServletResponse resp, String type, String path) throws IOException {
+    switch (type) {
+      case JS:
+        this.doLoadJs(resp, path);
+        break;
+      case CSS:
+        this.doLoadCss(resp, path);
+        break;
+      default:
+        resp.sendError(404);
+    }
+  }
+
+  private void doLoadCss(HttpServletResponse resp, String css) throws IOException {
+    File file = new File("web/css/" + css);
+
+    try {
+      this.verifyFile(file);
+    } catch (IOException exception) {
+      resp.sendError(404);
+    }
+
+    resp.setContentType("text/css");
+    // Complete
+  }
+
+  private void doLoadJs(HttpServletResponse resp, String js) throws IOException {
+    File file = new File("web/js/" + js);
+
+    try {
+      this.verifyFile(file);
+    } catch (IOException exception) {
+      resp.sendError(404);
+    }
+
+    resp.setContentType("application/javascript");
+    // Complete
+  }
+
+  /**
+   * Verify path validity.
+   *
+   * @param file file instance
+   * @throws IOException on security exception
+   */
+  private void verifyFile(File file) throws IOException {
+    if (file.isAbsolute()) {
+      throw new IOException("Absolute file access ?");
+    }
+
+    String absolutePath = file.getAbsolutePath();
+    String canonicalPath = file.getCanonicalPath();
+
+    if (!canonicalPath.equals(absolutePath)) {
+      throw new IOException("Breaking in attempt ?");
+    }
+  }
+
+}

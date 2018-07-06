@@ -1,0 +1,8 @@
+package dal.dao;
+
+
+import dal.dao.schema.JeSchema;
+
+public interface JeDao extends JeSchema {
+
+}

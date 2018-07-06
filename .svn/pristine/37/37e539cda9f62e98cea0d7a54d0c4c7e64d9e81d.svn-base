@@ -1,0 +1,81 @@
+package bizz;
+
+import bizz.dto.UserDto;
+import bizz.exceptions.BusinessErrorException;
+import bizz.exceptions.BusinessException;
+import bizz.objects.UserBizz;
+import dal.DalFrontEndServices;
+import dal.dao.UserDao;
+import ihm.utils.DataValidator;
+import ihm.utils.Logger;
+
+class UserUccImpl implements UserUcc {
+
+  private DalFrontEndServices dal;
+
+  private UserDao userDao;
+
+  UserUccImpl(DalFrontEndServices dal, UserDao userDao) {
+    this.dal = dal;
+
+    this.userDao = userDao;
+  }
+
+  /**
+   * Connect a new user.
+   *
+   * @return UserDto user transport object
+   */
+  public UserDto connect(String login, String password) {
+    Logger.log("ucc", "UserUccImpl", "connect triggered");
+
+    if (!DataValidator.validateString(login) || !DataValidator.validateString(password)) {
+      throw new BusinessException("Veuillez vérifier vos informations");
+    }
+
+    UserBizz user = (UserBizz) this.userDao.findByLogin(login);
+
+    if (user == null || !user.comparePassword(password)) {
+      throw new BusinessException("Veuillez vérifier vos informations");
+    }
+
+    return user;
+  }
+
+  /**
+   * Register a new user into the application.
+   *
+   * @param userDto the user to persist
+   * @return a boolean to indicate whether or not it worked
+   */
+  @Override
+  public boolean subscribe(UserDto userDto) {
+    Logger.log("ucc", "UserUccImpl", "subscribe triggered");
+
+    UserBizz user = (UserBizz) userDto;
+    user.prepareForInsert();
+
+    if (null != this.userDao.findByLogin(user.getLogin())) {
+      throw new BusinessException("Login déjà utilisé");
+    } else if (null != this.userDao.findByEmail(user.getEmail())) {
+      throw new BusinessException("Email déjà utilisé");
+    }
+
+    try {
+      this.dal.startTransaction();
+
+      if (null == this.userDao.create(user)) {
+        throw new BusinessErrorException("Unknown error happened");
+      }
+
+      this.dal.commitTransaction();
+
+      return true;
+    } catch (Exception e) {
+      this.dal.rollbackTransaction();
+
+      throw e;
+    }
+  }
+
+}

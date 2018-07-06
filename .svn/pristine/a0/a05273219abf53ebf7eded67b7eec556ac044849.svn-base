@@ -1,0 +1,15 @@
+package biz.objects;
+
+class ParticipationBiz extends BizObject implements Participation {
+
+  @Override
+  int getVersion() {
+    return version;
+  }
+
+  @Override
+  void setVersion(int version) {
+    this.version = version;
+  }
+
+}

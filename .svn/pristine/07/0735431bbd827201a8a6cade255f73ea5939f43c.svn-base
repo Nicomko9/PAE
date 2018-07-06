@@ -1,0 +1,80 @@
+package biz.objects;
+
+import static org.junit.Assert.*;
+import static util.Util.*;
+
+import java.time.LocalDate;
+
+import org.junit.Before;
+import org.junit.Test;
+
+public class JeBizTest {
+
+  private Je jeBiz1, jeBiz2;
+  private Company company;
+  private Address address;
+  private User creator;
+  private Contact contact;
+  
+  @Before
+  public void setUp() throws Exception {
+    jeBiz1 = BusinessFactory.getJe();
+    jeBiz2 = BusinessFactory.getJe();
+    jeBiz1.setDate(LocalDate.now());
+    jeBiz2.setDate(LocalDate.now().minusYears(1));
+    company = BusinessFactory.getCompany();
+    address = BusinessFactory.getAddress();
+    fillAddress(address, 12, "commune", 500, "rue", 12, 1000);
+    creator = BusinessFactory.getUser();
+    fillUser(creator, "email", "zakaria", "lamrini", "login", "pswd", 500);
+    fillCompany(company, address, "company name", creator, 500);
+    jeBiz1.addCompany(company);
+    contact = BusinessFactory.getContact();
+    jeBiz2.addCompany(company);
+    fillContact(contact, company, "email", "zak", "lam", "phone", 500);
+    jeBiz1.addContact(contact);
+  }  
+  
+  @Test
+  public void testGetCompanies() {
+    assertFalse(jeBiz1.getCompanies().isEmpty());
+  }
+  
+  @Test
+  public void testGetContacts() {
+    assertFalse(jeBiz1.getContacts().isEmpty());
+  }
+
+  @Test
+  public void testGetContactsByCompany1() {
+    assertFalse(jeBiz1.getContactsByCompany().isEmpty());
+  }
+  
+  @Test
+  public void testGetContactsByCompany2() {
+    assertTrue(jeBiz1.getContactsByCompany().containsKey(company));
+  }
+  
+  @Test
+  public void testAddContact1(){
+    assertFalse(jeBiz1.addContact(contact));
+  }
+  
+  @Test
+  public void testAddContact2(){
+    Contact c = BusinessFactory.getContact();
+    c.setCompany(BusinessFactory.getCompany());
+    assertTrue(jeBiz1.addContact(c));
+  }
+  
+  @Test
+  public void testAddCompany1(){
+    assertFalse(jeBiz1.addCompany(company));
+  }
+  
+  @Test
+  public void testAddCompany2(){
+    assertTrue(jeBiz1.addCompany(BusinessFactory.getCompany()));
+  }
+
+}

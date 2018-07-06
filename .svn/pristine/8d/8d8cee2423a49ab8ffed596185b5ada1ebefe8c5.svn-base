@@ -1,0 +1,23 @@
+package dal.caching;
+
+
+public class DbCacheManager {
+
+  public static DbCacheManager INSTANCE = new DbCacheManager();
+
+  private DbCacheManager() {
+  }
+
+  public Object get(String item) {
+    return null;
+  }
+
+  public boolean isHit() {
+    return true;
+  }
+
+  public boolean set(String item, Object value) {
+    return true;
+  }
+
+}

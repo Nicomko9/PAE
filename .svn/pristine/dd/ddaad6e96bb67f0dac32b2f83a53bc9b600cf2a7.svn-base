@@ -1,0 +1,38 @@
+application.define("objects/object", function(id, object) {
+  var watchers = [];
+  var readyListeners = [];
+
+  var ready = true;
+
+  object.watch = function(callback, watched) {
+    if (typeof watched == "undefined") {
+      watchers[watchers.length] = callback;
+    } else {
+      watchers[watchers.length] = function(d, w) {
+        if (watched == w) {
+          callback(d);
+        }
+      }
+    }
+  };
+
+  object.onReady = function (callback) {
+    readyListeners[readyListeners.length] = callback;
+  };
+
+  if (typeof object.init == "function") {
+    application.onReady(object.init);
+  }
+
+  return {
+    isReady : function isReady() {
+      ready = true;
+    },
+    notify : function (watched) {
+      console.log(id + " notifying for " + watched);
+      for (var i = 0; i < watchers.length; i++) {
+          watchers[i](object, watched);
+      }
+    }
+  }
+});

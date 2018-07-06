@@ -1,0 +1,10 @@
+package bizz;
+
+
+import bizz.dto.UserDto;
+
+public interface DtoFactory {
+
+  UserDto getUser();
+
+}

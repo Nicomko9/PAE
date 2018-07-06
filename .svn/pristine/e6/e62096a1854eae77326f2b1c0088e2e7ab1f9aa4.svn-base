@@ -1,0 +1,6 @@
+package dal;
+
+class DalFrontEndServicesImpl implements DalFrontEndServices {
+
+
+}

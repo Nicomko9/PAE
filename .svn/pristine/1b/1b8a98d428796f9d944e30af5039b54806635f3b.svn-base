@@ -1,0 +1,46 @@
+application.define("entreprise", function() {
+
+	return {
+		main : function(module, context) {
+			$("#NewEntreprise").click(
+					function() {
+						$("#popup-new-entreprise div[class='panel-heading']")
+								.html("Ajouter entreprise");
+						$("fieldset div[class='panel-heading']").html(
+								"Adresse de facturation");
+						$("#btn-save-popup-entreprise").click(function() {
+							console.log("Click");
+							application.require("entreprise", "create");
+						});
+					});
+		},
+		create : function() {
+			console.log("entreprise - create");
+			application.require("utils/forms", function(module) {
+				// Gestion du formuliare d'inscirption d'une entreprise
+				var form = module.getForm("#entreprise-form");
+
+				// True Ou false ??
+				if (form.validate(true)) {
+					console.log("Ajax");
+					$.ajax({
+						url : "/app/entreprise/create",
+						data : {
+							json : JSON.stringify(form.getValues())
+						},
+						method : "POST",
+						datatype : "json",
+						success : function(data) {
+						},
+						error : function(xhr) {
+							console.log(xhr.responseJSON);
+						}
+					});
+				}
+				// Gestion du lien entre contact et entreprise
+				// ToDo
+			});
+		}
+
+	};
+}());

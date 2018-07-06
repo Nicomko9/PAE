@@ -1,0 +1,43 @@
+package mock.dao;
+
+import java.util.List;
+
+import biz.dto.ParticipationDto;
+import biz.objects.Participation;
+import dal.dao.ParticipationDao;
+import mock.DataBaseMock;
+
+public class ParticipationDaoMock implements ParticipationDao {
+
+  private DataBaseMock dataBaseMock;
+  
+  ParticipationDaoMock() {
+    this.dataBaseMock = DataBaseMock.getInstance();
+  }
+
+  @Override
+  public ParticipationDto create(Participation participation) {
+    return dataBaseMock.addParticipation(participation);
+  }
+
+  @Override
+  public ParticipationDto update(Participation participation) {
+    return dataBaseMock.updateParticipation(participation);
+  }
+
+  @Override
+  public List<ParticipationDto> findByYear(int year) {
+    return dataBaseMock.getParticipationByYear(year);
+  }
+
+  @Override
+  public List<ParticipationDto> findByCompanyNumber(int companyNumber) {
+    return dataBaseMock.getParticipationByCompanyNumber(companyNumber);
+  }
+
+  @Override
+  public List<ParticipationDto> findAllParticipationsForSelection() {
+    return dataBaseMock.getParticipationForSelection();
+  }
+  
+}

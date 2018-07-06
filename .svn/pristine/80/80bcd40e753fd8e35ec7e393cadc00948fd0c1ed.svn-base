@@ -1,0 +1,21 @@
+package biz.dto;
+
+import biz.objects.Company;
+import biz.objects.Contact;
+import biz.objects.Participation;
+
+public interface PresenceDto extends AbstractDto {
+
+  ParticipationDto getParticipation();
+  
+  void setParticipation(Participation participation);
+  
+  public CompanyDto getCompany();
+  
+  public void setCompany(Company company);
+
+  public ContactDto getContact();
+  
+  public void setContact(Contact contact);
+  
+}

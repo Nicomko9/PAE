@@ -1,0 +1,21 @@
+package utils;
+
+
+import java.time.Instant;
+import java.time.LocalDateTime;
+
+public class Logger {
+
+  /**
+   * Print a formatted data to output
+   * e.g. 1028302  [generic - server] server started
+   * @param pack the package where it happened
+   * @param object the object in use (user, auth, etc)
+   * @param message the message
+   */
+  public static void log(String pack, String object, String message) {
+    System.out.format("%d.%d\t [%s - %s] %s %n", LocalDateTime.now().getSecond(),
+        Instant.now().getNano() / 100000, pack, object, message);
+  }
+
+}

@@ -1,0 +1,364 @@
+application.define("entreprise", function() {
+
+  /**
+   * Formatte une addresse
+   * @param address
+   * @returns {string}
+   */
+  function formatAdress(address) {
+    var boite = "";
+    if(address.box === 0) {
+      logger.log("loader.js", "listCompanies()", "empty");
+    } else {
+      boite = "boite " + address.box;
+    }
+
+    return address.street + ", " + address.streetNumber + " "
+    + boite + ", " + address.zipCode + ", " + address.commune;
+  }
+
+  /**
+   * Initialize datatable
+   * @type {jQuery}
+   */
+  var datatable = $("#companies-table").DataTable(
+      { columns : [
+          { className : "col-md-3 col-sm-3 " } ,
+          { className : "col-md-4 col-sm-4 " },
+          { className : "col-md-2 col-sm-2 " },
+          { className : "col-md-3 col-sm-3  text-center", sortable : false }
+      ], language : application.datatable.translations });
+
+  function getCompany(pk) {
+    var data = $("#companies-table").find("tbody tr[data-pk='"+ pk +"']").data("json");
+
+    return {
+      "pk"      : data.pk,
+      "version" : data.version,
+      "name"    : data.companyName,
+      "lastParticipation" : data.lastParticipationYear,
+      "address.box" : data.address.box,
+      "address.number"  : data.address.streetNumber,
+      "address.street"  : data.address.street,
+      "address.zip"     : data.address.zipCode,
+      "address.city"    : data.address.commune,
+      "address.version" : data.address.version,
+      "address.pk"      : data.address.pk
+    }
+  }
+
+  function contact2line(o) {
+    var str = "<tr data-pk='" + o.pk + "' data-version='" + o.version + "'>";
+
+    str += "<td class='col-sm-2 col-xs-2'>"
+        + o.firstname + "</td><td class='col-sm-3 col-xs-3'>"
+        + o.lastname + "</td>" + "<td class='col-sm-2 col-xs-2'>" + o.phone +"</td>"
+        + "<td class='col-sm-3 col-xs-3'>"+ o.email +"</td><td>"
+        + ((o.active == true) ? "<span class='label label-info'>Actif</span>"
+            : "<span class='label label-default'>Inactif</span>") + "</td>";
+
+    if (o.active == true) {
+      str += "<div class='label label-info'>actif</div>";
+    } else {
+      str += "<div class='label label-warning'>inactif</div>";
+    }
+
+    return str + "</td></tr>";
+  }
+
+  function getCompanyContacts(pk) {
+    $("#popup-contact-table table tbody tr:not(#popup-form-registration)").html("");
+    return $.ajax({
+      url : "/app/contact/listForCompany",
+      method : "POST",
+      data : { json : pk },
+      dataType : "JSON",
+      success  : function (contacts) {
+        if (contacts.length === 0) {
+          $("#popup-contact-table table tbody").prepend(
+             "<tr class='no-contact'>"
+             + "<td colspan='" + $("#contact-table table thead th").length + "'>"
+             + "<p class='text-center text-muted'>"
+             + "Aucun contact enregistré"
+             + "</p></td></tr>");
+        } else {
+          for(var i in contacts){
+            $("#popup-contact-table table tbody").prepend(contact2line(contacts[i]));
+          }
+        }
+      },
+      error : function () {
+        $("#popup-contact-table table tbody").prepend(
+            "<tr class='no-contact error'>"
+            + "<td colspan='" + $("#contact-table table thead th").length + "'>"
+            + "<p class='text-center text-muted'>"
+            + "Erreur au chargement des contacts de l'entreprise"
+            + "</p></td></tr>");
+      }
+    });
+  }
+
+  /**
+   * Insère une compagnie dans la datatable
+   *
+   * @param company
+   */
+  function insertCompany(company) {
+    if ($(datatable.row("[data-pk='" + company.pk + "']").node()).length != 0) {
+      updateCompany(company);
+      return;
+    }
+    var row = datatable.row.add([
+      company.companyName,
+      formatAdress(company.address),
+      (company.lastParticipationYear == 0)
+          ? "<span class='text-muted'>Aucune</span>"
+          : company.lastParticipationYear,
+      "<div class='btn-group'> <button data-view='entreprise:display' "
+      + "class='btn btn-active' data-context='{ \"pk\" : \"" + company.pk + "\" }'>Visualiser</button>"
+      + "<button class='btn btn-primary' data-view='entreprise:showEdit' "
+      + "data-context='{ \"pk\" : \"" + company.pk + "\" }'>Editer</button></div>"
+    ]).draw().node();
+
+    var $row = $(row);
+    $row.attr("data-pk", company.pk);
+    $row.data("pk", company.pk);
+    $row.data("version", company.version);
+    $row.data("json", company);
+  }
+
+  function loadParticipations(pk) {
+    $.ajax({
+      url : "/app/participations/company",
+      method : "POST",
+      dataType : "JSON",
+      data : { "company-pk" : pk },
+      success : function(data) {
+        $("#company-participations-table tbody").html("");
+        if (data.length === 0) {
+          $("#company-participations-table").find("tbody").html(
+              "<tr><td colspan='3' class='text-center text-muted'>"
+              + "Aucune participation enregistrée"
+              + "</td>"
+              + "</tr>"
+          )
+        } else {
+          for (var k in data) {
+            console.log(data[k]);
+            $("#company-participations-table").find("tbody").append(
+                "<tr>"
+                + "<td>"+ (data[k].je.pk - 1) +" - " + data[k].je.pk +" </td>"
+                + "<td><span class='label label-info'>" + data[k].state + "</span></td>"
+                + "<td>" + ((data[k].je.payed) ? "Oui" : "Non") + "</td>"
+                + "</tr>"
+            );
+          }
+        }
+      }
+    });
+  }
+
+  /**
+   * Update une compagnie dans la datatable
+   *
+   * @param company
+   */
+  function updateCompany(company) {
+    var row = datatable.row("[data-pk='" + company.pk + "']");
+
+    if (company.version === $(row.node()).data("version")) {
+      console.log("Déja a jour");
+    }
+
+    row.remove().draw();
+    insertCompany(company);
+  }
+  
+  function registerContactPrivate(){
+	  var form = application.require("utils/forms").getForm("#popup-cont-comp-form");
+
+      if (!form.validate(true)) {
+        return;
+      }
+
+      var values = form.getValues();
+      var pk = values["contact-company"];
+
+      $.ajax({
+        url : "/app/contact/create",
+        data : { json : JSON.stringify(values) },
+        dataType : "JSON",
+        method : "POST",
+        success : function (resp) {
+          $("#popup-contact-table table tbody .no-contact:not(.error)").remove();
+          $("#popup-contact-table table tbody").prepend(contact2line(resp));
+          form.clean();
+          $("#popup-form-registration input[name='contact-company']").val(pk)
+        }
+      });
+  }
+
+  	function createEntreprise(){
+  		var form = application.require("utils/forms").getForm("#popup-comp-form");
+
+        if (!form.validate(true)) {
+          console.log("Formulaire incomplet !");
+          return;
+        }
+
+        $.ajax({
+          url: "/app/entreprise/create",
+          data: {
+            json: JSON.stringify(form.getValues())
+          },
+          method: "POST",
+          dataType: "JSON"
+        }).done(function(resp) {
+          insertCompany(resp);
+          application.require("utils/popups").unload("company");
+          notifications.notify("Inscription de l'entreprise réussie", "success", "user");
+        }).fail(function(xhr) {
+          if (xhr.responseJSON == 473) {
+            form.tagInput($("#popup-name-entreprise"), "danger",
+                errors.translate(xhr.repsonseJSON));
+          } else {
+            notifications.notify(errors.translate(xhr.responseJSON), "warning");
+          }
+        });
+  	}
+  	
+  	function updateEntreprise(){
+  		var form = application.require("utils/forms").getForm("#popup-comp-form");
+
+        if (!form.validate(true)) {
+          console.log("Formulaire incomplet !");
+          return;
+        }
+
+        $.ajax({
+          url: "/app/entreprise/update",
+          data: {
+            json: JSON.stringify(form.getValues())
+          },
+          method: "POST",
+          dataType: "JSON"
+        }).done(function(resp) {
+          updateCompany(resp);
+          application.require("utils/popups").unload("company");
+          notifications.notify("Mise à jour réussie", "success", "user");
+        }).fail(function(xhr) {
+          if (xhr.responseJSON == 473) {
+            form.tagInput($("#popup-name-entreprise"), "danger",
+                errors.translate(xhr.repsonseJSON));
+          } else {
+            notifications.notify(errors.translate(xhr.responseJSON), "warning");
+          }
+        });
+  	}
+  	
+  	function displayEntreprise(module, context){
+  		var data = getCompany(context.pk);
+        data["title"] = "Profil de l'entreprise " + data.name;
+        data["button-text"] = "Editer";
+
+        application.require("utils/popups").load("company", data, function (modal) {
+          modal.setSize("lg");
+          modal.$.find("#popup-cont-comp-form").show(0);
+          $("#popup-form-registration").hide(0);
+          modal.$.find(".popup-confirm:first").attr("data-view", "entreprise:showEdit");
+          modal.$.find(".popup-confirm:first").attr("data-context", JSON.stringify(context));
+          modal.$.find("#popup-participation-list").show(0);
+          modal.$.find("input").each(function() { $(this).attr("disabled", "disabled"); });
+          loadParticipations(context.pk);
+        }, getCompanyContacts(context.pk));
+  	}
+  	
+  	function showEditEntreprise(module, context){
+  		var data = getCompany(context.pk);
+        data["title"] = "Edition de l'entreprise " + data.name;
+        data["button-text"] = "Mettre à jour";
+
+        application.require("utils/popups").load("company", data , function (modal) {
+          modal.setSize("xl");
+          modal.$.find("#popup-participation-list").hide(0);
+          modal.$.find(".popup-confirm:first").attr("data-view", "entreprise:update");
+          modal.$.find("#popup-cont-comp-form").show(0);
+          $("#popup-form-registration").show(0);
+          modal.$.find("input").each(function() { $(this).removeAttr("disabled"); });
+        }, getCompanyContacts(context.pk));
+  	}
+  
+  	function showCreateEntreprise(){
+  		application.require("utils/popups").load("company", {
+  	        "title"  : "Création d'une entreprise",
+  	        "button-text" : "Créer"
+  	      }, function (modal) {
+  	        modal.setSize("lg");
+  	        modal.$.find("#popup-participation-list").hide(0);
+  	        modal.$.find(".popup-confirm:first").attr("data-view", "entreprise:create");
+  	        modal.$.find(".panel-footer").show(0);
+  	        modal.$.find("#popup-cont-comp-form").hide(0);
+  	        modal.$.find("input").each(function() { $(this).removeAttr("disabled"); });
+  	      });
+  	}
+  	
+  	function enterFunction(){
+  		$("#entreprise-loading").show(250);
+        $.ajax({
+          url : "/app/entreprise/list",
+          method : "POST",
+          dataType : "JSON",
+          success : function(data) {
+            for (var k in data) {
+              if (!data.hasOwnProperty(k))
+                continue;
+
+              insertCompany(data[k]);
+            }
+            $("#entreprise-loading").hide(250);
+          },
+          error : function(data) {
+            logger.log("loader.js", "loadCompanies()", "Erreur");
+          }
+        });
+  	}
+  	
+	return {
+    /** Affiche toutes les entreprises */
+		main : function() {
+			logger.log("entreprise.js", "main", "");
+	    	enterFunction();
+		},
+    /** Affiche le pop-up de création d'entreprise */
+    showCreate : function() {
+    	logger.log("entreprise.js", "showCreate", "");
+    	showCreateEntreprise();
+    },
+    /** Affiche le pop-up d'update */
+    showEdit  : function(module, context) {
+    	logger.log("entreprise.js", "showEdit", "");
+    	showEditEntreprise(module, context);
+    },
+    /** Affiche une entreprise */
+    display : function (module, context) {
+    	logger.log("entreprise.js", "display", "");
+    	displayEntreprise(module, context);
+    },
+    /** Effectue une update */
+    update : function() {
+    	logger.log("entreprise.js", "update", "");
+    	updateEntreprise();
+    },
+
+    /** Effecte un create */
+    create : function() {
+    	logger.log("entreprise.js", "create", "");
+    	createEntreprise();
+    },
+
+		registerContact : function () {
+			logger.log("entreprise.js", "registerContact", "");
+			registerContactPrivate();
+		}
+	};
+}());

@@ -1,0 +1,11 @@
+package biz;
+
+import biz.dto.UserDto;
+
+public interface UserUcc {
+
+  UserDto connect(String login, String password);
+
+  boolean subscribe(UserDto biz);
+
+}

@@ -1,0 +1,24 @@
+package biz.dto;
+
+import biz.objects.Company;
+import biz.objects.Je;
+
+public interface ParticipationDto extends AbstractDto {
+  
+  public CompanyDto getCompany();
+  
+  public void setCompany(Company company);
+  
+  public JeDto getJe();
+  
+  public void setJe(Je je);
+  
+  public String getState();
+  
+  public void setState(String state);
+  
+  public String getLastState();
+  
+  public void setLastState(String lastState);
+  
+}

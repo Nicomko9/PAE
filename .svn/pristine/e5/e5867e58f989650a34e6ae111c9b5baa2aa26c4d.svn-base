@@ -1,0 +1,220 @@
+package ihm;
+
+
+import config.AppConfig;
+import config.annotation.Service;
+import ihm.utils.Logger;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.util.ArrayList;
+
+class TemplateLoader {
+
+  private ArrayList<String> templates = new ArrayList<String>() {
+    {
+      add("blank");
+      add("contacts");
+      add("dashboard");
+      add("entreprise");
+      add("je");
+      add("search");
+    }
+  };
+
+  private ArrayList<String> popups  = new ArrayList<String>() {
+    {
+      add("company");
+      add("contact");
+      add("launch-je");
+      add("invitations");
+      add("confirm");
+    }
+  };
+
+  private ArrayList<String> jsFiles = new ArrayList<String>() {
+    {
+      add("jquery.js");
+      add("script.js");
+      add("startbootstrap-sb-admin-2-gh-pages/vendor/bootstrap/js/bootstrap.js");
+      add("startbootstrap-sb-admin-2-gh-pages/dist/js/sb-admin-2.js");
+      add("startbootstrap-sb-admin-2-gh-pages/vendor/datatables/js/jquery.dataTables.min.js");
+      add("startbootstrap-sb-admin-2-gh-pages/vendor/datatables-plugins/dataTables.bootstrap.min.js");
+      add("startbootstrap-sb-admin-2-gh-pages/vendor/metisMenu/metisMenu.min.js");
+
+      add("lib/pickadate.js/lib/compressed/picker.js");
+      add("lib/pickadate.js/lib/compressed/picker.date.js");
+      add("lib/pickadate.js/lib/translations/fr_FR.js");
+
+      // Data objects
+      add("js/objects/object.js");
+      add("js/objects/user.js");
+      add("js/objects/jes.js");
+
+      // Controllers
+      add("js/template.js");
+      add("js/connection.js");
+      add("js/contacts.js");
+      add("js/dashboard.js");
+      add("js/entreprise.js");
+      add("js/je.js");
+      add("js/search.js");
+
+      // Utils
+      add("js/utils/forms.js");
+      add("js/utils/date-picker.js");
+      add("js/utils/loader.js");
+      add("js/utils/popups.js");
+      add("js/utils/ajax.js");
+    }
+  };
+
+  private boolean appendJs = false;
+
+  @Service(shared = false)
+  public TemplateLoader(AppConfig config) {
+    appendJs = Boolean.parseBoolean(config.getProperty("assets.js.append", "false"));
+  }
+
+  /**
+   * Compile.
+   */
+  public void compile() {
+    try (Writer writer = new BufferedWriter(new OutputStreamWriter(
+        new FileOutputStream("web/index.html"), "utf-8"))) {
+      loadPart(writer, "head.html");
+      writer.write("<body class=\"\">");
+
+      // Unconnected content
+      loadPart(writer, "unconnected-main.html");
+
+      // Application content
+      loadPart(writer, "connected-main.html");
+
+      for (String template : templates) {
+        loadInnerTemplate(writer, template);
+      }
+
+      writer.write("</div><div id=\"popup-collection\">");
+
+      for (String popup : popups) {
+        loadInnerPopup(writer, popup);
+      }
+
+      // Load dynamically all pages
+
+      writer.write("</div></div></body>");
+      loadPart(writer, "footer.html");
+
+
+      if (appendJs) {
+        try {
+          writer.write("<script type=\"text/javascript\" src=\"js_appended.js\"></script>");
+          this.appendJsFiles();
+        } catch (IOException exception) {
+          for (String jsFile : jsFiles) {
+            writer.write("<script type=\"text/javascript\" src=\"/" + jsFile + "\"></script>");
+          }
+        }
+      } else {
+        for (String jsFile : jsFiles) {
+          writer.write("<script type=\"text/javascript\" src=\"/" + jsFile + "\"></script>");
+        }
+      }
+
+      writer.write("<script> $(document).ready(function() { application.load(); }); </script>");
+      writer.write("</html>");
+    } catch (IOException exception) {
+      Logger.log("TemplateLoader", "compile", "The compilation was failed : " 
+          + exception.getMessage(), Logger.ERROR);
+    }
+  }
+
+  private void appendJsFiles () throws IOException {
+    try (Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("web/js_appended.js"), "utf-8"))) {
+      for (String jsFile : jsFiles) {
+        BufferedReader reader = null;
+        String str;
+
+        try {
+          reader = new BufferedReader(new InputStreamReader(new FileInputStream("web/"+jsFile), "UTF-8"));
+
+          while (null != (str = reader.readLine())) {
+            writer.write(str + "\n");
+          }
+        } catch (Exception exception) {
+          Logger.log("TemplateLoader", "appendingJs", "Appending failed : " + exception.getMessage(), Logger.ERROR);
+        } finally {
+          if (reader != null) {
+            reader.close();
+          }
+        }
+      }
+    }
+  }
+
+  private void loadInnerPopup(Writer writer, String popup) throws IOException {
+
+    writer.write("<div class=\"template-popup\" data-template=\"" + popup + "\">");
+
+    inject(writer, "web/html/popups/" + popup + ".html");
+
+    writer.write("</div>");
+  }
+
+  private void loadInnerTemplate(Writer writer, String template) throws IOException {
+
+    writer.write("<div class=\"container-fluid inner-template\" data-template=\""
+        + template + "\" style=\"display:none\">");
+
+    inject(writer, "web/html/pages/" + template + ".html");
+
+    writer.write("</div>");
+  }
+
+  private void inject(Writer writer, String path) throws IOException {
+    BufferedReader reader = null;
+    String str;
+
+    try {
+      //System.out.println("Injecting template " + path);
+      reader = new BufferedReader(new InputStreamReader(new FileInputStream(path), "UTF-8"));
+
+      while (null != (str = reader.readLine())) {
+        writer.write(str);
+      }
+    } catch (Exception exception) {
+      Logger.log("TemplateLoader", "inject", "The injection failed : " + exception.getMessage(),
+          Logger.ERROR);
+    } finally {
+      if (reader != null) {
+        reader.close();
+      }
+    }
+  }
+
+  private void loadPart(Writer writer, String part) throws IOException {
+    BufferedReader reader = null;
+
+    try {
+      String str;
+      reader = new BufferedReader(
+          new InputStreamReader(new FileInputStream("web/html/parts/" + part), "UTF-8"));
+
+      while (null != (str = reader.readLine())) {
+        writer.write(str);
+      }
+    } finally {
+      if (reader != null) {
+        reader.close();
+      }
+    }
+  }
+
+
+}

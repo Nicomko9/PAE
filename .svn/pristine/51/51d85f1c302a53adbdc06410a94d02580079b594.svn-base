@@ -1,0 +1,76 @@
+<div name="page-title" class="row">
+	<div class="col-lg-12 col-md-12">
+		<div class="page-container " id="container-JE">
+			<div class="row">
+				<div id="div-new-je" class="pull-right admin-block">
+					<a id="#" class="title-btn btn btn-primary btn-rigth"
+						data-view="je:showCreate"> Lancer nouvelle JE </a>
+				</div>
+				<h1 class="page-header">
+					Journée Entreprise : <span data-attribute="date-je"></span> <small>
+						<span data-attribute="year-je"></span>
+					</small>
+				</h1>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="row" id="je-message">
+	<div class="col-md-6 col-md-offset-3 alert alert-warning">
+	</div>
+</div>
+<div class="row" id="launch-invites">
+	<div class="text-center col-md-8 col-md-offset-2 alert alert-warning">
+		<div data-visibility="future">
+			<h1>
+				<strong>Attention</strong>
+			</h1>
+			<hr>
+			<p>Il n'y a pas encore d'invitations pour cette année ci</p>
+			<a href="#" class="btn btn-default admin-block" data-view="je:inviteList">
+				Lancer des invitations
+			</a>
+		</div>
+		<div data-visibility="past">
+			<h1>
+				<strong>Ancienne journée entreprise</strong>
+			</h1>
+			<hr>
+			<p>Il n'y a pas eu d'invitations aux entreprises en <span data-attribute="year-je"></span></p>
+		</div>
+	</div>
+</div>
+<div class="row" id="manage-je">
+	<div id="participations-table">
+		<div class="panel-body">
+			<div class="">
+				<table class="table table-condensed table-bordered table-hover"
+					id="invitedCompanies">
+					<thead class="thead-inverse">
+						<tr>
+							<th class="text-center">Entreprise</th>
+							<th class="text-center">Personnes de Contact</th>
+							<th class="text-center">Statut</th>
+							<th class="text-center">Action</th>
+						</tr>
+					</thead>
+					<tbody>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+	<div class="col-lg-6 col-md-6 col-sm-6 pull-right admin-block">
+		<div class="row">
+			<button id="btn-invite" data-visibility="future"
+				class="btn btn-primary col-xs-offset-1 col-xs-5 "
+				data-view="je:inviteList">Inviter entreprises</button>
+
+			<button class="btn btn-active col-xs-5 pull-right" id="btn-csv-all"
+				data-view="je:exportAllInvited">
+				Générer Csv Complet
+			</button>
+		</div>
+	</div>
+</div>
+<div class="col-xs-12" id="JeFormAlert"></div>

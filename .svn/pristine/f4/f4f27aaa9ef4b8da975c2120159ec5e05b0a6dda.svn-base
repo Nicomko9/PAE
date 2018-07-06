@@ -1,0 +1,34 @@
+package biz;
+
+import dal.dao.CompanyDao;
+import dal.dao.ContactDao;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
+public class SearchUccImpl implements SearchUcc {
+
+  private CompanyDao companyDao;
+  private ContactDao contactDao;
+
+  SearchUccImpl(CompanyDao companyDao, ContactDao contactDao) {
+    this.companyDao = companyDao;
+    this.contactDao = contactDao;
+  }
+
+  @Override
+  public Map<String, Set<?>> search(String search) {
+    String[] searches = search.split(" ");
+
+    if (searches.length == 0) {
+      searches = new String[1];
+      searches[0] = search;
+    }
+
+    Map<String, Set<?>> map = new HashMap<>();
+
+    map.put("companies", this.companyDao.search(searches));
+    map.put("contacts", this.contactDao.search(searches));
+    return map;
+  }
+}

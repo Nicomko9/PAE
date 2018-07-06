@@ -1,0 +1,9 @@
+package biz.objects;
+
+import biz.dto.JeDto;
+
+
+public interface Je extends JeDto {
+
+
+}

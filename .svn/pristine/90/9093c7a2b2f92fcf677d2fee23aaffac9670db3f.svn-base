@@ -1,0 +1,78 @@
+package ihm.utils;
+
+import java.lang.reflect.Method;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
+import config.annotation.Service;
+
+public class Logger {
+
+  public static final int SUCCESS = 0;
+
+  public static final int INFORMATION = 1;
+
+  public static final int ERROR = 2;
+
+  public static final int SYSTEM = 3;
+
+  @Service
+  public Logger() {}
+
+  /**
+   * Print a formatted data to output e.g. 1028302 [generic - server] server started.
+   *
+   * @param classe {@link Class} from where the output comes
+   * @param method {@link Method} form where the output comes
+   * @param message the message
+   */
+  @Deprecated
+  public static void log(String classe, String method, String message) {
+    System.out.print(Thread.currentThread().getName() + "  ");
+    System.out.format("%d.%d\t [%s - %s] %s %n", LocalDateTime.now().getSecond(),
+        Instant.now().getNano() / 100000, classe, method, message);
+  }
+
+  /**
+   * Print a formatted data to output e.g. 1028302 [generic - server] server started.
+   *
+   * @param classe {@link Class} from where the output comes
+   * @param method {@link Method} form where the output comes
+   * @param message the message
+   */
+  public static void log(String classe, String method, String message, int statut) {
+    String statutMessage;
+    switch (statut) {
+      case SUCCESS :
+        statutMessage = "SUCCESS";
+        break;
+      case INFORMATION :
+        statutMessage = "INFORMATION";
+        break;
+      case ERROR :
+        statutMessage = "ERROR";
+        break;
+      default : 
+        statutMessage = "NO STATUT";
+        break;
+    }
+    System.out.format("%d %s\t [%s - %s] %s : %s %n", Thread.currentThread().getId() ,
+        LocalDateTime.now().format(DateTimeFormatter.ofPattern("d/MM/y kk:mm:ss.SSSS")).toString(),
+        classe, method, statutMessage, message);
+  }
+
+  /**
+   * Print a formatted data to output e.g. 1028302 [generic - server] server started.
+   *
+   * @param user the author of the log
+   * @param classe {@link Class} from where the output comes
+   * @param method {@link Method} form where the output comes
+   * @param message the message
+   */
+  public static void log(String user, String classe, String method, String message) {
+    System.out.format("%d.%d\t %s : [%s - %s] %s", LocalDateTime.now().getSecond(),
+        Instant.now().getNano() / 100000, user, classe, method, message);
+  }
+
+}

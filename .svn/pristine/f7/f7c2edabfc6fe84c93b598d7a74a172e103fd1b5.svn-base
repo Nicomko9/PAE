@@ -1,0 +1,162 @@
+package biz;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+import biz.dto.CompanyDto;
+import biz.dto.ParticipationDto;
+import biz.exceptions.BusinessErrorException;
+import biz.exceptions.BusinessException;
+import biz.exceptions.ErrorsCode;
+import biz.objects.Company;
+import dal.DalFrontEndServices;
+import dal.dao.CompanyDao;
+import dal.dao.ParticipationDao;
+import ihm.utils.DataValidator;
+import ihm.utils.Logger;
+
+/**
+ * Implementation of the Company's Use Case Controller.
+ */
+class CompanyUccImpl implements CompanyUcc {
+
+  private DalFrontEndServices dal;
+
+  private CompanyDao companyDao;
+  private ParticipationDao participationDao;
+
+  CompanyUccImpl(DalFrontEndServices dal, CompanyDao companyDao,
+      ParticipationDao participationDao) {
+    this.dal = dal;
+    this.companyDao = companyDao;
+    this.participationDao = participationDao;
+  }
+
+  /**
+   * Register a new company in the database.
+   *
+   * @param companyDto {@link CompanyDto} to persist
+   * @return the companyDto with the information added in the Database
+   */
+  @Override
+  public CompanyDto register(CompanyDto companyDto) {
+    Logger.log("CompanyUccImpl", "createCompany", "Creating company");
+
+    Company company = (Company) companyDto;
+    company.checkConstraints();
+
+    if (null != this.companyDao.findByName(companyDto.getCompanyName())) {
+      Logger.log("CompanyUccImpl", "register", companyDto.getCompanyName() + " already exists.");
+      throw new BusinessException(ErrorsCode.BUSINESS_NAME_COMPANY_EXISTED);
+    }
+
+    company = (Company) companyDto;
+    company.setInscriptionDate(LocalDateTime.now());
+
+    try {
+      this.dal.startTransaction();
+
+      companyDto = this.companyDao.create(company);
+      if (null == companyDto) {
+        throw new BusinessErrorException(ErrorsCode.INTERNAL_UNKNOWN_ERROR);
+      }
+
+      this.dal.commitTransaction();
+
+      return companyDto;
+    } catch (Exception exc) {
+      this.dal.rollbackTransaction();
+      throw exc;
+    }
+  }
+
+  /**
+   * Update a company already present in the database.
+   *
+   * @param companyDto {@link CompanyDto} to persist
+   * @return the information of the company updated in the database
+   */
+  @Override
+  public CompanyDto update(CompanyDto companyDto) {
+    Logger.log("CompanyUccImpl", "update", "Updating company");
+    Company company = (Company) companyDto;
+
+    if (!DataValidator.validateString(companyDto.getCompanyName())) {
+      throw new BusinessException(ErrorsCode.BUSINESS_INVALID_COMPANY_NAME);
+    }
+
+    CompanyDto company2 = this.companyDao.findByName(companyDto.getCompanyName());
+    if (company2 != null && !companyDto.equals(company2)) {
+      Logger.log("CompanyUccImpl", "update", companyDto.getCompanyName() + " already exists.");
+      throw new BusinessException(ErrorsCode.BUSINESS_NAME_COMPANY_EXISTED);
+    }
+
+    try {
+      this.dal.startTransaction();
+
+      companyDto = this.companyDao.update(company);
+      if (null == companyDto) {
+        throw new BusinessErrorException(ErrorsCode.INTERNAL_UNKNOWN_ERROR);
+      }
+
+      this.dal.commitTransaction();
+
+      return companyDto;
+    } catch (Exception exception) {
+      Logger.log("CompanyUccImpl", "update", "Error updating company : " + exception.getMessage());
+      this.dal.rollbackTransaction();
+      throw new BusinessException(ErrorsCode.UNDEFINED_ERROR);
+    }
+  }
+
+  /**
+   * Give all the Companies of the database.
+   *
+   * @return a {@link List} of {@link CompanyDto}
+   */
+  @Override
+  public List<CompanyDto> getAllCompanies() {
+    try {
+      return this.companyDao.findAllCompanies();
+    } catch (Exception exception) {
+      Logger.log("CompanyUccImpl", "getAllCompanies", "Error Querying Companies");
+      throw new IllegalArgumentException(exception.getMessage());
+    }
+  }
+
+  @Override
+  public CompanyDto getCompanyByName(String name) {
+    try {
+      return this.companyDao.findByName(name);
+    } catch (IllegalArgumentException exception) {
+      Logger.log("CompanyUccImpl", "getCompanyByName", "~Error querying Company~");
+      throw new IllegalArgumentException(exception.getMessage());
+    }
+  }
+
+  @Override
+  public CompanyDto getCompanyByPk(int pk) {
+    try {
+      return this.companyDao.findByPk(pk);
+    } catch (IllegalArgumentException exception) {
+      Logger.log("CompanyUccImpl", "getCompanyByPk", "~Error querying Company~");
+      throw new IllegalArgumentException(exception.getMessage());
+    }
+  }
+
+  @Override
+  public List<CompanyDto> getAllCompaniesForTheSelection() {
+    try {
+      List<CompanyDto> companies = this.companyDao.findAllNewCompanies();
+      List<ParticipationDto> listDto = this.participationDao.findAllParticipationsForSelection();
+      for (ParticipationDto participation : listDto) {
+        companies.add(participation.getCompany());
+      }
+      return companies;
+    } catch (IllegalArgumentException exception) {
+      Logger.log("CompanyUccImpl", "getAllCompaniesForTheSelection", "~Error querying Company~");
+      throw new IllegalArgumentException(exception.getMessage());
+    }
+  }
+
+}

@@ -1,0 +1,122 @@
+package biz.ucc;
+
+import static org.junit.Assert.assertFalse;
+import static util.Util.BOX;
+import static util.Util.COMMUNE;
+import static util.Util.COMPANY_NAME;
+import static util.Util.EMAIL;
+import static util.Util.FIRSTNAME;
+import static util.Util.LASTNAME;
+import static util.Util.LOGIN;
+import static util.Util.PASSWORD;
+import static util.Util.PHONE;
+import static util.Util.STREET;
+import static util.Util.STREET_NUMBER;
+import static util.Util.ZIP_CODE;
+import static util.Util.createAddress;
+import static util.Util.createCompany;
+import static util.Util.createContact;
+import static util.Util.createJe;
+import static util.Util.createParticipation;
+import static util.Util.createPresence;
+import static util.Util.createUser;
+import static util.Util.deleteTestRecord;
+import static util.Util.fillAddress;
+import static util.Util.fillCompany;
+import static util.Util.fillContact;
+import static util.Util.fillPresence;
+import static util.Util.fillUser;
+
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import biz.PresenceUcc;
+import biz.objects.Address;
+import biz.objects.Company;
+import biz.objects.Contact;
+import biz.objects.Je;
+import biz.objects.Participation;
+import biz.objects.Presence;
+import biz.objects.User;
+import config.AppConfig;
+
+public class PresenceUccImplTest {
+
+  private static AppConfig appConfig;
+  private static PresenceUcc presenceUcc;
+  private static Presence presence;
+  private static Participation participation;
+  private static Je je;
+  private static Company company;
+  private static Contact contact;
+  private static Address address;
+  private static User creator;
+  private static int pkAddress, pkCreator, pkCompany, pkContact;
+
+  @BeforeClass
+  public static void setUpBeforeClass() throws Exception {
+    appConfig = new AppConfig(AppConfig.APP_DEV);
+    if(!appConfig.load())
+      throw new Exception();
+    presenceUcc = appConfig.newInstanceOf(PresenceUcc.class);
+
+    address = createAddress(appConfig);
+    pkAddress = address.getPk();
+
+    creator = createUser(appConfig);
+    pkCreator = creator.getPk();
+
+    company = createCompany(appConfig, address, creator);
+    pkCompany = company.getPk();
+
+    contact = createContact(appConfig, company);
+    pkContact = contact.getPk();
+
+    je = createJe(appConfig);
+
+    participation = createParticipation(appConfig, company, je, "facturée", "payée");
+    presence = createPresence(appConfig, company, contact, participation);
+  }
+
+  @AfterClass
+  public static void tearDownAfterClass() throws Exception {
+    deleteTestRecord(appConfig);
+  }
+
+  @Before
+  public void setUp() throws Exception {
+    fillAddress(address, BOX, COMMUNE, pkAddress, STREET, STREET_NUMBER, ZIP_CODE);
+    fillUser(creator, EMAIL, FIRSTNAME, LASTNAME, LOGIN, PASSWORD, pkCreator);
+    fillCompany(company, address, COMPANY_NAME, creator, pkCompany);
+    fillContact(contact, company, EMAIL, FIRSTNAME, LASTNAME, PHONE, pkContact);
+    fillPresence(presence, company, contact, participation);    
+  }
+
+  @Test
+  public void testRegister() {
+    /*CompanyDao companyDao = null;
+    try {
+      companyDao = appConfig.newInstanceOf(CompanyDao.class);
+    } catch (Exception e) {
+      e.printStackTrace();
+      throw new IllegalArgumentException();
+    }
+    List<CompanyDto> companies = companyDao.findAllCompanies();
+    for (CompanyDto companyDto : companies) {
+      if(companyDto.getPk() != pkCompany) {
+        company = (Company)companyDto;
+        break;
+      }
+    }
+    fillPresence(presence, company, contact, participation);
+    assertNotNull(presenceUcc.register(presence));*/
+  }
+
+  @Test
+  public void testGetAllPresencesOf() {
+    assertFalse(presenceUcc.getAllPresencesOf(je).isEmpty());
+  }
+}
+

@@ -1,0 +1,54 @@
+package mock.ucc;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
+import biz.DtoFactory;
+import biz.JeUcc;
+import biz.dto.JeDto;
+import biz.objects.Je;
+
+class JeUccMock implements JeUcc {
+
+  private DtoFactory dtoFactory;
+  
+  JeUccMock(DtoFactory dtoFactory) {
+    this.dtoFactory = dtoFactory;
+  }
+  
+  @Override
+  public boolean createNewJe(JeDto jeDto) {
+    return jeDto != null;
+  }
+
+  @Override
+  public List<JeDto> getAllJe() {
+    List<JeDto> jes = new ArrayList<>();
+    Je je = (Je) dtoFactory.getCompanyDay();
+    for (int i = 0; i < 3; i++) {
+      je.setDate(LocalDate.now().minusYears(i));
+      jes.add(je);
+    }
+    return jes;
+  }
+
+  @Override
+  public List<JeDto> getPreviousJe() {
+    List<JeDto> jes = new ArrayList<>();
+    Je je = (Je) dtoFactory.getCompanyDay();
+    for (int i = 1; i < 3; i++) {
+      je.setDate(LocalDate.now().minusYears(i));
+      jes.add(je);
+    }
+    return jes;
+  }
+
+  @Override
+  public JeDto getJeByYear(int year) {
+    Je je = dtoFactory.getCompanyDay();
+    je.setDate(LocalDate.ofYearDay(year, 299));
+    return null;
+  }
+
+}

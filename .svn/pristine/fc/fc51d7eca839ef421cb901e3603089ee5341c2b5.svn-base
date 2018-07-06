@@ -1,0 +1,32 @@
+package dal.dao;
+
+import bizz.objects.UserBizz;
+import dal.dao.schema.UserSchema;
+
+public interface UserDao extends UserSchema {
+
+  /**
+   * Persist a new user in database.
+   *
+   * @param userDto data to persist
+   * @return true on success, false otherwise
+   */
+  boolean create(UserBizz userDto);
+
+  /**
+   * Find an user by his email.
+   *
+   * @param email supplied email
+   * @return UserDto on match, null otherwise
+   */
+  UserBizz findByEmail(String email);
+
+  /**
+   * Find an user by his login.
+   *
+   * @param login supplied login
+   * @return UserDto on match, null otherwise
+   */
+  UserBizz findByLogin(String login);
+
+}

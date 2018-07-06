@@ -1,0 +1,106 @@
+package biz.objects;
+
+import biz.dto.CompanyDto;
+
+/**
+ * Contact's business object.
+ */
+class ContactBiz extends BizObject implements Contact {
+
+  /**
+   * Contact's company.
+   */
+  private CompanyDto company;
+
+  /**
+   * Contact's lastname.
+   */
+  private String lastname;
+
+  /**
+   * Contact's firstname.
+   */
+  private String firstname;
+
+  /**
+   * Contact's email.
+   */
+  private String email;
+
+  /**
+   * Contact's phone.
+   */
+  private String phone;
+
+  /**
+   * Contact's activity.
+   */
+  private boolean active = true;
+
+  ContactBiz() {}
+
+
+  /*
+   * Getters & setters.
+   */
+
+  public CompanyDto getCompany() {
+    return company;
+  }
+
+  public void setCompany(CompanyDto company) {
+    this.company = company;
+  }
+
+  public String getLastname() {
+    return lastname;
+  }
+
+  public void setLastname(String lastname) {
+    this.lastname = lastname;
+  }
+
+  public String getFirstname() {
+    return firstname;
+  }
+
+  public void setFirstname(String firstname) {
+    this.firstname = firstname;
+  }
+
+  public String getEmail() {
+    return email;
+  }
+
+  public void setEmail(String email) {
+    this.email = email;
+  }
+
+  public String getPhone() {
+    return phone;
+  }
+
+  public void setPhone(String phone) {
+    this.phone = phone;
+  }
+
+  public boolean isActive() {
+    return active;
+  }
+
+  public void setActive(boolean active) {
+    this.active = active;
+  }
+
+  @Override
+  int getVersion() {
+    return version;
+  }
+
+
+  @Override
+  void setVersion(int version) {
+    this.version = version;
+  }
+
+}

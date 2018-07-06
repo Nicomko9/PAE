@@ -1,0 +1,148 @@
+$(function() {
+	$(function() {
+		checkConnection();
+	});
+
+	$("form").find("input").each(function() {
+		$(this).click(function(e) {
+			$(this).css("background-color", "white");
+		});
+	});
+
+	$("#BtnConn").click(function(e) {
+		connexion(e);
+	});
+
+	$("#BtnIns").click(function(e) {
+		inscription(e);
+	});
+
+});
+
+// Fonction Accueil
+
+function inscription(e) {
+	e.preventDefault();
+	// Business
+	if (verifChampVide("Insc") !== false) {
+		var o = FORMtoJSON("Insc");
+		ajCon("insc", o);
+	}
+}
+
+function connexion(e) {
+	e.preventDefault();
+	// Business
+	if (verifChampVide("Conn") !== false) {
+		console.log("Ok!");
+		var o = FORMtoJSON("Conn");
+		ajCon("conn", o);
+	}
+}
+
+function checkConnection() {
+	$.ajax({
+		url : "/app/check",
+		type : "POST",
+		success : function(re) {
+			if (re === "Ok") {
+				connOk();
+			}
+		},
+		error : function(re) {
+			console.log(re);
+		}
+	});
+}
+
+function ajCon(action, json) {
+	// Ajax
+	$.ajax({
+				url : "/app/" + action,
+				type : "POST",
+				data : "json=" + JSON.stringify(JSON.parse(json)),
+				success : function(e) {
+					if (action === "conn") {
+						if (e === "Ok") {
+							connOk();
+						} else {
+							alerteForm("Conn",
+									"<strong>Attention</strong> Mot de passe incorrect");
+						}
+					} else {
+						// action === insc
+						if (e === "Ok") {
+							connOk();
+						} else if (e === "Login") {
+							alerteForm("Insc",
+									"<strong>Attention</strong> Login déjà utilisé."
+											+ " Veuillez en choisir un autre");
+						} else if (e === "Email") {
+							alerteForm("Insc",
+									"<strong>Attention</strong> Email déjà utilisé."
+											+ " Veuillez en choisir un autre");
+						}
+					}
+				},
+				error : function(e) {
+					console.log(e);
+				}
+			});
+}
+
+function connOk() {
+
+	// Passer nom et prenom en paramêtre
+	console.log("connOk()");
+	// Loading
+	$("#LoadingSnackbar").show();
+
+	setTimeout(function() {
+		$("#connPage").hide();
+		$("#LoadingSnackbar").hide();
+		$("header").show();
+		$(".sidebar").show();
+		$("#page-wrapper").show();
+		// a modifier
+		$("#headerPrenom").html("Henry");
+		$("#headerNom").html("Arthur");
+	}, 3000);
+
+}
+
+function FORMtoJSON(form) {
+	var o = {};
+
+	$("#" + form + "Form").find("input").each(function() {
+		console.log($(this).val());
+		if ($(this).attr('type') === 'checkbox') {
+			o[$(this).attr('name')] = $(this).is(':checked');
+		} else {
+			o[$(this).attr('name')] = $(this).val();
+		}
+	});
+
+	return JSON.stringify(o);
+}
+
+function verifChampVide(form) {
+	var ret = true;
+	$("#" + form + "Form")
+			.find("input")
+			.each(
+					function() {
+						if ($(this).val() === "") {
+							alerteForm(form,
+									"<strong>Attention</strong> Tous les champs ne sont pas remplits!");
+							ret = false;
+						}
+					});
+	return ret;
+}
+
+function alerteForm(form, message) {
+	console.log(form + " - " + message);
+	$("#" + form + "FormAlert>p").html("" + message);
+	$("#" + form + "FormAlert").show(1000);
+
+}

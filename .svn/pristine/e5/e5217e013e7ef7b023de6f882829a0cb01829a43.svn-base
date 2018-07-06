@@ -1,0 +1,7 @@
+package dal.dao;
+
+import dal.dao.schema.ContactSchema;
+
+public interface ContactDao extends ContactSchema {
+
+}

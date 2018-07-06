@@ -1,0 +1,46 @@
+package biz.objects;
+
+import biz.dto.UserDto;
+import biz.exceptions.BusinessException;
+
+
+/**
+ * User's business object.
+ */
+public interface User extends UserDto {
+
+  /**
+   * Get the primary key of the Object User in the database.
+   *
+   * @return int the value of the primary key
+   */
+  int getPk();
+
+  /**
+   * Set the value of the primary key of a User Object.
+   *
+   * @param primaryKey the new value of the primary key
+   */
+  void setPk(int primaryKey);
+
+  /**
+   * Compare password.
+   *
+   * @param password password to be compare to
+   * @return <code>true</code> in case of match
+   */
+  boolean comparePassword(String password);
+
+  /**
+   * Check some Constraints.
+   *
+   * @throws BusinessException if of no respect of the constraints.
+   */
+  void checkConstraints() throws BusinessException;
+
+  /**
+   * Prepare the {@link User} to be insert in the database while setting his Inscription Date.
+   */
+  void prepareForInsert() throws BusinessException;
+
+}

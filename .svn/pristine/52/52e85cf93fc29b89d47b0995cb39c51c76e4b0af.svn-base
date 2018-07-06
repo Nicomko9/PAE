@@ -1,0 +1,81 @@
+package dal;
+
+import config.AppConfig;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
+
+class DalBackEndServicesImpl implements DalBackEndServices {
+
+  private static final String dbDriver = AppConfig.INSTANCE
+      .getProperty("db.driver", "jdbc:postgresql://");
+  private static final String dbPath = AppConfig.INSTANCE.getProperty("db.path");
+  private static final String dbDatabase = AppConfig.INSTANCE.getProperty("db.db_name");
+  private static final String dbLogin = AppConfig.INSTANCE.getProperty("db.login");
+  private static final String dbPassword = AppConfig.INSTANCE.getProperty("db.password");
+  private static final String dbSchema = AppConfig.INSTANCE.getProperty("db.schema", null);
+
+  private Connection connection;
+
+  private Map<String, PreparedStatement> statementMap = new HashMap<>();
+
+  public DalBackEndServicesImpl() throws SQLException {
+
+    this.connection = DriverManager
+        .getConnection(dbDriver + dbPath + "/" + dbDatabase, dbLogin, dbPassword);
+
+    try {
+      if (null != dbSchema) {
+        this.connection.setSchema(dbSchema);
+      }
+    } catch (SQLException exception) {
+      System.out.println("Error switching schema in database ! (schema : " + dbSchema + ")");
+    }
+  }
+
+  public void startTransaction() {
+    try {
+      this.connection.setAutoCommit(false);
+    } catch (SQLException e) {
+      // Handle exception
+    }
+  }
+
+  public void commitTransaction() {
+    try {
+      this.connection.commit();
+      this.connection.setAutoCommit(true);
+    } catch (SQLException e) {
+      // Handle exception
+    }
+  }
+
+  public void rollbackTransaction() {
+    try {
+      this.connection.rollback();
+      this.connection.setAutoCommit(true);
+    } catch (SQLException e) {
+      // Handle exception
+    }
+  }
+
+  public PreparedStatement prepareStatement(String statement) {
+    try {
+      if (this.statementMap.containsKey(statement)) {
+        return this.statementMap.get(statement);
+      }
+
+      PreparedStatement stmt = this.connection.prepareStatement(statement);
+      this.statementMap.put(statement, stmt);
+
+      return stmt;
+    } catch (SQLException e) {
+      // Handle exception
+      return null;
+    }
+  }
+
+}

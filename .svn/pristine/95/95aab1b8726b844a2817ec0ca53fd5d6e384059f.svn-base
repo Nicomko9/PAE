@@ -1,0 +1,130 @@
+application.define("entreprise", function() {
+
+	function fillPopup(cont){
+		$("#popup-pk-entreprise").val(cont.data("pk"));
+		$("#popup-contact-company").val(cont.data("pk"));
+		$("#popup-version-entreprise").val(cont.data("version"));
+
+		cont = cont.find("td:first");
+		$("#popup-name-entreprise").val(cont.text());
+		$("#popup-name-entreprise").focus();
+
+		cont = cont.next("td");
+		//Address
+		$("#popup-entreprise-adress-pk").val(cont.data("pk"));
+		$("#popup-entreprise-adress-version").val(cont.data("version"));
+		var val = cont.text().substr(0, cont.text().indexOf(','));
+		var tmp = cont.text().substr(cont.text().indexOf(',')+2);
+		$("#popup-street-entreprise").val(val);
+		//gestion numero et boite
+		val = tmp.substr(0, tmp.indexOf(','));
+		tmp = tmp.substr(tmp.indexOf(',')+2);
+		var valad = val.substr(0, val.indexOf(' '));
+		$("#popup-number-entreprise").val(valad);
+		var reste =  val.substr(val.indexOf(' ') + 1);
+		reste = reste.substr(reste.indexOf(' ') + 1);
+		$("#popup-box-number-entreprise").val(reste);
+		//Gestion Code Postal
+		val = tmp.substr(0, tmp.indexOf(','));
+		tmp = tmp.substr(tmp.indexOf(',')+2);
+		$("#popup-postal-code-entreprise").val(val);
+		//Gestion Ville
+		$("#popup-city-name-entreprise").val(tmp);
+
+		application.require("utils/loader", function(module){
+			module.fillColor("#popup-new-entreprise");
+		});
+	}
+
+  /**
+   * Maybe ?
+   * 
+   * @param action
+   * @param id
+   * @returns {boolean}
+   */
+	function showPopup(action, id) {
+    if (action != "edit" && action != "create" && action != "view") {
+      return false;
+    }
+
+    $("#popup-new-entreprise").modal("show");
+
+    // Clean previous data
+    application.require("utils/forms").getForm("#popup-comp-form").clean();
+    $("#popup-cont-comp-form table tbody").html("");
+
+    // Display correct version
+    if (action == "create") {
+      $("#btn-save-popup-entreprise").show();
+      $("#btn-update-popup-entreprise").hide();
+			$("#popup-new-entreprise span[data-toggle='company-name']").html(": création");
+			$("#popup-cont-comp-form").hide();
+    }
+    else {
+			var row = $("#companies-table").find("table tr[data-pk='" + id + "']");
+			fillPopup(row);
+
+			$("#btn-save-popup-entreprise").hide();
+
+			if (action == "view") {
+				$("#btn-update-popup-entreprise").hide();
+			} else {
+				$("#btn-update-popup-entreprise").show();
+			}
+
+			$("#popup-new-entreprise span[data-toggle='company-name']")
+				.html(row.children("td:first").text());
+
+			$("#popup-cont-comp-form").show();
+    }
+
+		$("#popup-new-entreprise .modal-dialog:first").removeClass("modal-lg modal-xl");
+    if (action !== "edit") {
+			$("#popup-new-entreprise .modal-dialog:first").addClass("modal-lg");
+		} else {
+			$("#popup-new-entreprise .modal-dialog:first").addClass("modal-xl");
+		}
+  }
+	
+	return {
+		main : function() {
+			// load companies
+			application.require("utils/loader", function(module){
+				module.loadCompanies();
+			});
+
+		},
+		registerContact : function () {
+			application.require("utils/loader", function(module){
+				module.crudAjax(false, "#popup-cont-comp-form", true, "Contact créé");
+			});
+		},
+		/** Affiche le pop-up de création d'entreprise */
+		showCreate : function() {
+			showPopup("create");
+		},
+    edit : function (module, context, $elem) {
+			showPopup("edit", $($elem.parents("tr")[0]).data("pk"));
+			application.require("utils/loader", function(module){
+				module.loadContact(false, "#popup-cont-comp-form", $elem, true);
+			});
+    },
+    display : function (module, context, $elem) {
+			showPopup("view", $elem.parents("tr").data("pk"));
+			application.require("utils/loader", function(module){
+				module.loadContact(false, "#popup-cont-comp-form", $elem, false);
+			});
+		},
+		update : function() {
+			application.require("utils/loader", function(module){
+				module.crudAjax(true, "#popup-comp-form", false, "Entreprise Modifiée")
+			});
+		},
+		create : function() {
+			application.require("utils/loader", function(module){
+				module.crudAjax(false, "#popup-comp-form", false, "Entreprise Créée")
+			});
+		}
+	};
+}());

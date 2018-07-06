@@ -1,0 +1,10 @@
+package dal.dao.schema;
+
+
+import config.AppConfig;
+
+interface GenericSchema {
+
+  String SCHEMA = AppConfig.getProperty("db.schema");
+
+}

@@ -1,0 +1,102 @@
+package biz.ucc;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static util.Util.*;
+
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import biz.UserUcc;
+import biz.exceptions.BusinessException;
+import biz.objects.BusinessFactory;
+import biz.objects.User;
+import config.AppConfig;
+
+public class UserUccImplTest {
+
+  private static AppConfig appConfig;
+  private static UserUcc userUccImpl;
+  private static User user;   
+  private static int pkUser;
+
+  @BeforeClass
+  public static void setUpBeforeClass() throws Exception {
+    appConfig = new AppConfig(AppConfig.APP_DEV);
+    if(!appConfig.load())
+      throw new Exception();
+    userUccImpl =  (UserUcc) appConfig.newInstanceOf(UserUcc.class);
+
+    user = createUser(appConfig);
+    pkUser = user.getPk();
+  }
+
+  @AfterClass
+  public static void tearDownAfterClass() throws Exception {
+    deleteTestRecord(appConfig);
+  }
+  
+  @Before
+  public void setUp() throws Exception {
+    fillUser(user, EMAIL, FIRSTNAME, LASTNAME, LOGIN, PASSWORD, pkUser);
+  }
+
+  @Test (expected = BusinessException.class)
+  public void testConnect1() {
+    userUccImpl.connect(null, PASSWORD);
+  }
+
+  @Test (expected = BusinessException.class)
+  public void testConnect2() {
+    userUccImpl.connect(LOGIN, null);
+  }
+
+  @Test
+  public void testConnect3() {
+    assertNotNull(userUccImpl.connect(LOGIN, PASSWORD));
+  }
+
+  @Test 
+  public void testSubscribe1() {
+    userUccImpl.subscribe(BusinessFactory.getUser());
+  }
+
+  @Test (expected = BusinessException.class)
+  public void testSubscribe2() {
+    userUccImpl.subscribe(user);
+  }
+
+  @Test (expected = BusinessException.class)
+  public void testSubscribe3() {
+    user.setLogin("test");
+    userUccImpl.subscribe(user);
+  }
+
+  @Test (expected = BusinessException.class)
+  public void testSubscribe4() {
+    user.setEmail("test@pre.be");
+    userUccImpl.subscribe(user);
+  }
+
+  @Test
+  public void testSubscribe5() {
+    user.setLogin("test_junit");
+    user.setEmail("test@pre.be");
+    assertTrue(userUccImpl.subscribe(user));
+  }
+
+  @Test
+  public void testGetUserByLogin1() {
+    assertEquals(LOGIN,userUccImpl.getUserByLogin(LOGIN).getLogin());
+  }
+
+  @Test
+  public void testGetUserByLogin2() {
+    assertNull(userUccImpl.getUserByLogin("dhiz"));
+  }
+
+}

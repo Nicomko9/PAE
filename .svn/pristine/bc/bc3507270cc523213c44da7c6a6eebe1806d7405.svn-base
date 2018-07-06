@@ -1,0 +1,11 @@
+package dal.dao;
+
+import biz.DtoFactory;
+import dal.DalBackEndServices;
+
+class ContactDaoImpl extends AbstractDao implements ContactDao {
+
+  public ContactDaoImpl(DalBackEndServices dal, DtoFactory factory) {
+    super(dal, factory);
+  }
+}

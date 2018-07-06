@@ -1,0 +1,8 @@
+$(function(){
+	$("#NewEntreprise").click(function(){
+		$(this).html("Ajouter");
+		$("#container-new-entreprise").show(250);
+		$("#container-new-entreprise div[class='panel-heading']").html("Ajouter entreprise");
+		$("fieldset div[class='panel-heading']").html("Adresse de facturation");
+	});
+});

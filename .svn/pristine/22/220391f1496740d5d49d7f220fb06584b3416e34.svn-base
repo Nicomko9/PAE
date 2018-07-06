@@ -1,0 +1,14 @@
+package bizz.factory;
+
+import bizz.dto.UserDto;
+import bizz.objects.implementations.UserBizzImpl;
+
+public class BizzFactoryImpl implements BizzFactory {
+
+  @Override
+  public UserDto getUserDto() {
+    return new UserBizzImpl();
+  }
+
+
+}

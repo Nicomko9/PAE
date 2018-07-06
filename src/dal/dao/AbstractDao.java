@@ -1,0 +1,64 @@
+package dal.dao;
+
+
+import biz.DtoFactory;
+import biz.objects.BizObject;
+import dal.DalBackEndServices;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * Abstract Dao object.
+ */
+public abstract class AbstractDao implements GenericDao {
+
+  /**
+   * {@link DalBackEndServices} object.
+   */
+  protected DalBackEndServices dal;
+
+  /**
+   * {@link DtoFactory} Object.
+   */
+  protected DtoFactory factory;
+
+  private ThreadLocal<Map<Object, BizObject>> dbCache = 
+      new ThreadLocal<Map<Object, BizObject>>() {
+
+    @Override
+    protected Map<Object, BizObject> initialValue() {
+      return new HashMap<>();
+    }
+
+  };
+
+  /**
+   * Constructor.
+   *
+   * @param dal Initiate the {@link DalBackEndServices}
+   * @param factory Initiate the {@link DtoFactory}
+   */
+  AbstractDao(DalBackEndServices dal, DtoFactory factory) {
+    this.dal = dal;
+    this.factory = factory;
+  }
+
+  boolean cacheContains(Object key) {
+    return false;
+    //    return this.dbCache.get().containsKey(key);
+  }
+
+  BizObject cacheGet(Object key) {
+    return this.dbCache.get().get(key);
+  }
+
+  BizObject cacheStore(Object key, BizObject object) {
+    this.dbCache.get().put(key, object);
+
+    return object;
+  }
+
+  public void cacheClean() {
+    this.dbCache.remove();
+  }
+}

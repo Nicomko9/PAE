@@ -1,0 +1,71 @@
+package ihm;
+
+import java.text.SimpleDateFormat;
+import java.util.HashMap;
+import java.util.Map;
+
+import com.owlike.genson.Genson;
+import com.owlike.genson.GensonBuilder;
+
+import config.PluginFactory;
+import ucc.DtoEmptyFactory;
+import ucc.UserUcc;
+import ucc.dto.UserDto;
+
+class IhmUtilitaire {
+
+  public IhmUtilitaire() {
+    // TODO Auto-generated constructor stub
+  }
+
+  Genson genson = new GensonBuilder().useIndentation(true)
+      .useDateFormat(new SimpleDateFormat("dd/MM/yyyy")).useConstructorWithArguments(true).create();
+
+  @SuppressWarnings("unchecked")
+  Map<String, Object> traitementJsonConn(String json) {
+
+    Map<String, Object> m = new HashMap<String, Object>();
+    return genson.deserialize(json, Map.class);
+
+  }
+
+  UserDto getEmptyUser() {
+
+    DtoEmptyFactory emptyUser = PluginFactory.INSTANCE.getPluginFor(ucc.DtoEmptyFactory.class);
+    return emptyUser.getUser();
+
+  }
+
+  UserDto setUserDto(String log, String pwd) {
+
+    UserDto user = getEmptyUser();
+    user.setLogin(log);
+    user.setPassword(pwd);
+    return user;
+
+  }
+
+  UserDto setUserDto(String log, String name, String first_name, String pwd, String email) {
+
+    UserDto user = setUserDto(log, pwd);
+    user.setFirstname(first_name);
+    user.setLastname(name);
+    user.setEmail(email);
+    return user;
+
+  }
+
+  boolean connectUser(UserDto userDto) {
+
+    UserUcc userUcc = PluginFactory.INSTANCE.getPluginFor(ucc.UserUcc.class);
+    UserDto userDtb = userUcc.connect(userDto);
+    // Vérifier correspondance entre les mots de passe et les login
+    if (userDtb.getLogin().equals(userDto.getLogin())
+        && userDtb.getPassword().equals(userDto.getPassword())) {
+      return true;
+    }
+    return false;
+
+  }
+
+}

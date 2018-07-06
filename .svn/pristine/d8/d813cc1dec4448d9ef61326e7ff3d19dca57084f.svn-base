@@ -1,0 +1,92 @@
+package ucc.dto;
+
+import java.time.LocalDateTime;
+
+public class UserDtoImpl implements UserDto {
+
+  @Override
+  public String toString() {
+    return "UserDtoImpl [login=" + login + ", password=" + password + ", lastname=" + lastname
+        + ", firstname=" + firstname + ", email=" + email + ", responsible=" + responsible
+        + ", inscriptionDate=" + inscriptionDate + "]";
+  }
+
+
+  private String login;
+
+  private String password;
+
+  private String lastname;
+
+  private String firstname;
+
+  private String email;
+
+  private boolean responsible;
+
+  private LocalDateTime inscriptionDate;
+
+  public String getLogin() {
+    return login;
+  }
+
+  public void setLogin(String login) {
+    this.login = login;
+  }
+
+  @Override
+  public String getPassword() {
+    return this.password;
+  }
+
+  @Override
+  public void setPassword(String password) {
+    this.password = password;
+  }
+
+  public String getLastname() {
+    return lastname;
+  }
+
+  public void setLastname(String lastname) {
+    this.lastname = lastname;
+  }
+
+  public String getFirstname() {
+    return firstname;
+  }
+
+  public void setFirstname(String firstname) {
+    this.firstname = firstname;
+  }
+
+  public String getEmail() {
+    return email;
+  }
+
+  public void setEmail(String email) {
+    this.email = email;
+  }
+
+  public boolean isResponsible() {
+    return responsible;
+  }
+
+  public void setResponsible(boolean responsible) {
+    this.responsible = responsible;
+  }
+
+  public LocalDateTime getInscriptionDate() {
+    return inscriptionDate;
+  }
+
+  public void setInscriptionDate(LocalDateTime inscriptionDate) {
+    this.inscriptionDate = inscriptionDate;
+  }
+
+
+  public void login() {
+    // TODO Auto-generated method stub
+
+  }
+}

@@ -1,0 +1,115 @@
+application.define("contacts", function() {
+	var companiesloaded = false;
+
+	function selectCompanies(list){
+		if(list.length === 0){
+			logger.log("contact.js", "selectCompanies()", "Pas d'entreprise");
+		} else {
+			for(var i in list){
+				var o = list[i];
+				$("#contact-form select").append("<option value='" + o.companyName 
+						+"'>" + o.companyName + "</option>");
+			}
+		}
+	}
+	
+	function loadCompaniesPopUp(){
+		$.ajax({
+			url : "/app/entreprise/list",
+			method : "POST",
+			dataType : "JSON",
+			success : 
+				function(data){
+					selectCompanies(data);
+			},
+			error : 
+				function(xhr){
+					logger.log("contact.js", "loadCompaniesPopUp()", "Erreur");
+			}
+		});
+	}
+	
+	function fillPopup(cont){
+		cont = cont.parents("tr").find("td:first");
+		$("#popup-pk-contact").val(cont.text());
+		cont = cont.next("td");
+		$("#popup-new-contact select option[value='" + cont.text() 
+				+ "']").prop('selected', true);
+		$("#popup-new-contact select").css("background-color", "#FAFAD2");
+		$("#popup-new-contact select").change(function(){
+			$("#popup-new-contact select").css("background-color", "");
+		});
+		cont = cont.next("td");
+		var first = cont.text().substr(0, cont.text().indexOf(' '));
+		$("#popup-new-contact #popup-firstname-contact").val(first);
+		var last = cont.text().substr(cont.text().indexOf(' ')+1);
+		$("#popup-new-contact #popup-lastname-contact").val(last);
+		cont = cont.next("td");
+		if(cont.text() !== ""){
+			$("#popup-new-contact #popup-email-contact").val(cont.text());
+		}
+		cont = cont.next("td");
+		if(cont.text() !== ""){
+			$("#popup-new-contact #popup-tel-contact").val(cont.text());
+		}
+		application.require("utils/loader", function(module){
+			module.fillColor("#popup-new-contact")
+		});
+	}
+	
+	return {
+		main : function(module, context) {
+			application.require("utils/loader", function(module){
+				module.loadContact(true, "#contact-table", $(this), false);
+			});
+			//loadContact();
+			$("#btn-new-contact").click(function() {
+				application.require("utils/forms", function(module){
+					var form = module.getForm("#contact-form");
+					form.clean()
+				});
+				$("#btn-update-popup-contact").hide();
+				$("#btn-save-popup-contact").show();
+				$("#popup-new-contact div[class='panel-heading']")
+						.text("Nouveau contact");
+				$("#btn-save-popup-contact").click(function() {
+					application.require("contacts", "create");
+				});
+			});
+			$(document).on("click", "#contact-table tbody button", function(){
+				application.require("utils/forms", function(module){
+					var form = module.getForm("#contact-form");
+					form.clean();
+				});
+				$("#btn-update-popup-contact").show();
+				$("#btn-save-popup-contact").hide();
+				$("#popup-new-contact div[class='panel-heading']")
+						.html("Modifier contact");
+				//Fill Popup
+				//fillPopup($(this));
+				$("#btn-update-popup-contact").click(function() {
+					application.require("contacts", "update");
+				});
+			});
+			/*
+			 * Load Companies for popup
+			 */
+			if(!companiesloaded){
+				loadCompaniesPopUp();
+				companiesloaded = true;
+			}
+		},
+		update : function() {
+			logger.log("contact.js", "update()", "update");
+			application.require("utils/loader", function(module){
+				module.crudAjax(true, "#contact-form", true, "Contact modifié"	);
+			});
+		},
+		create : function() {
+			logger.log("contact.js", "create()", "create");
+			application.require("utils/loader", function(module){
+				module.crudAjax(false, "#contact-form", true, "Contact créé"	);
+			});
+		},
+	};
+}());

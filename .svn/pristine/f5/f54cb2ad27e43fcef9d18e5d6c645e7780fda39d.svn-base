@@ -1,0 +1,5 @@
+package biz.objects;
+
+class ParticipationBiz extends BizObject implements Participation {
+
+}

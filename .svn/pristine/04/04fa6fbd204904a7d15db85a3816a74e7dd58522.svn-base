@@ -1,0 +1,6 @@
+package dal;
+
+class ConnectionFactoryImpl implements ConnectionFactory {
+
+
+}

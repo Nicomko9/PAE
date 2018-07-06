@@ -1,0 +1,14 @@
+package ucc;
+
+
+interface UccInterface {
+
+
+  /**
+   * Return the id of this UCC, used for routing.
+   *
+   * @return ucc's ID
+   */
+  String getId();
+
+}

@@ -1,0 +1,42 @@
+<div name="page-title" class="row">
+  <div class="col-lg-12 col-md-12">
+    <h1 class="page-header">Entreprises</h1>
+  </div>
+</div>
+
+<div class="row">
+  <!--<div class="col-lg-10 col-md-10 col-lg-offset-1 col-md-offset-1">--><div>
+    <!--<div class="panel panel-default">--><div>
+      <!--<div class="panel-heading">Liste des entreprises du système:</div>-->
+      <!-- /.panel-heading -->
+      <div class="panel-body">
+        <table id="companies-table" class="table-condensed table table-bordered table-hover">
+          <div id="entreprise-loading" style="display: none">
+            <i class="fa fa-spinner fa-spin"></i> Loading...
+          </div>
+          <thead class="thead-inverse">
+          <tr>
+            <th>Entreprise</th>
+            <th>Adresse de facturation</th>
+            <th>Dernière participation</th>
+            <th>Action</th>
+          </tr>
+          </thead>
+          <tbody>
+          <!-- Filled by js -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="col-lg-offset-9 col-md-offset-9 col-lg-2 col-md-2">
+    <a id="NewEntreprise" class="btn btn-info btn-rigth"
+       data-view="entreprise:showCreate">
+      Nouvelle entreprise
+    </a>
+  </div>
+</div>
+
+</html>

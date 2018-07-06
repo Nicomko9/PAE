@@ -1,0 +1,201 @@
+package ihm;
+
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import biz.DtoFactory;
+import biz.UserUcc;
+import biz.dto.UserDto;
+import biz.exceptions.BusinessErrorException;
+import biz.exceptions.BusinessException;
+import ihm.utils.JsonUtil;
+import ihm.utils.Logger;
+
+/**
+ * Unique Servlet of the application
+ */
+public class ApplicationServlet extends HttpServlet {
+
+
+  /**
+   * User's session utility
+   */
+  private SessionManager userSessions;
+
+  /**
+   * Business object's factory
+   */
+  private DtoFactory dtoFactory;
+
+  /**
+   * User Use-Case Controller.
+   */
+  private UserUcc userUcc;
+
+  /**
+   * Construct the servlet.
+   *
+   * @param dtoFactory Business Object's factory
+   * @param userSessions Manager of user's session
+   * @param userUcc User Use-Case Controller
+   */
+  ApplicationServlet(DtoFactory dtoFactory, SessionManager userSessions, UserUcc userUcc) {
+    this.dtoFactory = dtoFactory;
+    this.userSessions = userSessions;
+
+    this.userUcc = userUcc;
+  }
+
+  /**
+   * Handle the POST Http request
+   * 
+   * @param req request object
+   * @param resp response object
+   * @throws BusinessException Already connected
+   * @throws BusinessException Internal JSON decoding error
+   * 
+   */
+
+  @SuppressWarnings("unchecked")
+  @Override
+  protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+      throws BusinessException {
+
+    UserDto userDto;
+    UserDto connectedUser = userSessions.readSession(req);
+
+    switch (req.getPathInfo()) {
+      case "/connection":
+        Logger.log("ihm", "ApplicationSevlet", "Connection");
+
+        if (null != connectedUser) {
+          throw new BusinessException("Un utilisateur est déja connecté");
+        }
+
+        userDto = this.userUcc.connect(req.getParameter("login"), req.getParameter("password"));
+
+        this.handleResponse(resp, userSessions.createSession(req, resp, userDto));
+        break;
+      case "/signup":
+        Logger.log("ihm", "ApplicationSevlet", "Sign up");
+        try {
+
+          Map<String, Object> requestMap =
+              (Map<String, Object>) JsonUtil.decode(req.getParameter("json"), Map.class);
+
+          if (null == requestMap) {
+            throw new BusinessException("Internal JSON decoding error");
+          }
+
+          userDto = this.dtoFactory.getUser();
+
+          userDto.setLogin((String) requestMap.get("login"));
+          userDto.setFirstname((String) requestMap.get("firstname"));
+          userDto.setLastname((String) requestMap.get("lastname"));
+          userDto.setEmail((String) requestMap.get("email"));
+          userDto.setPassword((String) requestMap.get("password"));
+        } catch (Exception e) {
+          throw new BusinessErrorException("Error internal");
+        }
+
+        if (this.userUcc.subscribe(userDto)) {
+          this.handleResponse(resp, userSessions.createSession(req, resp, userDto));
+        }
+
+        break;
+      case "/disconnect":
+        Logger.log("ihm", "ApplicationSevlet", "Log out");
+        userSessions.deleteSession(req, resp);
+        this.handleResponse(resp, true);
+
+        break;
+      default:
+        this.handleResponse(resp, "Page not found", 404);
+    }
+  }
+
+  /**
+   * Handle the POST Http request
+   * 
+   * @param req request object
+   * @param resp response object
+   * @throws BusinessException if there's no user in session or in cookie.
+   */
+
+  protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws BusinessException {
+    UserDto connectedUser = userSessions.readSession(req);
+
+    switch (req.getPathInfo()) {
+      case "/auth":
+
+        if (connectedUser == null) {
+          throw new BusinessException("Unauthorized used");
+        }
+
+        this.handleResponse(resp, connectedUser);
+        break;
+      default:
+        this.handleResponse(resp, "Page not found", 404);
+    }
+  }
+
+  /**
+   * In case of business exception, render a JSON response "{ error : message }" .
+   */
+  @Override
+  protected void service(HttpServletRequest req, HttpServletResponse resp)
+      throws ServletException, IOException {
+    try {
+      super.service(req, resp);
+    } catch (BusinessException e) {
+      System.out.println("Business Exception with code => " + e.getMessage() + " \n\tin "
+          + e.getStackTrace()[0].getFileName() + ":" + e.getStackTrace()[0].getLineNumber());
+      this.handleResponse(resp, new HashMap<String, String>() {
+        {
+          put("error", e.getMessage());
+        }
+      }, 500);
+    }
+  }
+
+  /**
+   * Send a response to back-end.
+   *
+   * @param resp response object
+   * @param data the data to send to front-end
+   * @param code page status code (200, 404, etc)
+   */
+  private void handleResponse(HttpServletResponse resp, Object data, int code) {
+    try {
+      String str = JsonUtil.encode(data);
+      byte[] bytes = str.getBytes(Charset.forName("UTF-8"));
+
+      resp.setContentLength(bytes.length);
+      resp.setContentType("application/javascript");
+      resp.getOutputStream().write(bytes);
+      resp.setStatus(code);
+    } catch (IOException exception) {
+      try {
+        resp.sendError(500);
+      } catch (IOException e) {
+        System.out.println("System internal error : " + e.getMessage());
+      }
+    }
+  }
+
+  /**
+   * Default status code is 200.
+   */
+  private void handleResponse(HttpServletResponse resp, Object data) {
+    handleResponse(resp, data, 200);
+  }
+
+
+}

@@ -1,0 +1,30 @@
+package biz.dto;
+
+import java.time.LocalDateTime;
+
+/**
+ * Company's Data Transfer Object.
+ */
+public interface CompanyDto {
+
+  String getCompanyName();
+
+  void setCompanyName(String companyName);
+
+  UserDto getCreator();
+
+  void setCreator(UserDto creator);
+
+  AddressDto getAddress();
+
+  void setAddress(AddressDto address);
+
+  LocalDateTime getInscriptionDate();
+
+  void setInscriptionDate(LocalDateTime inscriptionDate);
+
+  int getLastParticipationYear();
+
+  void setLastParticipationYear(int lastParticipationYear);
+
+}

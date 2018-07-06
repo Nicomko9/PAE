@@ -1,0 +1,8 @@
+package biz.dto;
+
+/**
+ * Abstract class for Data Transfer Objects.
+ */
+abstract class AbstractDto {
+
+}

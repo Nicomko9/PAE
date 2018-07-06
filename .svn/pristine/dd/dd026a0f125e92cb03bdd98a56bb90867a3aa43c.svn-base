@@ -1,0 +1,6 @@
+package ucc.dto;
+
+
+abstract class AbstractDto {
+
+}

@@ -1,0 +1,12 @@
+package ucc;
+
+import ucc.dto.UserDto;
+
+public interface UserUcc extends UccInterface {
+
+  UserDto connect(UserDto userDto);
+
+  boolean subscribe(UserDto dto);
+
+
+}

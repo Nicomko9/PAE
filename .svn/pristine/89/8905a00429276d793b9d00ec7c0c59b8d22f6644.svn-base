@@ -1,0 +1,154 @@
+package dal;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
+import org.apache.commons.dbcp2.BasicDataSource;
+
+import biz.exceptions.FatalException;
+import config.AppConfig;
+import config.annotation.Service;
+import ihm.utils.Logger;
+
+/**
+ * Services for the communication with Database.
+ */
+class DalServices implements DalBackEndServices, DalFrontEndServices {
+
+  //  /**
+  //   * Instance of the appConfig to create a connection to the Database.
+  //   */
+  //  private AppConfig appConfig;
+
+  private BasicDataSource bds;
+
+  /**
+   * Instances of connections to the Database according the thread.
+   */
+  private ThreadLocal<Connection> connections = new ThreadLocal<Connection>() {
+
+    /**
+     * Overriding of the method initialValue.
+     *
+     * @return a new connection to the Database
+     */
+    @Override
+    protected Connection initialValue() {
+      try {
+        return bds.getConnection();
+
+      } catch (Exception exception) {
+        Logger.log("DalSercices", "initialValue", "The recovery of the connection failed : "
+            + exception.getMessage(), Logger.ERROR);
+        throw new FatalException();
+      }
+    }
+
+    /**
+     * Overriding of the method remove.
+     *
+     */
+    @Override
+    public void remove() {
+      try {
+        this.get().close();
+      } catch (SQLException exception) {
+        Logger.log("DalSercices", "remove", "The closing of the connection failed : "
+            + exception.getMessage(), Logger.ERROR);
+      }
+      super.remove();
+    }
+
+  };
+
+  ///**
+  // * Map with the {@link PreparedStatement}.
+  // */
+  //private Map<String, PreparedStatement> statementMap = new HashMap<>();
+
+  /**
+   * Constructor.
+   *
+   * @param appConfig Application Configuration
+   */
+  @Service
+  public DalServices(AppConfig appConfig, BasicDataSource bds) {
+    this.bds = bds;
+    this.bds = new BasicDataSource();
+    this.bds.setUrl(appConfig.getProperty("db.driver", "jdbc:postgresql://")
+        + appConfig.getProperty("db.path") + "/" + appConfig.getProperty("db.db_name"));
+    this.bds.setUsername(appConfig.getProperty("db.login"));
+    this.bds.setPassword(appConfig.getProperty("db.password"));
+    this.bds.setInitialSize(5);
+  }
+
+  /**
+   * Start transaction mode.
+   */
+  public void startTransaction() {
+    try {
+      this.connections.get().setAutoCommit(false);
+    } catch (SQLException exception) {
+      Logger.log("DalSercices", "prepareStatement", "The start transaction failed : "
+          + exception.getMessage(), Logger.ERROR);
+      throw new FatalException();
+    }
+  }
+
+  /**
+   * Commit the current transaction.
+   */
+  public void commitTransaction() {
+    try {
+      Connection connection = this.connections.get();
+      connection.commit();
+      connection.setAutoCommit(true);
+      this.connections.remove();
+    } catch (SQLException exception) {
+      Logger.log("DalSercices", "prepareStatement", "The commit transaction failed : "
+          + exception.getMessage(), Logger.ERROR);
+      throw new FatalException();
+    }
+  }
+
+  /**
+   * Roll back the current transaction.
+   */
+  public void rollbackTransaction() {
+    try {
+      Connection connection = this.connections.get();
+      connection.rollback();
+      connection.setAutoCommit(true);
+      this.connections.remove();
+    } catch (SQLException exception) {
+      Logger.log("DalSercices", "rollbackTransaction", "The rollback transaction failed : "
+          + exception.getMessage(), Logger.ERROR);
+      throw new FatalException();
+    }
+  }
+
+  /**
+   * Prepare a {@link PreparedStatement} if not already cached.
+   *
+   * @param statement {@link String} query to prepare.
+   * @return a {@link PreparedStatement} based on the given {@link String}
+   */
+  public PreparedStatement prepareStatement(String statement) {
+    try {
+      //      if (this.statementMap.containsKey(statement)) {
+      //        return this.statementMap.get(statement);
+      //      }
+
+      PreparedStatement stmt = this.connections.get().prepareStatement(statement);
+      // this.statementMap.put(statement, stmt);
+
+      return stmt;
+    } catch (SQLException exception) {
+      Logger.log("DalSercices", "prepareStatement", "The prepare statement (" + statement 
+          + ") failed : " + exception.getMessage(), Logger.ERROR);
+      throw new FatalException();
+    }
+  }
+
+}

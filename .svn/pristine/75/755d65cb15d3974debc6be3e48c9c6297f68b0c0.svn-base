@@ -1,0 +1,33 @@
+package dal.dao;
+
+
+import biz.dto.UserDto;
+import biz.objects.UserBiz;
+
+public interface UserDao {
+
+  /**
+   * persist given user.
+   *
+   * @param user given user
+   * @return true on success
+   */
+  UserDto create(UserBiz user);
+
+  /**
+   * Find a single user based on login.
+   *
+   * @param login the value to lookup
+   * @return a UserDto instance
+   */
+  UserDto findByLogin(String login);
+
+  /**
+   * Find a single user based on email.
+   *
+   * @param email the value to lookup
+   * @return a UserDto instance
+   */
+  UserDto findByEmail(String email);
+
+}

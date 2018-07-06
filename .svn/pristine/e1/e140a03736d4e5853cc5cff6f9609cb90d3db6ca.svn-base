@@ -1,0 +1,155 @@
+02:21:11.579 [qtp1342443276-15] ERROR logger.errors - [JeDaoImpl - create] The JE creation failed : Aucun résultat retourné par la requête.
+02:21:29.211 [qtp1342443276-31] ERROR logger.errors - [JeDaoImpl - create] The JE creation failed : Aucun résultat retourné par la requête.
+02:30:26.226 [qtp1342443276-35] ERROR logger.errors - [JeDaoImpl - create] The JE creation failed : Aucun résultat retourné par la requête.
+02:31:16.467 [qtp1342443276-19] ERROR logger.errors - [JeDaoImpl - create] The JE creation failed : Aucun résultat retourné par la requête.
+02:31:16.475 [qtp1342443276-19] ERROR logger.errors - [JeUccImpl - CreateJe] Creating je : null
+02:32:25.914 [qtp1342443276-19] ERROR logger.errors - [JeDaoImpl - create] The JE creation failed : Aucun résultat retourné par la requête.
+02:32:25.918 [qtp1342443276-19] ERROR logger.errors - [JeUccImpl - CreateJe] Creating je : null
+02:36:54.187 [qtp1342443276-14] ERROR logger.errors - [JeDaoImpl - create] The JE creation failed : Aucun résultat retourné par la requête.
+02:36:54.187 [qtp1342443276-14] ERROR logger.errors - [JeUccImpl - CreateJe] Creating je : null
+02:37:51.838 [qtp1342443276-15] ERROR logger.errors - [JeDaoImpl - create] The JE creation failed : Aucun résultat retourné par la requête.
+02:37:51.838 [qtp1342443276-15] ERROR logger.errors - [JeUccImpl - CreateJe] Creating je : null
+18:05:47.492 [qtp1342443276-48] ERROR logger.errors - [ContactDaoImpl - update] The contact update failed : The version number does not match that of the database
+18:05:47.730 [qtp1342443276-52] ERROR logger.errors - [ContactDaoImpl - update] The contact update failed : The version number does not match that of the database
+18:05:47.796 [qtp1342443276-53] ERROR logger.errors - [ContactDaoImpl - update] The contact update failed : The version number does not match that of the database
+18:06:32.409 [qtp1342443276-51] ERROR logger.errors - [ContactDaoImpl - update] The contact update failed : The version number does not match that of the database
+18:06:32.532 [qtp1342443276-49] ERROR logger.errors - [ContactDaoImpl - update] The contact update failed : The version number does not match that of the database
+18:06:32.580 [qtp1342443276-52] ERROR logger.errors - [ContactDaoImpl - update] The contact update failed : The version number does not match that of the database
+18:10:53.342 [qtp1342443276-57] ERROR logger.errors - [ContactDaoImpl - update] The contact update failed : The version number does not match that of the database
+18:11:56.612 [qtp1342443276-48] ERROR logger.errors - [ContactDaoImpl - update] The contact update failed : The version number does not match that of the database
+18:41:04.209 [qtp1342443276-48] ERROR logger.errors - [ContactDaoImpl - update] The contact update failed : The version number does not match that of the database
+18:54:09.185 [qtp1342443276-62] ERROR logger.errors - [ContactDaoImpl - update] The contact update failed : The version number does not match that of the database
+18:54:09.408 [qtp1342443276-56] ERROR logger.errors - [ContactDaoImpl - update] The contact update failed : The version number does not match that of the database
+18:54:09.433 [qtp1342443276-60] ERROR logger.errors - [ContactDaoImpl - update] The contact update failed : The version number does not match that of the database
+19:00:25.141 [qtp1342443276-15] ERROR logger.errors - [ContactDaoImpl - update] The contact update failed : The version number does not match that of the database
+19:00:42.215 [qtp1342443276-26] ERROR logger.errors - [ContactDaoImpl - update] The contact update failed : The version number does not match that of the database
+19:00:53.520 [qtp1342443276-25] ERROR logger.errors - [ContactDaoImpl - update] The contact update failed : The version number does not match that of the database
+19:01:38.639 [qtp1342443276-25] ERROR logger.errors - [ContactDaoImpl - update] The contact update failed : The version number does not match that of the database
+19:01:51.668 [qtp1342443276-26] ERROR logger.errors - [ContactDaoImpl - update] The contact update failed : The version number does not match that of the database
+19:01:57.340 [qtp1342443276-15] ERROR logger.errors - [ContactDaoImpl - update] The contact update failed : The version number does not match that of the database
+19:11:28.773 [qtp1342443276-15] ERROR logger.errors - [ContactDaoImpl - update] The contact update failed : The version number does not match that of the database
+19:12:36.496 [qtp1342443276-38] ERROR logger.errors - [ContactDaoImpl - update] The contact update failed : The version number does not match that of the database
+19:15:03.566 [qtp1342443276-42] ERROR logger.errors - [ContactDaoImpl - update] The contact update failed : The version number does not match that of the database
+19:15:43.880 [qtp1342443276-26] ERROR logger.errors - [ContactDaoImpl - update] The contact update failed : The version number does not match that of the database
+19:30:03.053 [qtp1342443276-25] ERROR logger.errors - [ContactDaoImpl - update] The contact update failed : The version number does not match that of the database
+19:31:17.340 [qtp1342443276-53] ERROR logger.errors - [ContactDaoImpl - update] The contact update failed : The version number does not match that of the database
+19:33:28.588 [qtp1342443276-49] ERROR logger.errors - [ContactDaoImpl - update] The contact update failed : The version number does not match that of the database
+19:34:58.045 [qtp1342443276-54] ERROR logger.errors - [ContactDaoImpl - update] The contact update failed : The version number does not match that of the database
+23:15:12.060 [qtp1342443276-15] ERROR logger.errors - [AddressDaoImpl - update] The address update failed : The version number does not match that of the database
+23:58:25.785 [qtp1342443276-38] ERROR logger.errors - [AddressDaoImpl - update] The address update failed : The version number does not match that of the database
+02:18:25.840 [main] ERROR logger.errors - [appConfig - newInstanceOf] [prod] You cannot load plugin for 'biz.UnitOfWork' : problem finding constructor
+02:18:25.844 [main] ERROR logger.errors - [AppConfig - newInstanceOf] Skipping constructor - error happened : [prod] You cannot load plugin for 'biz.UnitOfWork' : problem finding constructor AppConfig.java:114
+02:18:25.844 [main] ERROR logger.errors - [appConfig - newInstanceOf] [prod] You cannot load plugin for 'biz.UserUcc' : problem finding constructor
+02:18:25.844 [main] ERROR logger.errors - [AppConfig - newInstanceOf] Skipping constructor - error happened : [prod] You cannot load plugin for 'biz.UserUcc' : problem finding constructor AppConfig.java:114
+02:18:25.844 [main] ERROR logger.errors - [appConfig - newInstanceOf] [prod] You cannot load plugin for 'ihm.ApplicationServlet' : problem finding constructor
+02:18:25.845 [main] ERROR logger.errors - [Main - startJetty] Internel system error - unable to start server: exiting application
+02:18:25.846 [main] ERROR logger.errors - [Main - main] [prod] Server failed starting
+02:22:26.438 [qtp1342443276-29] ERROR logger.errors - [AddressDaoImpl - update] The address update failed : The version number does not match that of the database
+02:26:03.800 [qtp1342443276-31] ERROR logger.errors - [AddressDaoImpl - update] The address update failed : The version number does not match that of the database
+02:36:03.286 [qtp1342443276-16] ERROR logger.errors - [AddressDaoImpl - update] The address update failed : The version number does not match that of the database
+02:36:30.982 [qtp1342443276-16] ERROR logger.errors - [AddressDaoImpl - update] The address update failed : The version number does not match that of the database
+02:36:31.136 [qtp1342443276-27] ERROR logger.errors - [AddressDaoImpl - update] The address update failed : The version number does not match that of the database
+02:39:53.505 [qtp1342443276-16] ERROR logger.errors - [AddressDaoImpl - update] The address update failed : The version number does not match that of the database
+02:40:02.061 [qtp1342443276-32] ERROR logger.errors - [AddressDaoImpl - update] The address update failed : The version number does not match that of the database
+02:43:40.604 [qtp1342443276-32] ERROR logger.errors - [AddressDaoImpl - update] The address update failed : The version number does not match that of the database
+02:44:09.906 [qtp1342443276-30] ERROR logger.errors - [AddressDaoImpl - update] The address update failed : The version number does not match that of the database
+02:45:03.254 [qtp1342443276-21] ERROR logger.errors - [AddressDaoImpl - update] The address update failed : The version number does not match that of the database
+02:45:29.452 [qtp1342443276-33] ERROR logger.errors - [AddressDaoImpl - update] The address update failed : The version number does not match that of the database
+02:46:01.534 [qtp1342443276-33] ERROR logger.errors - [AddressDaoImpl - update] The address update failed : The version number does not match that of the database
+02:50:03.363 [qtp1342443276-33] ERROR logger.errors - [AddressDaoImpl - update] The address update failed : The version number does not match that of the database
+02:54:52.225 [qtp1342443276-28] ERROR logger.errors - [AddressDaoImpl - update] The address update failed : The version number does not match that of the database
+03:06:55.010 [qtp1342443276-29] ERROR logger.errors - [AddressDaoImpl - update] The address update failed : The version number does not match that of the database
+03:28:54.373 [qtp1342443276-14] ERROR logger.errors - [AddressDaoImpl - findByPk] The registration of the company failed : This company name also exists
+03:30:30.313 [qtp1342443276-14] ERROR logger.errors - [AddressDaoImpl - findByPk] The registration of the company failed : This company name also exists
+19:17:49.356 [qtp1342443276-15] ERROR logger.errors - [ParticipationDaoImpl - update] The participation update failed : The version number does not match that of the database
+19:17:49.381 [qtp1342443276-15] ERROR logger.errors - [ParticipationUcc - confirm] Exception null
+19:18:44.455 [qtp1342443276-17] ERROR logger.errors - [ParticipationDaoImpl - update] The participation update failed : The version number does not match that of the database
+19:18:44.455 [qtp1342443276-17] ERROR logger.errors - [ParticipationUcc - confirm] Exception null
+19:30:42.106 [qtp1342443276-15] ERROR logger.errors - [ParticipationDaoImpl - update] The participation update failed : The version number does not match that of the database
+19:30:42.106 [qtp1342443276-15] ERROR logger.errors - [ParticipationUcc - confirm] Exception null
+19:42:40.520 [qtp1342443276-26] ERROR logger.errors - [ParticipationDaoImpl - update] The participation update failed : The version number does not match that of the database
+19:42:40.546 [qtp1342443276-26] ERROR logger.errors - [ParticipationUcc - Rollback] Exception null
+19:52:30.890 [qtp1342443276-19] ERROR logger.errors - [ParticipationDaoImpl - update] The participation update failed : The version number does not match that of the database
+19:52:30.921 [qtp1342443276-19] ERROR logger.errors - [ParticipationUcc - Rollback] Exception null
+19:53:14.055 [qtp1342443276-19] ERROR logger.errors - [ParticipationDaoImpl - update] The participation update failed : The version number does not match that of the database
+19:53:14.114 [qtp1342443276-19] ERROR logger.errors - [ParticipationUcc - update] Error : null
+20:26:31.684 [qtp1342443276-38] ERROR logger.errors - [UserUccImpl - connect] The login is unknown
+21:27:50.524 [qtp1342443276-42] ERROR logger.errors - [PresenceDaoImpl - create] The presence creation failed : ERROR: duplicate key value violates unique constraint "presence_pkey"
+  Détail : Key (participation_year, company_number, contact_number)=(2017, 196, 194) already exists.
+21:27:50.525 [qtp1342443276-42] ERROR logger.errors - [PresenceUcc - register] Exception : null
+21:36:51.806 [qtp1342443276-37] ERROR logger.errors - [AddressDaoImpl - update] The address update failed : The version number does not match that of the database
+21:37:13.956 [qtp1342443276-48] ERROR logger.errors - [AddressDaoImpl - update] The address update failed : The version number does not match that of the database
+21:48:45.782 [qtp1342443276-50] ERROR logger.errors - [ParticipationDaoImpl - update] The participation update failed : The version number ( 1 does not match that of the database
+21:48:45.807 [qtp1342443276-50] ERROR logger.errors - [ParticipationUcc - update] Error : null
+21:48:55.968 [qtp1342443276-44] ERROR logger.errors - [ParticipationDaoImpl - update] The participation update failed : The version number ( 1 does not match that of the database
+21:48:55.968 [qtp1342443276-44] ERROR logger.errors - [ParticipationUcc - confirm] Exception null
+02:42:52.524 [qtp1342443276-59] ERROR logger.errors - [UserUccImpl - connect] The login is unknown
+02:43:38.274 [qtp1342443276-58] ERROR logger.errors - [UserUccImpl - connect] The login is unknown
+02:48:03.497 [qtp1342443276-56] ERROR logger.errors - [UserUccImpl - connect] The login is unknown
+02:52:49.441 [qtp1342443276-29] ERROR logger.errors - [UserUccImpl - connect] The login is unknown
+03:00:41.311 [qtp1342443276-21] ERROR logger.errors - [UserUccImpl - connect] The login is unknown
+03:01:33.329 [qtp1342443276-20] ERROR logger.errors - [UserUccImpl - connect] The login is unknown
+03:02:28.281 [qtp1342443276-31] ERROR logger.errors - [UserUccImpl - connect] The login is unknown
+03:05:55.333 [qtp1342443276-25] ERROR logger.errors - [UserUccImpl - subscribe] The user cdj was successfully registered
+03:07:32.063 [qtp1342443276-34] ERROR logger.errors - [UserUccImpl - subscribe] The login cdj exists already
+03:07:41.583 [qtp1342443276-25] ERROR logger.errors - [UserUccImpl - subscribe] The mail clement.dujardin@student.vinci.be exists already
+03:50:34.551 [qtp1342443276-33] ERROR logger.errors - [AddressDaoImpl - update] The address update failed : The version number does not match that of the database
+03:53:48.740 [qtp1342443276-29] ERROR logger.errors - [AddressDaoImpl - update] The address update failed : The version number does not match that of the database
+03:55:13.177 [qtp1342443276-37] ERROR logger.errors - [AddressDaoImpl - update] The address update failed : The version number does not match that of the database
+04:00:30.205 [qtp1342443276-45] ERROR logger.errors - [AddressDaoImpl - update] The address update failed : The version number does not match that of the database
+04:01:47.137 [qtp1342443276-29] ERROR logger.errors - [AddressDaoImpl - update] The address update failed : The version number does not match that of the database
+04:02:04.304 [qtp1342443276-14] ERROR logger.errors - [AddressDaoImpl - update] The address update failed : The version number does not match that of the database
+04:03:50.983 [qtp1342443276-29] ERROR logger.errors - [AddressDaoImpl - update] The address update failed : The version number does not match that of the database
+04:04:20.506 [qtp1342443276-42] ERROR logger.errors - [AddressDaoImpl - update] The address update failed : The version number does not match that of the database
+04:05:21.640 [qtp1342443276-42] ERROR logger.errors - [AddressDaoImpl - update] The address update failed : The version number does not match that of the database
+04:06:03.917 [qtp1342443276-40] ERROR logger.errors - [AddressDaoImpl - update] The address update failed : The version number does not match that of the database
+04:06:48.311 [qtp1342443276-50] ERROR logger.errors - [AddressDaoImpl - update] The address update failed : The version number does not match that of the database
+04:09:13.477 [qtp1342443276-51] ERROR logger.errors - [AddressDaoImpl - update] The address update failed : The version number does not match that of the database
+04:13:15.149 [qtp1342443276-17] ERROR logger.errors - [AddressDaoImpl - update] The address update failed : The version number does not match that of the database
+04:16:07.511 [qtp1342443276-53] ERROR logger.errors - [ParticipationDaoImpl - update] The participation update failed : The version number ( 3 does not match that of the database
+04:16:07.536 [qtp1342443276-53] ERROR logger.errors - [ParticipationUcc - Rollback] Exception null
+04:26:59.657 [qtp1342443276-20] ERROR logger.errors - [ParticipationDaoImpl - update] The participation update failed : The version number ( 4 does not match that of the database
+04:26:59.680 [qtp1342443276-20] ERROR logger.errors - [ParticipationUcc - Rollback] Conflit de version
+04:27:40.382 [qtp1342443276-19] ERROR logger.errors - [ParticipationDaoImpl - update] The participation update failed : The version number ( 5 does not match that of the database
+04:27:40.415 [qtp1342443276-19] ERROR logger.errors - [ParticipationUcc - update] Error : null
+04:30:36.159 [qtp1342443276-28] ERROR logger.errors - [ParticipationDaoImpl - update] The participation update failed : The version number ( 6 does not match that of the database
+04:30:36.183 [qtp1342443276-28] ERROR logger.errors - [ParticipationUcc - Rollback] Conflit de version
+04:31:07.180 [qtp1342443276-21] ERROR logger.errors - [ParticipationDaoImpl - update] The participation update failed : The version number ( 7 does not match that of the database
+04:31:07.206 [qtp1342443276-21] ERROR logger.errors - [ParticipationUcc - Rollback] Conflit de version
+04:31:18.940 [qtp1342443276-19] ERROR logger.errors - [ParticipationDaoImpl - update] The participation update failed : The version number ( 7 does not match that of the database
+04:31:18.964 [qtp1342443276-19] ERROR logger.errors - [ParticipationUcc - Rollback] Conflit de version
+04:33:02.086 [qtp1342443276-16] ERROR logger.errors - [ParticipationDaoImpl - update] The participation update failed : The version number ( 8 does not match that of the database
+04:33:02.113 [qtp1342443276-16] ERROR logger.errors - [ParticipationUcc - Rollback] Conflit de version
+04:40:45.076 [qtp1342443276-25] ERROR logger.errors - [ParticipationDaoImpl - update] The participation update failed : The version number ( 9 does not match that of the database
+04:40:45.105 [qtp1342443276-25] ERROR logger.errors - [ParticipationUcc - Rollback] Conflit de version
+04:44:59.442 [qtp1342443276-29] ERROR logger.errors - [ParticipationDaoImpl - update] The participation update failed : The version number ( 10 does not match that of the database
+04:44:59.469 [qtp1342443276-29] ERROR logger.errors - [ParticipationUcc - Rollback] Conflit de version
+04:48:10.171 [qtp1342443276-19] ERROR logger.errors - [ParticipationDaoImpl - update] The participation update failed : The version number ( 11 does not match that of the database
+04:48:10.196 [qtp1342443276-19] ERROR logger.errors - [ParticipationUcc - Rollback] Conflit de version
+04:49:20.321 [qtp1342443276-28] ERROR logger.errors - [ParticipationDaoImpl - update] The participation update failed : The version number ( 12 does not match that of the database
+04:49:20.346 [qtp1342443276-28] ERROR logger.errors - [ParticipationUcc - Rollback] Conflit de version
+05:21:24.616 [qtp1342443276-19] ERROR logger.errors - [PresenceDaoImpl - create] The presence creation failed : ERROR: duplicate key value violates unique constraint "presence_pkey"
+  Détail : Key (participation_year, company_number, contact_number)=(2017, 184, 203) already exists.
+05:21:24.622 [qtp1342443276-19] ERROR logger.errors - [PresenceUcc - register] Exception : null
+05:23:31.722 [qtp1342443276-19] ERROR logger.errors - [PresenceDaoImpl - create] The presence creation failed : ERROR: duplicate key value violates unique constraint "presence_pkey"
+  Détail : Key (participation_year, company_number, contact_number)=(2017, 184, 203) already exists.
+05:23:31.729 [qtp1342443276-19] ERROR logger.errors - [PresenceUcc - register] Exception : null
+05:24:52.770 [qtp1342443276-20] ERROR logger.errors - [PresenceDaoImpl - create] The presence creation failed : ERROR: duplicate key value violates unique constraint "presence_pkey"
+  Détail : Key (participation_year, company_number, contact_number)=(2017, 184, 203) already exists.
+05:24:52.779 [qtp1342443276-20] ERROR logger.errors - [PresenceUcc - register] Exception : null
+05:26:32.295 [qtp1342443276-19] ERROR logger.errors - [PresenceDaoImpl - create] The presence creation failed : ERROR: duplicate key value violates unique constraint "presence_pkey"
+  Détail : Key (participation_year, company_number, contact_number)=(2017, 184, 203) already exists.
+05:26:32.298 [qtp1342443276-19] ERROR logger.errors - [PresenceUcc - register] Exception : null
+05:29:57.755 [qtp1342443276-18] ERROR logger.errors - [PresenceDaoImpl - create] The presence creation failed : ERROR: duplicate key value violates unique constraint "presence_pkey"
+  Détail : Key (participation_year, company_number, contact_number)=(2017, 184, 203) already exists.
+05:29:57.764 [qtp1342443276-18] ERROR logger.errors - [PresenceUcc - register] Exception : null
+05:30:54.955 [qtp1342443276-19] ERROR logger.errors - [PresenceUcc - register] Exception : null
+05:47:15.279 [qtp1342443276-19] ERROR logger.errors - [ContactDaoImpl - findBy] The search of the contact failed : ERROR: current transaction is aborted, commands ignored until end of transaction block
+05:52:22.753 [qtp1342443276-20] ERROR logger.errors - [ContactDaoImpl - findAllContact] The search of all contacts was failed : ERROR: current transaction is aborted, commands ignored until end of transaction block
+11:25:48.881 [qtp1342443276-15] ERROR logger.errors - [JeDaoImpl - findBy] The search of the JE failed : ERROR: current transaction is aborted, commands ignored until end of transaction block
+11:25:49.735 [qtp1342443276-20] ERROR logger.errors - [JeDaoImpl - findAllJe] The search of all JE was failed : ERROR: current transaction is aborted, commands ignored until end of transaction block
+11:51:09.091 [qtp1342443276-28] ERROR logger.errors - [ParticipationDaoImpl - update] The participation update failed : The version number ( 16 does not match that of the database
+11:51:09.117 [qtp1342443276-28] ERROR logger.errors - [ParticipationUcc - Rollback] Conflit de version
+11:51:35.091 [qtp1342443276-29] ERROR logger.errors - [AddressDaoImpl - update] The address update failed : The version number does not match that of the database
+12:07:02.735 [qtp1342443276-42] ERROR logger.errors - [AddressDaoImpl - update] The address update failed : The version number does not match that of the database
+12:07:35.808 [qtp1342443276-53] ERROR logger.errors - [AddressDaoImpl - update] The address update failed : The version number does not match that of the database

@@ -1,0 +1,41 @@
+package ihm;
+
+import java.io.IOException;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+public class ApplicationServlet extends HttpServlet {
+
+  @Override
+  protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+      throws ServletException, IOException {
+
+    System.out.println("doPost");
+    switch (req.getParameter("action")) {
+      case "/conn":
+        System.out.println("Connexion");
+        resp.getWriter().print("OK");
+        break;
+      case "/insc":
+        System.out.println("Inscription");
+        resp.getWriter().print("OK");
+        break;
+      default:
+        System.out.println("Default");
+        break;
+    }
+  }
+
+  /*
+   * @Override public void service(HttpServletRequest req, HttpServletResponse res) throws
+   * ServletException, IOException {
+   * 
+   * /* String resp = "Hello world response from path " + req.getPathInfo() + " !";
+   * System.out.println(resp); res.getWriter().write(resp);
+   * 
+   * }
+   */
+
+}

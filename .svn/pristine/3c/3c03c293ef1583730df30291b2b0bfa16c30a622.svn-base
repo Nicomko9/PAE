@@ -1,0 +1,119 @@
+package biz.objects;
+
+import biz.exceptions.BusinessException;
+import biz.exceptions.ErrorsCode;
+import ihm.utils.DataValidator;
+
+/**
+ * Address's business object.
+ */
+class AddressBiz extends BizObject implements Address {
+
+  /**
+   * Address' street.
+   */
+  private String street;
+
+  /**
+   * Address' street number.
+   */
+  private int streetNumber;
+
+  /**
+   * Address' box.
+   */
+  private int box;
+
+  /**
+   * Address' postal code.
+   */
+  private int zipCode;
+
+  /**
+   * Address' commune.
+   */
+  private String commune;
+
+  AddressBiz() {
+  }
+
+  /*
+   * Getters & setters.
+   */
+
+  @Override
+  public String getStreet() {
+    return street;
+  }
+
+  @Override
+  public void setStreet(String street) {
+    this.street = street;
+  }
+
+  @Override
+  public int getStreetNumber() {
+    return streetNumber;
+  }
+
+  @Override
+  public void setStreetNumber(int streetNumber) {
+    this.streetNumber = streetNumber;
+  }
+
+  @Override
+  public int getBox() {
+    return box;
+  }
+
+  @Override
+  public void setBox(int box) {
+    this.box = box;
+  }
+
+  @Override
+  public int getZipCode() {
+    return zipCode;
+  }
+
+  @Override
+  public void setZipCode(int zipCode) {
+    this.zipCode = zipCode;
+  }
+
+  @Override
+  public String getCommune() {
+    return commune;
+  }
+
+  @Override
+  public void setCommune(String commune) {
+    this.commune = commune;
+  }
+  
+  /**
+   * Prepare the {@link Contact} to be insert in the database.
+   */
+  @Override
+  public void prepareForInsert() {
+    this.checkConstraints();
+  }
+  
+  @Override
+  public void checkConstraints() {
+    if(!DataValidator.validateString(street)
+        || !DataValidator.validateString(commune)
+        || !DataValidator.validateInt(box)
+        || !DataValidator.validateInt(zipCode)
+        || !DataValidator.validateInt(streetNumber)) {
+      throw new BusinessException(ErrorsCode.BUSINESS_INVALID_ADDRESS);
+    }
+  }
+
+  @Override
+  public String toString() {
+    return "AddressBiz [primaryKey=" + super.getPk() + ", street=" + street + ", streetNumber="
+        + streetNumber + ", box=" + box + ", zipCode=" + zipCode + ", commune=" + commune + "]";
+  }
+  
+}

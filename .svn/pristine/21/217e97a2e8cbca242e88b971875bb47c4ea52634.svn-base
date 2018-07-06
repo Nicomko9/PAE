@@ -1,0 +1,8 @@
+package biz.objects;
+
+/**
+ * Abstract class for Business Object.
+ */
+abstract class BizObject {
+
+}

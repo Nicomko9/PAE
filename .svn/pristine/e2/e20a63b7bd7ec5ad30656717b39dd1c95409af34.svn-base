@@ -1,0 +1,212 @@
+package biz.objects;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import biz.exceptions.BusinessException;
+import biz.exceptions.ErrorsCode;
+
+class ParticipationBiz extends BizObject implements Participation {
+
+
+  /**
+   * The Je of the participation.
+   */
+  private Je je;
+
+
+  /**
+   * The company that participates in the JE.
+   */
+  private Company company;
+
+  /**
+   * Contacts for this participations.
+   */
+  private List<Contact> contacts = new ArrayList<>();
+
+  /**
+   * Possible states of a participation. 
+   */
+  private static String[] STATES = {"invitée","confirmée","refusée","facturée","payée","annulée"};
+
+  /**
+   * The current state of the participation.
+   */
+  private int state;
+
+
+  /**
+   * The state before the current the current state.
+   */
+  private int lastState = -1;
+
+  ParticipationBiz() {}
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((company == null) ? 0 : company.hashCode());
+    result = prime * result + ((je == null) ? 0 : je.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    ParticipationBiz other = (ParticipationBiz) obj;
+    if (company == null) {
+      if (other.company != null) {
+        return false;
+      }
+    } else if (!company.equals(other.company)) {
+      return false;
+    }
+    if (je == null) {
+      if (other.je != null) {
+        return false;
+      }
+    } else if (!je.equals(other.je)) {
+      return false;
+    }
+    return true;
+  }
+
+  public boolean addContact(Contact contact) {
+    if (!this.equals(contact.getCompany()) || contacts.contains(contact)) {
+      return false;
+    }
+    return contacts.add(contact);
+  }
+
+  public boolean removeContact(Contact contact) {
+    return contacts.remove(contact);
+  }
+
+  public boolean confirm() {
+    if (state != 0) {
+      return false;
+    }
+    state = 1;
+    lastState = 0;
+    return true;
+  }
+
+  public boolean refuse() {
+    if (state != 0) {
+      return false;
+    }
+    state = 2;
+    lastState = 0;
+    return true;
+  }
+
+  public boolean invoice() {
+    if (state != 1) {
+      return false;
+    }
+    state = 3;
+    lastState = 1;
+    return true;
+  }
+
+  public boolean pay() {
+    if (state != 3) {
+      return false;
+    }
+    state = 4;
+    lastState = 2;
+    return true;
+  }
+
+  public void cancel() {
+    state = 5;
+  }
+
+  /**
+   * Prepare the {@link Contact} to be insert in the database.
+   */
+  @Override
+  public void prepareForInsert() {
+    this.checkConstraints();
+  }
+
+  @Override
+  public void checkConstraints() throws BusinessException {
+    if (je == null || company == null) {
+      throw new BusinessException(ErrorsCode.BUSINESS_INVALID_PARTICIPATION);
+    }
+    je.checkConstraints();
+    company.checkConstraints();
+  }
+
+  @Override 
+  @Deprecated
+  public int getPk() {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override 
+  @Deprecated
+  public void setPk(int primaryKey) {
+    throw new UnsupportedOperationException();
+  }
+
+  public Company getCompany() {
+    return company;
+  }
+
+  public void setCompany(Company company) {
+    this.company = company;
+  }
+
+  public Je getJe() {
+    return je;
+  }
+
+  public void setJe(Je je) {
+    this.je = je;
+  }
+
+  public String getState() {
+    return STATES[state];
+  }
+
+  @Deprecated
+  public void setState(String state) {
+    for (int i = 0; i < STATES.length; i++) {
+      if (STATES[i].equals(state)) {
+        this.state = i;
+      }
+    }
+  }
+
+  public String getLastState() {    
+    return (lastState >= 0) ? STATES[lastState] : null;
+  }
+
+  @Deprecated
+  public void setLastState(String lastState) {
+    for (int i = 0; i < STATES.length; i++) {
+      if (STATES[i].equals(lastState)) {
+        this.lastState = i;
+      }
+    }
+  }
+
+  @Override
+  public String toString() {
+    return "ParticipationBiz [je=" + je.getDayYear() + ", company=" + company.getCompanyName() +
+        ", state=" + state + ", lastState=" + lastState + "]";
+  }
+
+}

@@ -1,0 +1,13 @@
+package bizz.objects;
+
+import ucc.dto.UserDto;
+
+public interface UserBizz extends UserDto {
+
+  boolean validateUser(UserDto userDto);
+
+  boolean register(UserDto userDto);
+
+  UserDto verifyPassword(UserDto userDto);
+
+}

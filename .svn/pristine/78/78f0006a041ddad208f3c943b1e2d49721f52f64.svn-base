@@ -1,0 +1,40 @@
+package biz.objects;
+
+/**
+ * {@link User} Factory.
+ */
+public class BusinessFactory {
+
+  /**
+   * Give a {@link User}.
+   *
+   * @return a new empty {@link User}
+   */
+  public static User getUser() {
+    return new UserBiz();
+  }
+
+  /**
+   * Give a {@link Company}.
+   * 
+   * @return a new empty {@link Company}
+   */
+  public static Company getCompany() {
+    return new CompanyBiz();
+  }
+
+  /**
+   * Give a {@link Contact}.
+   * 
+   * @return a new empty {@link Contact}
+   */
+  public static Contact getContact() {
+    return new ContactBiz();
+  }
+
+  public static Je getJe() {
+    // TODO Auto-generated method stub
+    return new JeBiz();
+  }
+
+}

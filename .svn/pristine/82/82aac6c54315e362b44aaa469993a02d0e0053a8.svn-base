@@ -1,0 +1,192 @@
+application
+.define(
+    "template",
+    function () {
+      var inAnimation;
+      var currentDisplay;
+      var currentView;
+
+      var connectedLoaded = false;
+
+      /*
+       * Au chargement du template connecté, liste les JE
+       * précédentes :)
+       */
+      function loadPreviousJe() {
+        if (connectedLoaded == true) {
+          return;
+        }
+        connectedLoaded = true;
+
+        $
+        .ajax("/app/je/list", {
+          method: "POST",
+          dataType: "JSON"
+        })
+        .done(
+            function (data) {
+              var menu = $("#previousJE");
+
+              $("#menu-je-futur").html("");
+              $("#menu-je-history").html("");
+
+              for (var k in data) {
+                var je = data[k];
+                if (je.pk > application.currentYear) {
+                  $("#menu-je-futur").append(
+                      '<li><a href="#" data-view="je:main">'
+                      + (je.pk - 1) + "-" + je.pk
+                      + "</a></li>");
+                  $("#menu-je-futur a:last").attr("data-year", je.pk);
+                  $("#menu-je-futur a:last").attr("data-context", '{ \"year\" : "' + je.pk + '" }');
+                } else if (je.pk < application.currentYear) {
+                  $("#menu-je-history").prepend("<li><a data-view='je:main'>"
+                      + (je.pk - 1)  + "-" + je.pk
+                      + "</a></li>");
+                  $("#menu-je-history a:first").attr("data-year", je.pk);
+                  $("#menu-je-history a:first").attr("data-context", '{ \"year\" : "' + je.pk + '" }');
+                }
+              }
+
+              if ($("#menu-je-history li").length === 0) {
+                $("#menu-je-history").append("<li><a href='#' class='text-muted'>"
+                    + "Aucune journée enregistrée</a></li>");
+              }
+              if ($("#menu-je-futur li").length === 0) {
+                $("#menu-je-futur").append("<li><a href='#' class='text-muted'>"
+                    + "Aucune journée à venir</a></li>");
+              }
+            });
+      }
+
+      /*
+       * Change de container principal
+       */
+      function switchContainer(event) {
+        var display;
+
+        if (typeof event == "object") {
+          event.preventDefault();
+          display = $(this).attr("data-toggle");
+        } else {
+          display = event;
+        }
+
+        var id = "page_" + display.slice("container-".length);
+
+        if (inAnimation || $("body").attr("id") === id) {
+          return;
+        }
+
+        inAnimation = true;
+
+        $("body > .page-container:not(" + display + ")")
+        .fadeOut(0);
+        $("#" + display).fadeIn(250, function () {
+          inAnimation = false;
+          currentDisplay = display;
+          $("body").attr("id", id);
+        });
+      }
+
+      /*
+       * Charge une vue dynamiquement
+       */
+      var loadView = function (view, target, callback) {
+        if (typeof target === "function" && typeof callback == "undefined") {
+          callback = target;
+          target = null;
+        }
+
+        // temporary patch
+        if (view.indexOf(".html") === view.length - 5) {
+          view = view.substr(0, view.length - 5);
+        }
+
+        if (view !== currentView) {
+          var panes = $("div#page-wrapper > .inner-template[data-template='"
+              + view + "']");
+
+          if (panes.length == 0) {
+            logger.log("template.js", "loadView()",
+                "Unable to insert " + view + " !");
+            return;
+          }
+
+          var pane = $(panes[0]);
+
+          $("div#page-wrapper > .active").fadeOut(0, function () {
+            $(this).removeClass("active");
+          });
+
+          pane.fadeIn(200, function () {
+            $(this).addClass("active");
+          });
+          $("body").attr("data-toggle", view);
+        }
+
+        if (typeof callback != "undefined") {
+          callback();
+        }
+      };
+
+      /*
+       * Gère un click ou envoi de formulaire associé à une
+       * vue/template
+       */
+      function handleEvent(event) {
+        var $trigger = $(this);
+
+        function c() {
+          var r = view.substr(0, view.indexOf(":"));
+          var v = view.substr(view.indexOf(":") + 1);
+
+          logger.log("template.js", "hanleEvent()",
+              "Loading module " + r + " with " + v);
+
+          application.require(r, v, context, $trigger);
+        }
+
+        event.preventDefault();
+
+        var template = $(this).attr("data-template");
+        var view = $(this).attr("data-view");
+        var context = $(this).attr("data-context");
+
+        if (typeof context != "undefined") {
+          context = JSON.parse(context);
+        } else {
+          context = {};
+        }
+
+        if (typeof template != "undefined") {
+          logger.log("template.js", "handleEvent()",
+              "Loading template " + template);
+
+          loadView(template, $(this).attr(
+              "data-template-holder"), c)
+        } else if (typeof view == "string") {
+          c();
+        }
+      }
+
+      $(document).on("click", "button[data-view], a[data-view], a[data-template]",
+          handleEvent);
+      $(document).on("submit", "form[data-view]", handleEvent);
+
+      /*
+       * View representation
+       */
+      return {
+        loadView: loadView,
+        unconnected: function () {
+          switchContainer("container-login");
+        },
+        connected: function () {
+          switchContainer("container-application");
+          loadPreviousJe();
+          application.require("dashboard", "main");
+        }
+      }
+
+    }());

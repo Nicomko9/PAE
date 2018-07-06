@@ -1,0 +1,145 @@
+package ihm.utils;
+
+import java.nio.charset.Charset;
+import java.text.SimpleDateFormat;
+import java.util.Map;
+
+import com.owlike.genson.Genson;
+import com.owlike.genson.GensonBuilder;
+
+import biz.CompanyUcc;
+import biz.dto.AddressDto;
+import biz.dto.CompanyDto;
+import biz.dto.ContactDto;
+import biz.dto.UserDto;
+import biz.objects.Company;
+import config.annotation.Service;
+
+/**
+ * Servlet & Json utility.
+ */
+public class ServletUtil {
+
+  /**
+   * {@link Genson} object.
+   */
+  private static Genson genson = new GensonBuilder().useIndentation(true)
+      .useDateFormat(new SimpleDateFormat("dd/MM/yyyy")).useConstructorWithArguments(true).create();
+
+  @Service()
+  public ServletUtil() {}
+
+  /**
+   * Serialize an {@link Object} into {@link String}.
+   *
+   * @param object the object to encode
+   * @return String the encoded string
+   */
+  public String encode(Object object) {
+    return genson.serialize(object);
+  }
+
+  /**
+   * Deserialize a {@link String} into an {@link Object}.
+   *
+   * @param str given {@link String} to deserialize
+   * @param classType {@link Class} to deserialize into
+   * @return Object deserialized {@link Object}
+   */
+  public Object decode(String str, Class<?> classType) {
+    return genson.deserialize(str.getBytes(Charset.forName("UTF-8")), classType);
+  }
+
+
+  /**
+   * Fill a {@link UserDto} for the subscribe of a user.
+   *
+   * @param dto the {@link UserDto} to fill in
+   * @param map the {@link Map} that contains the informations
+   * @return the filled {@link UserDto}
+   */
+  public UserDto fillUserDto(UserDto dto, Map<String, Object> map) {
+    dto.setLogin((String) map.get("login"));
+    dto.setFirstname((String) map.get("firstname"));
+    dto.setLastname((String) map.get("lastname"));
+    dto.setEmail((String) map.get("email"));
+    dto.setPassword((String) map.get("password"));
+    return dto;
+  }
+
+  /**
+   * Fill a {@link AddressDto} for the subscribe of a company.
+   *
+   * @param dto the {@link AddressDto} to fill in
+   * @param map the {@link Map} that contains the informations
+   * @return the filled {@link AddressDto}
+   */
+  public AddressDto fillAddressDto(AddressDto dto, Map<String, Object> map) {
+    dto.setStreet((String) map.get("street"));
+    dto.setStreetNumber(Integer.parseInt((String) map.get("number")));
+    // Vérifier que la boite n'est pas vide
+    if (!map.get("box").equals("")) {
+      dto.setBox(Integer.parseInt((String) map.get("box")));
+    } else {
+      dto.setBox(0);
+    }
+    dto.setZipCode(Integer.parseInt((String) map.get("postal-code")));
+    dto.setCommune((String) map.get("city"));
+    return dto;
+  }
+
+  /**
+   * SetUp a ContactDto object.
+   *
+   * @todo changer le parameter CompanyUcc via une méthode interne à ContactDto ?
+   *
+   * @param requestMap given http-parameters
+   * @param contactDto dto object to fill
+   * @param compUcc ?
+   *
+   * @return a fill contact Dto object
+   */
+  public ContactDto fillContactDto(Map<String, Object> requestMap, ContactDto contactDto,
+      CompanyUcc compUcc) {
+    /*
+     * Fill contactDto
+     */
+    Company comp = compUcc.getCompanyByName((String) requestMap.get("entreprise"));
+    contactDto.setCompany(comp);
+    contactDto.setFirstname((String) requestMap.get("firstname-contact"));
+    contactDto.setLastname((String) requestMap.get("lastname-contact"));
+
+    if (!requestMap.get("tel-contact").equals("")) {
+      contactDto.setPhone((String) requestMap.get("tel-contact"));
+    } else {
+      Logger.log("ApplicationServlet", "/contact/create", "Empty Phone");
+      contactDto.setPhone("");
+    }
+    if (!requestMap.get("email-contact").equals("")) {
+      contactDto.setEmail((String) requestMap.get("email-contact"));
+    } else {
+      Logger.log("ApplicationServlet", "/contact/create", "Empty Email");
+      contactDto.setEmail("");
+    }
+    return contactDto;
+  }
+
+  /**
+   * SetUp a company dto based on http request.
+   *
+   * @param companyDto the dto object
+   * @param requestMap the http parameters map
+   * @param user a user dto
+   * @param addressDto company address
+   * @return a dto object
+   */
+  public CompanyDto fillCompanyDto(CompanyDto companyDto, Map<String, Object> requestMap,
+      UserDto user, AddressDto addressDto) {
+    companyDto.setCompanyName((String) requestMap.get("name"));
+    companyDto.setCreator(user);
+    companyDto.setAddress(addressDto);
+    companyDto.setLastParticipationYear(0);
+    return companyDto;
+  }
+
+}

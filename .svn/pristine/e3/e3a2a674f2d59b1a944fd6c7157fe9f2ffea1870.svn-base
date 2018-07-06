@@ -1,0 +1,68 @@
+package mock.ucc;
+
+import java.util.List;
+
+import biz.ParticipationUcc;
+import biz.dto.CompanyDto;
+import biz.dto.JeDto;
+import biz.dto.ParticipationDto;
+import dal.dao.ParticipationDao;
+
+public class ParticipationUccMock implements ParticipationUcc {
+
+  @SuppressWarnings("unused")
+  private ParticipationDao participationDao;
+  
+  ParticipationUccMock(ParticipationDao participationDao) {
+    this.participationDao = participationDao;
+  }
+
+  @Override
+  public ParticipationDto invite(ParticipationDto participationDto) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public ParticipationDto confirm(ParticipationDto participationDto) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public ParticipationDto refuse(ParticipationDto participationDto) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public ParticipationDto invoice(ParticipationDto participationDto) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public ParticipationDto pay(ParticipationDto participationDto) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public ParticipationDto cancel(ParticipationDto participationDto) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public List<ParticipationDto> getAllParticipationsOf(JeDto jeDto) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public List<ParticipationDto> getAllParticipationsOf(CompanyDto companyDto) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+  
+}

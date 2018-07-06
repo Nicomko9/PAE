@@ -1,0 +1,86 @@
+package biz.ucc;
+
+import static org.junit.Assert.*;
+import static util.Util.*;
+
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import biz.ContactUcc;
+import biz.exceptions.BusinessException;
+import biz.objects.Address;
+import biz.objects.BusinessFactory;
+import biz.objects.Company;
+import biz.objects.Contact;
+import biz.objects.User;
+import config.AppConfig;
+import dal.dao.ContactDao;
+
+public class ContactUccImplTest {
+
+  private static ContactUcc contactUcc;
+  private static Contact contact;
+  private static Company company;
+  private static Address address;
+  private static User creator;
+  
+  @BeforeClass
+  public static void setUpBeforeClass() throws Exception {
+    AppConfig appConfig = new AppConfig(AppConfig.APP_DEV);
+    if(!appConfig.load())
+      throw new Exception();
+    contactUcc = (ContactUcc) appConfig.getClassForName(ContactUcc.class);
+    ContactDao contactDao = (ContactDao) appConfig.getClassForName(ContactDao.class);
+    address = BusinessFactory.getAddress();
+    fillAddress(address, 12, "com_junit", 500, "rue_junit", 12, 1000);
+    creator = BusinessFactory.getUser();
+    fillUser(creator, "prenom.nom@test.be", "prenom", "nom", "login_junit", "motdepasse", 500);
+    company = BusinessFactory.getCompany();
+    fillCompany(company, address, "name_co_junit", creator, 500);
+    contact = BusinessFactory.getContact();
+    fillContact(contact, company, "prenom.nom@student.vinci.be", "prenom", "nom", "0481736946", 500);
+    contactDao.create(contact);
+  }
+  
+  @Before
+  public void setUp() throws Exception {
+    fillAddress(address, 12, "com_junit", 500, "rue_junit", 12, 1000);
+    fillUser(creator, "prenom.nom@test.be", "prenom", "nom", "login_junit", "motdepasse", 500);
+    fillCompany(company, address, "name_co_junit", creator, 500);
+    fillContact(contact, company, "prenom.nom@student.vinci.be", "prenom", "nom", "0481736946", 500);
+  }
+
+  @Test (expected = BusinessException.class)
+  public void testCreateNewContact1() {
+    contactUcc.createNewContact(contact);
+  }
+  
+  @Test (expected = BusinessException.class)
+  public void testCreateNewContact2() {
+    contact.setEmail("");
+    contactUcc.createNewContact(contact);
+  }
+  
+  @Test
+  public void testCreateNewContact3() {
+    contact.setEmail("test.test@test.be");
+    contactUcc.createNewContact(contact);    
+   }
+  
+  @Test
+  public void testGetContactsForCompany1(){
+    contactUcc.getContactsForCompany("name_co_junit");
+  }
+  
+  @Test
+  public void testUpdate(){
+    contactUcc.update(contact);
+  }
+  
+  @Test
+  public void testGetAllContact(){
+    assertFalse(contactUcc.getAllContact().isEmpty());
+  }
+
+}

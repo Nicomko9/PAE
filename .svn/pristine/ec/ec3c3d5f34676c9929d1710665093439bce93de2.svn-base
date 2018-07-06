@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<configuration strict="true" name="LoggerConfiguration" packages="org.apache.logging.log4j.test">
+
+  <appenders>
+    <Appender type="File" name="File.errors" filename="logs/errors.log">
+      <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+    </Appender>
+
+    <Appender type="File" name="File.access" filename="logs/access.log">
+      <PatternLayout pattern="%d{HH:mm:ss.SSS} %msg%n"/>
+    </Appender>
+
+    <Console name="console" target="SYSTEM_OUT">
+      <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" />
+    </Console>
+  </appenders>
+
+  <loggers>
+    <Logger name="logger.access" level="TRACE">
+      <AppenderRef ref="File.access"/>
+    </Logger>
+
+    <Root level="WARN">
+      <AppenderRef ref="console" />
+    </Root>
+
+    <logger name="logger.errors" level="ERROR">
+      <AppenderRef ref="File.errors" />
+    </logger>
+  </loggers>
+
+</configuration>

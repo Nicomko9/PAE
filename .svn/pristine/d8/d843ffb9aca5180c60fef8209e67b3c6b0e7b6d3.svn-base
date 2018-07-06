@@ -1,0 +1,46 @@
+package mock.ucc;
+
+import static util.Util.*;
+
+import biz.DtoFactory;
+import biz.UserUcc;
+import biz.dto.UserDto;
+import biz.objects.User;
+
+class UserUccMock implements UserUcc {
+
+  private DtoFactory dtoFactory;
+  
+  UserUccMock(DtoFactory dtoFactory) {
+    this.dtoFactory = dtoFactory;
+  }
+
+  @Override
+  public UserDto connect(String login, String password) {
+    if(login == null || password == null) {
+      return null;
+    }
+    User user = (User) dtoFactory.getUser();
+    fillUser(user, EMAIL, FIRSTNAME, LASTNAME, login, password, 1);
+    return user;
+  }
+
+  @Override
+  public boolean subscribe(UserDto biz) {
+    if(biz == null){
+      return false;
+    }
+    return !biz.getLogin().equals("don");
+  }
+
+  @Override
+  public UserDto getUserByLogin(String login) {
+    if(login == null) {
+      return null;
+    }
+    User user = (User) dtoFactory.getUser();
+    fillUser(user, EMAIL, FIRSTNAME, LASTNAME, login, PASSWORD, 2);    
+    return user;
+  }
+
+}

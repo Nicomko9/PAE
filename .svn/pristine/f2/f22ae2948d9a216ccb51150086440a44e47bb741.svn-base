@@ -1,0 +1,43 @@
+package dal.dao;
+
+
+import java.util.List;
+
+import biz.dto.ParticipationDto;
+import biz.objects.Participation;
+import dal.dao.schema.ParticipationSchema;
+
+public interface ParticipationDao extends ParticipationSchema {
+
+  /**
+   * Persist a participation into the table participations in database.
+   *
+   * @param participation the {@link Participation} to persist
+   * @return the {@link ParticipationDto} persisted
+   */
+  ParticipationDto create(Participation participation);
+  
+  /**
+   * Update a participation already present in the database.
+   * 
+   * @param participation {@link Participation} to persist
+   * @return the new value of the {@link Participation} casted in {@link ParticipationDto}
+   */
+  ParticipationDto update(Participation participation);
+  
+  /**
+   * Get All the participation for the given year.
+   *
+   * @return {@link List} of {@link ParticipationDto}
+   */
+  List<ParticipationDto> findByYear(int year);
+  
+  /**
+   * Get All the participation for the given company number.
+   *
+   * @param companyNumber the company number to recover its participations
+   * @return {@link List} of {@link ParticipationDto}
+   */
+  List<ParticipationDto> findByCompanyNumber(int companyNumber);
+  
+}

@@ -1,0 +1,129 @@
+package config;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Parameter;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+
+/**
+ * App Configurator
+ */
+
+public class AppConfig {
+
+  public static final String APP_DEV = "dev";
+  public static final String APP_PROD = "prod";
+
+  private static Properties properties = new Properties();
+
+  private String environment = AppConfig.APP_DEV;
+
+  private Map<Class<?>, Object> services = new HashMap<>();
+
+  /**
+   * Empty constructor for AppConfig.
+   */
+  public AppConfig(String environment) {
+    this.environment = environment;
+
+    this.services.put(AppConfig.class, this);
+  }
+
+  /**
+   * Get a property from configuration file.
+   *
+   * @param key lookup key
+   * @return the associated value
+   */
+  public static String getProperty(String key) {
+    return properties.getProperty(key);
+  }
+
+  /**
+   * Get a property from configuration file, and a default value if not found.
+   *
+   * @param key lookup key
+   * @param defaultValue the value to return on miss
+   * @return defaultValue on miss, associated value on hit
+   */
+  public static String getProperty(String key, String defaultValue) {
+    return properties.getProperty(key, defaultValue);
+  }
+
+  @SuppressWarnings("unchecked")
+  public <T> T getClassForName(Class<T> className) throws Exception {
+    if (this.services.containsKey(className)) {
+      try {
+        return (T) this.services.get(className);
+      } catch (ClassCastException exception) {
+        System.out.println("Invalid cache entry for class " + className);
+      }
+    }
+
+    if (!properties.containsKey("plugin." + className.getName())) {
+      throw new IllegalArgumentException(
+          "[" + this.environment + "] You cannot load plugin for '" + className.getName() + "'");
+    }
+
+    try {
+      Class<?> impl = Class.forName(properties.getProperty("plugin." + className.getName()));
+
+      Constructor<?>[] constructors = impl.getDeclaredConstructors();
+
+      for (Constructor<?> constructor : constructors) {
+        try {
+          constructor.setAccessible(true);
+
+          int index = 0;
+          Object[] params = new Object[constructor.getParameterCount()];
+          for (Parameter param : constructor.getParameters()) {
+            params[index] = getClassForName(param.getType());
+            index++;
+          }
+
+          Object instance = constructor.newInstance(params);
+
+          this.services.put(className, instance);
+
+          return (T) instance;
+        } catch (Exception e) {
+          System.out.println("Skipping constructor - error happened : " + e.getMessage() + " "
+              + e.getStackTrace()[0].getFileName() + ":" + e.getStackTrace()[0].getLineNumber());
+        }
+      }
+
+      // No constructor match
+      throw new IllegalArgumentException(
+          "[" + this.environment + "] You cannot load plugin for '" + className.getName()
+              + "' : problem finding constructor");
+    } catch (Throwable exception) {
+      System.out.println("AppConfig::getClassForName : exception");
+
+      throw exception;
+    }
+  }
+
+  /**
+   * Load the configurations of the App.
+   * 
+   * @return <code>true</code> if loading is clear
+   * @return <code>false</code> if loading failed
+   */
+  public boolean load() {
+    String configurationFile = "conf/" + this.environment + ".properties";
+    try (FileInputStream file = new FileInputStream(configurationFile)) {
+      properties.load(file);
+
+      return true;
+    } catch (IOException exception) {
+      System.out.println("Internel system error : exiting application");
+      exception.printStackTrace();
+
+      return false;
+    }
+  }
+
+}

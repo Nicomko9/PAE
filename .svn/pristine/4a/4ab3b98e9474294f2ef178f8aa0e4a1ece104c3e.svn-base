@@ -1,0 +1,44 @@
+package biz;
+
+import java.util.List;
+
+import biz.dto.ContactDto;
+
+/**
+ * Contact's Use Case Controller.
+ */
+public interface ContactUcc {
+
+  /**
+   * Persists a contact.
+   *
+   * @param contactDto to persists.
+   * @return <code>true</code> if the {@link ContactDto} has been set in the Database.
+   */
+  boolean createNewContact(ContactDto contactDto);
+
+  /**
+   * Get All the contacts.
+   *
+   * @return {@link List} of {@link ContactDto}
+   * @throws IllegalArgumentException if there's an error with the query
+   */
+  List<ContactDto> getAllContact();
+
+  /**
+   * Get All the contacts for the given company name.
+   *
+   * @return {@link List} of {@link ContactDto}
+   * @throws IllegalArgumentException if there's an error with the query
+   */
+  List<ContactDto> getContactsForCompany(String name);
+
+  /**
+   * Update a contact already present in the database.
+   *
+   * @param previousContact {@link ContactDto} to change
+   * @return {@link ContactDto} that has been updated in the database
+   */
+  ContactDto update(ContactDto contact);
+
+}

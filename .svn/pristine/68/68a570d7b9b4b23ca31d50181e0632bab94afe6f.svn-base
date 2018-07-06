@@ -1,0 +1,50 @@
+# Jetty server configuration
+server.path=/
+server.resources=web
+server.port=8081
+
+# Database connection configuration
+db.driver=jdbc:postgresql://
+db.path=studentittools.ipl.be:5432
+db.db_name=dbnicolas_christodoulou
+db.login=nicolas_christodoulou
+db.password=jacquouille9
+db.schema=pae
+
+# cookies :
+cookie.max-age=6480000
+jwt.secret=QQPlitzYVYitz0tL8nvsEDfA4ilWoBNWFntavHPLsefL4SB7kFDzEm1XKckQ
+
+# Plugins
+plugin.dal.DalFrontEndServices=dal.DalServices
+plugin.dal.DalBackEndServices=dal.DalServices
+plugin.dal.dao.UserDao=dal.dao.UserDaoImpl
+plugin.dal.dao.ContactDao=dal.dao.ContactDaoImpl
+plugin.dal.dao.AddressDao=dal.dao.AddressDaoImpl
+plugin.dal.dao.CompanyDao=dal.dao.CompanyDaoImpl
+plugin.dal.dao.JeDao=dal.dao.JeDaoImpl
+
+# Business
+plugin.biz.objects.User=biz.objects.UserBiz
+plugin.biz.objects.Address=biz.objects.AddressBiz
+plugin.biz.objects.Company=biz.objects.CompanyBiz
+plugin.biz.objects.Je=biz.objects.JeBiz
+
+# UCC's
+plugin.biz.UserUcc=biz.UserUccMock
+plugin.biz.AddressUcc=mock.ucc.AddressUccMock
+plugin.biz.CompanyUcc=mock.ucc.CompanyUccMock
+plugin.biz.ContactUcc=mock.ucc.ContactUccMock
+plugin.biz.DtoFactory=mock.ucc.DtoFactoryImpl
+plugin.biz.JeUcc=mock.ucc.JeUccMock
+
+# DTO's
+plugin.biz.dto.UserDto=biz.objects.UserBiz
+plugin.biz.dto.AddressDto=biz.objects.AddressBiz
+plugin.biz.dto.ContactDto=biz.objects.ContactBiz
+plugin.biz.dto.CompanyDto=biz.objects.CompanyBiz
+plugin.biz.dto.JeDto=biz.objects.JeBiz
+
+# IHM
+plugin.ihm.ApplicationServlet=ihm.ApplicationServlet
+plugin.ihm.SessionManager=ihm.SessionManager

@@ -1,0 +1,218 @@
+package biz;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import biz.dto.CompanyDto;
+import biz.dto.JeDto;
+import biz.dto.ParticipationDto;
+import biz.exceptions.BusinessErrorException;
+import biz.exceptions.ErrorsCode;
+import biz.objects.Company;
+import biz.objects.Je;
+import biz.objects.Participation;
+import dal.DalFrontEndServices;
+import dal.dao.CompanyDao;
+import dal.dao.ParticipationDao;
+import ihm.utils.Logger;
+
+class ParticipationUccImpl implements ParticipationUcc {
+
+  private DalFrontEndServices dal;
+
+  private ParticipationDao participationDao;
+  private CompanyDao companyDao;
+
+  ParticipationUccImpl(DalFrontEndServices dal, ParticipationDao participationDao,
+      CompanyDao companyDao) {
+    this.dal = dal;
+    this.participationDao = participationDao;
+    this.companyDao = companyDao;
+  }
+
+  private ParticipationDto update(ParticipationDto participationDto) {
+    Participation participation = (Participation) participationDto;
+    participation.checkConstraints();
+
+    try {
+      this.dal.startTransaction();
+
+      participationDto = this.participationDao.update(participation);
+      if (null == participationDto) {
+        throw new BusinessErrorException(ErrorsCode.INTERNAL_UNKNOWN_ERROR);
+      }
+
+      this.dal.commitTransaction();
+
+      return participationDto;
+    } catch (Exception exc) {
+      this.dal.rollbackTransaction();
+      return null;
+    }
+  }
+
+  @Override
+  public ParticipationDto invite(ParticipationDto participationDto) {
+    Logger.log("ParticipationUccImpl", "invite", "invite company to the JE");
+    if (!participationDto.getState().equals("invitée")) {
+      throw new BusinessErrorException(ErrorsCode.BUSINESS_INVALID_PARTICIPATION_STATE);
+    }
+    Participation participation = (Participation) participationDto;
+    participation.checkConstraints();
+
+    try {
+      this.dal.startTransaction();
+
+      participationDto = this.participationDao.create(participation);
+
+      if (null == participationDto) {
+        throw new BusinessErrorException(ErrorsCode.INTERNAL_UNKNOWN_ERROR);
+      }
+
+      this.dal.commitTransaction();
+
+      return participationDto;
+    } catch (Exception exc) {
+      this.dal.rollbackTransaction();
+      return null;
+    }
+  }
+
+  @Override
+  public List<ParticipationDto> inviteCompanies(List<ParticipationDto> participationsToInvite) {
+    Logger.log("ParticipationUccImpl", "inviteCompanies", "invite companies to the JE");
+    List<ParticipationDto> participationsInvited = new ArrayList<ParticipationDto>();
+
+    try {
+
+      this.dal.startTransaction();
+
+      for (int idx = 0; idx < participationsToInvite.size(); idx++) {
+        Participation participation = (Participation) participationsToInvite.get(idx);
+        participation.checkConstraints();
+
+        if (!participation.getState().equals("invitée")) {
+          throw new BusinessErrorException(ErrorsCode.BUSINESS_INVALID_PARTICIPATION_STATE);
+        }
+        ParticipationDto participationDto = this.participationDao.create(participation);
+        if (null == participationDto) {
+          throw new BusinessErrorException(ErrorsCode.INTERNAL_UNKNOWN_ERROR);
+        }
+        participationsInvited.add(participationDto);
+      }
+
+      this.dal.commitTransaction();
+
+      return participationsInvited;
+    } catch (Exception exc) {
+      this.dal.rollbackTransaction();
+      return null;
+    }
+  }
+
+  @Override
+  public ParticipationDto confirm(ParticipationDto participationDto) {
+    Logger.log("ParticipationUccImpl", "confirm", "confirm the participation of the company");
+    Participation participation = (Participation) participationDto;
+    if (!participation.confirm()) {
+      throw new BusinessErrorException(ErrorsCode.BUSINESS_INVALID_PARTICIPATION_STATE);
+    }
+
+    try {
+      this.dal.startTransaction();
+
+      participationDto = this.participationDao.update(participation);
+      if (null == participationDto) {
+        throw new BusinessErrorException(ErrorsCode.INTERNAL_UNKNOWN_ERROR);
+      }
+
+      Company company = (Company) participationDto.getCompany();
+      company.setLastParticipationYear(participationDto.getJe().getDayYear());
+      this.companyDao.update(company);
+
+      /*List<ContactDto> contacts = this.contactDao.findContactsForCompany(company.getPk());
+
+      Presence presence = BusinessFactory.getPresence();
+      presence.setCompany(company);
+      presence.setParticipation((Participation) participationDto);
+
+      for (ContactDto contactDto : contacts) {
+        presence.setContact((Contact) contactDto);
+        if (this.presenceDao.create(presence) == null) {
+          throw new BusinessException(ErrorsCode.UNDEFINED_ERROR);
+        }
+      }*/
+
+      this.dal.commitTransaction();
+
+      return participationDto;
+    } catch (Exception exc) {
+      this.dal.rollbackTransaction();
+      return null;
+    }
+  }
+
+  @Override
+  public ParticipationDto returnToInvite(ParticipationDto participationDto) {
+    Logger.log("ParticipationUccImpl", "returnToInvite", "refuse the participation of the company");
+    Participation participation = (Participation) participationDto;
+    if (!participation.refuse()) {
+      throw new BusinessErrorException(ErrorsCode.BUSINESS_INVALID_PARTICIPATION_STATE);
+    }
+    return update(participationDto);
+  }
+
+  @Override
+  public ParticipationDto refuse(ParticipationDto participationDto) {
+    Logger.log("ParticipationUccImpl", "refuse", "refuse the participation of the company");
+    Participation participation = (Participation) participationDto;
+    if (!participation.refuse()) {
+      throw new BusinessErrorException(ErrorsCode.BUSINESS_INVALID_PARTICIPATION_STATE);
+    }
+    return update(participationDto);
+  }
+
+  @Override
+  public ParticipationDto invoice(ParticipationDto participationDto) {
+    Logger.log("ParticipationUccImpl", "invoice", "invoice the company for its participation");
+    Participation participation = (Participation) participationDto;
+    if (!participation.invoice()) {
+      throw new BusinessErrorException(ErrorsCode.BUSINESS_INVALID_PARTICIPATION_STATE);
+    }
+    return update(participationDto);
+  }
+
+  @Override
+  public ParticipationDto pay(ParticipationDto participationDto) {
+    Logger.log("ParticipationUccImpl", "pay", "company pay its participation");
+    Participation participation = (Participation) participationDto;
+    if (!participation.pay()) {
+      throw new BusinessErrorException(ErrorsCode.BUSINESS_INVALID_PARTICIPATION_STATE);
+    }
+    return update(participationDto);
+  }
+
+  @Override
+  public ParticipationDto cancel(ParticipationDto participationDto) {
+    Logger.log("ParticipationUccImpl", "cancel", "cancel the participation of the company");
+    Participation participation = (Participation) participationDto;
+    participation.cancel();
+    return update(participationDto);
+  }
+
+  @Override
+  public List<ParticipationDto> getAllParticipationsOf(JeDto jeDto) {
+    Je je = (Je) jeDto;
+    je.checkConstraints();
+
+    return participationDao.findByYear(je.getDayYear());
+  }
+
+  @Override
+  public List<ParticipationDto> getAllParticipationsOf(CompanyDto companyDto) {
+    Company company = (Company) companyDto;
+
+    return participationDao.findByCompanyNumber(company.getPk());
+  }
+
+}

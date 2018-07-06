@@ -1,0 +1,35 @@
+package dal.dao;
+
+import biz.dto.JeDto;
+import biz.objects.Je;
+import dal.dao.schema.JeSchema;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
+
+public interface JeDao extends JeSchema {
+
+  /**
+   * Find a single company day based on its year.
+   *
+   * @param year the value to lookup
+   * @return the {@link JeDto} instance found in the research
+   */
+  JeDto findByYear(int year);
+
+  /**
+   * Persist a company_day into the table company_days in database.
+   *
+   * @param je the {@link Je} to persist
+   */
+  Je create(Je je);
+
+  /**
+   * Get all the company days from the database.
+   *
+   * @return a {@link JeDto} list of Je data transfer object with the information of the {@link
+   * ResultSet}
+   * @throws SQLException if an error occurs during result set access
+   */
+  List<JeDto> findAllJe();
+}

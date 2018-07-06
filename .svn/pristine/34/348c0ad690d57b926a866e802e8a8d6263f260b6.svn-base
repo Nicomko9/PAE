@@ -1,0 +1,29 @@
+package mock.dao;
+
+import java.util.List;
+
+import biz.dto.PresenceDto;
+import biz.objects.Presence;
+import dal.dao.PresenceDao;
+import mock.DataBaseMock;
+
+class PresenceDaoMock implements PresenceDao {
+
+  private DataBaseMock dataBaseMock;
+
+  PresenceDaoMock(DataBaseMock dataBaseMock) {
+    this.dataBaseMock = dataBaseMock;
+  }
+
+
+  @Override
+  public PresenceDto create(Presence presence) {
+    return dataBaseMock.addPresence(presence);
+  }
+
+  @Override
+  public List<PresenceDto> findByYear(int year) {
+    return dataBaseMock.getPresencesByYear(year);
+  }
+
+}

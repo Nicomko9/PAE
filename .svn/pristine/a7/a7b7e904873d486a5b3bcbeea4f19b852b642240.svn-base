@@ -1,0 +1,44 @@
+package biz;
+
+import biz.dto.AddressDto;
+
+/**
+ * Address' Use Case Controller.
+ */
+public interface AddressUcc {
+
+  /**
+   * Register a new address in the database.
+   *
+   * @param biz {@link AddressDto} to persist
+   * @return the addressDto with the information added int the DataBase
+   */
+  AddressDto register(AddressDto biz);
+
+  /**
+   * Get an Address by its street, street number, zip code and commune.
+   *
+   * @param street of the Address
+   * @param streetNumber of the Address
+   * @param zipCode of the Address
+   * @param commune of the Address
+   * @return {@link AddressDto} that fits the good parameters
+   */
+  AddressDto getAddress(String street, int streetNumber, int zipCode, String commune);
+
+  /**
+   * Get an Address by PK.
+   *
+   * @param pk the pk of the Address
+   * @return {@link AddressDto}
+   */
+  AddressDto getByPk(int pk);
+
+  /**
+   * Update an address already present in the database.
+   *
+   * @param addressDto {@link AddressDto} to change
+   * @return {@link AddressDto} that has been updated in the database
+   */
+  AddressDto update(AddressDto addressDto);
+}

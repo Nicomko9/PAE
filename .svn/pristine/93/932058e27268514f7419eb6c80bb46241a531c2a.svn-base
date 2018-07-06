@@ -1,0 +1,57 @@
+package mock.dao;
+
+import static util.Util.*;
+
+import biz.DtoFactory;
+import biz.dto.UserDto;
+import biz.objects.User;
+import dal.dao.UserDao;
+
+public class UserDaoMock implements UserDao {
+
+  private DtoFactory dtoFactory;
+  
+  UserDaoMock(DtoFactory dtoFactory) {
+    this.dtoFactory = dtoFactory;
+  }
+  
+  @Override
+  public UserDto create(User user) {
+    if(user == null) {
+      return null;
+    }
+    user.setPk(3);
+    return user;
+  }
+
+  @Override
+  public UserDto findByLogin(String login) {
+    if(login == null) {
+      return null;
+    }
+    User user = (User) dtoFactory.getUser();
+    fillUser(user, EMAIL, FIRSTNAME, LASTNAME, login, PASSWORD, 1);
+    return user;
+  }
+
+  @Override
+  public UserDto findByEmail(String email) {
+    if(email == null){
+      return null;
+    }
+    User user = (User) dtoFactory.getUser();
+    fillUser(user, email, FIRSTNAME, LASTNAME, LOGIN, PASSWORD, 2);
+    return user;
+  }
+
+  @Override
+  public UserDto findByPk(int pk) {
+    if(pk < 1) {
+      return null;
+    }
+    User user = (User) dtoFactory.getUser();
+    fillUser(user, EMAIL, FIRSTNAME, LASTNAME, LOGIN, PASSWORD, pk);
+    return user;
+  }
+
+}

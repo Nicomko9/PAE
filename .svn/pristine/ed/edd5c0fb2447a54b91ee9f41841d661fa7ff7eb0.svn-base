@@ -1,0 +1,16 @@
+package biz.objects;
+
+
+class JeBiz extends BizObject implements Je {
+
+  @Override
+  int getVersion() {
+    return version;
+  }
+
+  @Override
+  void setVersion(int version) {
+    this.version = version;
+  }
+
+}

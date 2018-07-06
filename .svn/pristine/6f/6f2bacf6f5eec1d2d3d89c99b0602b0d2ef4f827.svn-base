@@ -1,0 +1,53 @@
+application.define("objects/object", function(id, object) {
+  var watchers = [];
+  var readyListeners = [];
+
+  var ready = true;
+  var pk    = {};
+
+  object.watch = function(callback, watched) {
+    if (typeof watched == "undefined") {
+      watchers[watchers.length] = callback;
+    } else {
+      watchers[watchers.length] = function(d, w, k) {
+        if (watched == w) {
+          callback(d, k);
+        }
+      }
+    }
+  };
+
+  object.onReady = function (callback) {
+    readyListeners[readyListeners.length] = callback;
+  };
+
+  if (typeof object.init == "function") {
+    application.onReady(object.init);
+  }
+
+  return {
+   listPk : function(data) {
+      pk = {};
+      for (var k in data) {
+        if (data.hasOwnProperty(k)) {
+          pk[data[k].pk] = k;
+        }
+      }
+    },
+    getPk : function() {
+      return pk;
+    },
+    getPkIndex : function (k) {
+      return typeof pk[k] != "undefined" ? pk[k] : -1;
+    },
+    isReady : function isReady() {
+      ready = true;
+    },
+    notify : function (watched, pk) {
+      console.log(id + " notifying " + watched);
+      for (var i = 0; i < watchers.length; i++) {
+          watchers[i](object, watched, pk);
+      }
+    }
+  }
+});

@@ -1,0 +1,74 @@
+<div id="inner-popup-contacts" class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog"
+     aria-labelledby="titrePopUp" aria-hidden="true" id="popup-new-contact">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="col-lg-12 col-md-12">
+            <div class="panel panel-default">
+              <div class="panel-heading clearfix">
+                <div class="col-md-10 col-md-offset-1 text-center">
+                  <span data-attribute="title"></span>
+                </div>
+                <div class="col-md-1" data-dismiss="modal"
+                     data-target="#popup-new-contact">
+                  <i class="fa fa-times"></i>
+                </div>
+              </div>
+              <div class="panel-body">
+                <form role="form" id="contact-form">
+                  <fieldset>
+                    <input data-attribute="pk" type="hidden" name="pk">
+                    <input data-attribute="version" type="hidden" name="version">
+                    <div class="row">
+                      <div class="form-group col-lg-8 col-md-8">
+                        <label for="popup-entreprise-contact">Entreprise</label>
+                        <select data-attribute="company.pk" class="form-control" data-required="true" name="companyPk" id="popup-entreprise-contact">
+                        <option></option>
+                      </select>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="form-group col-lg-5 col-md-5">
+                        <label for="popup-lastname-contact">Nom</label> <input
+                          type="text" class="form-control" data-attribute="lastname"
+                          id="popup-lastname-contact" name="lastname-contact"
+                          data-required="true" placeholder="Nom">
+                      </div>
+                      <div
+                          class="form-group col-lg-5 col-md-5 col-md-offset-1 col-lg-offset-1">
+                        <label for="popup-firstname-contact">Prénom</label> <input
+                          type="text" class="form-control"
+                          id="popup-firstname-contact" data-attribute="firstname" name="firstname-contact"
+                          data-required="true" placeholder="Prénom">
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="form-group 	col-lg-5 col-md-5">
+                        <label for="popup-email-contact">Email</label> <input
+                          type="text" class="form-control" data-attribute="email" id="popup-email-contact"
+                          name="email-contact" placeholder="contact@entreprise.be">
+
+                      </div>
+                      <div
+                          class="form-group col-lg-5 col-md-5 col-lg-offset-1 col-md-offset-1">
+                        <label for="popup-tel-contact">N° téléphone</label> <input
+                          type="text" class="form-control" data-attribute="phone" id="popup-tel-contact"
+                          name="tel-contact" placeholder="0471/00.00.00">
+                      </div>
+                    </div>
+                  </fieldset>
+                </form>
+              </div>
+              <div class="panel-footer clearfix">
+                <a href="#" data-attribute="button-text" class="popup-confirm btn btn-info pull-right">
+
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

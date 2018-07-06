@@ -1,0 +1,92 @@
+package biz.ucc;
+
+import static org.junit.Assert.*;
+import static util.Util.*;
+
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import biz.CompanyUcc;
+import biz.exceptions.BusinessException;
+import biz.objects.Address;
+import biz.objects.BusinessFactory;
+import biz.objects.Company;
+import biz.objects.User;
+import config.AppConfig;
+import dal.dao.CompanyDao;
+
+public class CompanyUccImplTest {
+
+  private static CompanyUcc companyUcc;
+  private static Company company;
+  private static Address address;
+  private static User creator;
+  
+  @BeforeClass
+  public static void setUpBeforeClass() throws Exception {
+    AppConfig appConfig = new AppConfig(AppConfig.APP_DEV);
+    if(!appConfig.load())
+      throw new Exception();
+    companyUcc = (CompanyUcc) appConfig.getClassForName(CompanyUcc.class);
+    CompanyDao companyDao = (CompanyDao) appConfig.getClassForName(CompanyDao.class);
+    address = BusinessFactory.getAddress();
+    fillAddress(address, 10, "commune_junit", 500, "rue_junit", 12, 1000);
+    creator = BusinessFactory.getUser();
+    fillUser(creator, "email_junit", "prenom_junit", "nom_junit", "login_junit", "motdepasse", 500);
+    company = BusinessFactory.getCompany();
+    fillCompany(company, address, "company_junit", creator, 500);
+    companyDao.create(company);
+  }
+  
+  @Before
+  public void setUp() throws Exception {
+    fillAddress(address, 10, "commune_junit", 500, "rue_junit", 12, 1000);
+    fillUser(creator, "email_junit", "prenom_junit", "nom_junit", "login_junit", "motdepasse", 500);
+    fillCompany(company, address, "company_junit", creator, 500);
+  }
+
+  @Test (expected = BusinessException.class)
+  public void testRegister1() {
+    companyUcc.register(company);
+  }
+  
+  @Test (expected = BusinessException.class)
+  public void testRegister2() {
+    company.setCompanyName("");
+    companyUcc.register(company);
+  }
+  
+  @Test (expected = BusinessException.class)
+  public void testRegister3() {
+    company.setAddress(null);
+    companyUcc.register(company);
+  }
+
+  @Test
+  public void testRegister4() {
+    company.setCompanyName("name_junit");
+    companyUcc.register(company);
+  }
+  
+  @Test
+  public void testUpdate() {
+    fail("Not yet implemented");
+  }
+
+  @Test
+  public void testGetAllCompanies() {
+    assertFalse(!companyUcc.getAllCompanies().isEmpty());
+  }
+  
+  @Test
+  public void testGetCompanyByName1(){
+    assertNull("company doesn' exist",companyUcc.getCompanyByName("andiaef"));
+  }
+  
+  @Test
+  public void testGetCompanyByName2(){
+    assertEquals("nom_junit",companyUcc.getCompanyByName("nom_junit").getCompanyName());
+  }
+
+}

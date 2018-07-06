@@ -1,0 +1,16 @@
+package ucc;
+
+import ucc.dto.UserDto;
+import ucc.dto.UserDtoImpl;
+
+class DtoEmptyFactoryImpl implements DtoEmptyFactory {
+
+  public DtoEmptyFactoryImpl() {
+    // TODO Auto-generated constructor stub
+  }
+
+  public UserDto getUser() {
+    return new UserDtoImpl();
+  }
+
+}

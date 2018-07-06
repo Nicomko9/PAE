@@ -1,0 +1,104 @@
+package biz.objects;
+
+import static org.junit.Assert.*;
+import static util.Util.*;
+
+import java.time.LocalDateTime;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import biz.exceptions.BusinessException;
+
+public class CompanyBizTest {
+
+  private Company company1, company2;
+  private Address address1, address2;
+  private User creator;
+  
+  @Before
+  public void setUp() throws Exception {
+    company1 = BusinessFactory.getCompany();
+    company2 = BusinessFactory.getCompany();
+    address1 = BusinessFactory.getAddress();
+    address2 = BusinessFactory.getAddress();
+    creator = BusinessFactory.getUser();
+    fillAddress(address1, 12, "commune 1", 500, "rue", 12, 1000);
+    fillAddress(address2, 12, "commune 2", 501, "rue", 12, 1000);
+    fillUser(creator, "email@test.be", "zakaria", "lamrini", "zak", "password", 500);
+    fillCompany(company1, address1, "company 1", creator, LocalDateTime.now(), 500);
+    fillCompany(company2, address2, "company 2", creator, LocalDateTime.now(), 501);
+  }
+
+  @Test
+  public void testHashCode1() {
+    assertNotEquals(company1.hashCode(), company2.hashCode());
+  }
+  
+  @Test
+  public void testHashCode2() {
+    company2.setPk(500);
+    assertEquals(company1.hashCode(), company2.hashCode());
+  }
+
+  @Test
+  public void testEquals1() {
+    assertFalse(company1.equals(company2));
+  }
+  
+  @Test
+  public void testEquals2() {
+    company2.setPk(500);
+    assertTrue(company1.equals(company2));
+  }
+
+  @Test
+  public void testGetCreator1() {
+    creator.setFirstname("blabla");
+    assertEquals("zakaria", company1.getCreator().getFirstname());
+  }
+  
+  @Test
+  public void testGetCreator2() {
+    assertNotSame(creator, company1.getCreator());
+  }
+
+  @Test
+  public void testGetAddress1() {
+    address1.setBox(12);
+    assertEquals(12, company1.getAddress().getBox());
+  }
+  
+  @Test
+  public void testGetAddress2() {
+    assertNotSame(address1, company1.getAddress());
+  }
+  
+  @Test
+  public void testGetCompanyName() {
+    assertEquals("company 1", company1.getCompanyName());
+  }
+  
+  @Test
+  public void testSetCompanyName() {
+    company1.setCompanyName("company 3");
+    assertEquals("company 3", company1.getCompanyName());
+  }
+  
+  @Test (expected = BusinessException.class)
+  public void testCheckConstraint1() {
+    BusinessFactory.getCompany().checkConstraints();
+  }
+  
+  @Test
+  public void testCheckConstraint2() {
+    company1.checkConstraints();
+  }
+  
+  @Test
+  public void testClone() {
+    assertEquals(company1, company1.clone());
+    assertNotSame(company1, company1.clone());
+  }  
+
+}

@@ -1,0 +1,8 @@
+package dal.finders;
+
+/**
+ * Created by clement on 28/02/17.
+ */
+public interface UserFinder {
+
+}

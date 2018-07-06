@@ -1,0 +1,7 @@
+application.define('dashboard', function () {
+  return {
+    main: function () {
+      application.require("je", "main");
+    }
+  };
+}());

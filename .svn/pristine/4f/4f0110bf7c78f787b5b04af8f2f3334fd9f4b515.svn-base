@@ -1,0 +1,38 @@
+package biz;
+
+import biz.objects.Company;
+import biz.objects.Contact;
+import dal.DalFrontEndServices;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * Created by clement on 23/04/17.
+ */
+public class SearchUccImpl implements SearchUcc {
+
+  private DalFrontEndServices dal;
+
+  SearchUccImpl(DalFrontEndServices dalFrontEndServices) {
+    this.dal = dalFrontEndServices;
+  }
+
+  @Override
+  public Map<String, Set> search(String search) {
+    this.dal.startTransaction();
+
+    String[] searches = search.split("\\w+");
+    Map<String, Set> map   = new HashMap<>();
+
+    Set<Company> companies = new HashSet<>();
+    Set<Contact> contacts  = new HashSet<>();
+
+    map.put("contacts", contacts);
+    map.put("companies", companies);
+
+    this.dal.commitTransaction();
+    return map;
+  }
+}

@@ -1,0 +1,143 @@
+package dal;
+
+import config.AppConfig;
+import config.annotation.Service;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * Services for the communication with Database.
+ */
+class DalServices implements DalBackEndServices, DalFrontEndServices {
+
+  /**
+   * Instance of the appConfig to create a connection to the Database.
+   */
+  private AppConfig appConfig;
+
+  /**
+   * Instances of connections to the Database according the thread.
+   */
+  private ThreadLocal<Connection> connections = new ThreadLocal<Connection>() {
+
+    /**
+     * Overriding of the method initialValue.
+     *
+     * @return a new connection to the Database
+     */
+    @Override
+    protected Connection initialValue() {
+      try {
+        return DriverManager.getConnection(
+            appConfig.getProperty("db.driver", "jdbc:postgresql://")
+                + appConfig.getProperty("db.path") + "/" + appConfig.getProperty("db.db_name"),
+            appConfig.getProperty("db.login"),
+            appConfig.getProperty("db.password")
+        );
+
+      } catch (Exception exception) {
+        exception.printStackTrace();
+        return null;
+      }
+    }
+
+    /**
+     * Overriding of the method remove.
+     *
+     */
+    @Override
+    public void remove() {
+      try {
+        this.get().close();
+      } catch (SQLException exc) {
+        exc.printStackTrace();
+      }
+      super.remove();
+    }
+
+  };
+
+  /**
+   * Map with the {@link PreparedStatement}.
+   */
+  private Map<String, PreparedStatement> statementMap = new HashMap<>();
+
+  /**
+   * Constructor.
+   *
+   * @param appConfig Application Configuration
+   */
+  @Service()
+  public DalServices(AppConfig appConfig) {
+    this.appConfig = appConfig;
+  }
+
+  /**
+   * Start transaction mode.
+   */
+  public void startTransaction() {
+    try {
+      this.connections.get().setAutoCommit(false);
+    } catch (SQLException exception) {
+      // Handle exception
+      exception.printStackTrace();
+    }
+  }
+
+  /**
+   * Commit the current transaction.
+   */
+  public void commitTransaction() {
+    try {
+      Connection connection = this.connections.get();
+      connection.commit();
+      connection.setAutoCommit(true);
+      this.connections.remove();
+    } catch (SQLException exception) {
+      // Handle exception
+      exception.printStackTrace();
+    }
+  }
+
+  /**
+   * Roll back the current transaction.
+   */
+  public void rollbackTransaction() {
+    try {
+      Connection connection = this.connections.get();
+      connection.rollback();
+      connection.setAutoCommit(true);
+      this.connections.remove();
+    } catch (SQLException exception) {
+      // Handle exception
+      exception.printStackTrace();
+    }
+  }
+
+  /**
+   * Prepare a {@link PreparedStatement} if not already cached.
+   *
+   * @param statement {@link String} query to prepare.
+   * @return a {@link PreparedStatement} based on the given {@link String}
+   */
+  public PreparedStatement prepareStatement(String statement) {
+    try {
+      //      if (this.statementMap.containsKey(statement)) {
+      //        return this.statementMap.get(statement);
+      //      }
+
+      return this.connections.get().prepareStatement(statement);
+      //      this.statementMap.put(statement, stmt);
+
+      //      return stmt;
+    } catch (SQLException exception) {
+      // Handle exception
+      return null;
+    }
+  }
+
+}

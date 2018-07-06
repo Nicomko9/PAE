@@ -1,0 +1,15 @@
+package mock.ucc;
+
+import biz.ParticipationUcc;
+import dal.dao.ParticipationDao;
+
+public class ParticipationUccMock implements ParticipationUcc {
+
+  @SuppressWarnings("unused")
+  private ParticipationDao participationDao;
+  
+  ParticipationUccMock(ParticipationDao participationDao) {
+    this.participationDao = participationDao;
+  }
+  
+}

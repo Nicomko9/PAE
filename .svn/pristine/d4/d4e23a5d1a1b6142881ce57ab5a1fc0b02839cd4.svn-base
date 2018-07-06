@@ -1,0 +1,80 @@
+package ihm.utils;
+
+import java.nio.charset.Charset;
+import java.text.SimpleDateFormat;
+import java.util.Map;
+
+import com.owlike.genson.Genson;
+import com.owlike.genson.GensonBuilder;
+
+import biz.dto.AddressDto;
+import biz.dto.UserDto;
+import config.annotation.Service;
+
+/**
+ * Servlet & Json utility.
+ */
+public class ServletUtil {
+
+  /**
+   * {@link Genson} object.
+   */
+  private static Genson genson = new GensonBuilder().useIndentation(true)
+      .useDateFormat(new SimpleDateFormat("dd/MM/yyyy")).useConstructorWithArguments(true).create();
+
+  @Service()
+  public ServletUtil() {
+  }
+
+  /**
+   * Serialize an {@link Object} into {@link String}.
+   *
+   * @param object the object to encode
+   * @return String the encoded string
+   */
+  public String encode(Object object) {
+    return genson.serialize(object);
+  }
+
+  /**
+   * Deserialize a {@link String} into an {@link Object}.
+   *
+   * @param str given {@link String} to deserialize
+   * @param classType {@link Class} to deserialize into
+   * @return Object deserialized {@link Object}
+   */
+  public Object decode(String str, Class<?> classType) {
+    return genson.deserialize(str.getBytes(Charset.forName("UTF-8")), classType);
+  }
+
+
+  /**
+   * Fill a {@link UserDto} for subscribe of a user.
+   * 
+   * @return a filled {@link UserDto}
+   */
+  public UserDto fillUserDto(UserDto dto, Map<String, Object> map) {
+    dto.setLogin((String) map.get("login"));
+    dto.setFirstname((String) map.get("firstname"));
+    dto.setLastname((String) map.get("lastname"));
+    dto.setEmail((String) map.get("email"));
+    dto.setPassword((String) map.get("password"));
+    return dto;
+  }
+
+  public AddressDto fillAddressDto(AddressDto dto, Map<String, Object> map) {
+    dto.setStreet((String) map.get("street"));
+    dto.setStreetNumber(Integer.parseInt((String) map.get("number")));
+    // Vérifier que la boite n'est pas vide
+    if (map.get("box") != null) {
+      System.out.println("Box : " + map.get("box"));
+      dto.setBox(Integer.parseInt((String) map.get("box")));
+    } else {
+      dto.setBox(0);
+    }
+    dto.setZipCode(Integer.parseInt((String) map.get("postal-code")));
+    dto.setCommune((String) map.get("city"));
+    return dto;
+  }
+
+}

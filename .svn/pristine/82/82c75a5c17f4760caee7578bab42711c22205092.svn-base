@@ -1,0 +1,87 @@
+import config.AppConfig;
+import ihm.ApplicationServlet;
+import ihm.utils.Logger;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.DefaultServlet;
+import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.webapp.WebAppContext;
+
+/**
+ * Scripts de démarrage de l'application.
+ */
+public class Main {
+
+  private AppConfig appConfig;
+
+  /**
+   * Constructeur du main.
+   *
+   * @param state l'état de base : APP_DEV ou APP_PROD
+   * @throws Exception si les configurations ne sont pas correctement chargées
+   */
+  private Main(String state) throws Exception {
+    AppConfig app = new AppConfig(state);
+
+    if (!app.load()) {
+      Logger.log("Main", "Main", "Unable to load app configuration !");
+
+      throw new Exception("Internal error !");
+    }
+
+    this.appConfig = app;
+  }
+
+  /**
+   * Point d'entrée de l'application principale.
+   *
+   * @param args Liste des arguments donnés lors du lancement de le l'application
+   */
+  public static void main(String[] args) {
+    try {
+      Main app = new Main(AppConfig.APP_DEV);
+
+      if (!app.startJetty()) {
+        Logger.log("Main", "main", "Server failed starting");
+      } else {
+        Logger.log("Main", "main", "Server started");
+      }
+    } catch (Exception exception) {
+      exception.printStackTrace();
+    }
+  }
+
+  /**
+   * Démarre une nouvelle instance jetty. Note : les configurations de jetty peuvent etre override
+   * dans le fichier .properties lancé.
+   *
+   * @return true si le serveur a correctement démarre
+   */
+  private boolean startJetty() {
+    try {
+      Server server;
+      WebAppContext context;
+
+      server = new Server(Integer.parseInt(AppConfig.getProperty("server.port", "8000")));
+      context = new WebAppContext();
+      server.setHandler(context);
+
+      context.setContextPath(AppConfig.getProperty("server.path", "/"));
+      context.setWelcomeFiles(new String[]{"index.html"});
+      context.setResourceBase(AppConfig.getProperty("server.resources", "web"));
+      context.addServlet(new ServletHolder(appConfig.getClassForName(ApplicationServlet.class)),
+          "/app/*");
+      context.addServlet(new ServletHolder(new DefaultServlet()), "/");
+      context.setInitParameter("cacheControl", "no-store, no-cache, must-revalidate");
+
+      server.start();
+
+      return true;
+    } catch (Exception exception) {
+      Logger.log("Main", "startJetty", "Internel system error - unable to start server: exiting application");
+      exception.printStackTrace();
+
+      return false;
+    }
+  }
+
+}

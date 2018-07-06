@@ -1,0 +1,6 @@
+package dal.finders;
+
+class UserFinderImpl implements UserFinder {
+
+
+}

@@ -1,0 +1,20 @@
+package config;
+
+public interface AppConfig {
+
+  String APP_DEV = "dev";
+  String APP_PROD = "prod";
+
+  AppConfig INSTANCE = new AppConfigImpl();
+
+  String getProperty(String key);
+
+  String getProperty(String key, String defaultValue);
+
+  String getEnvironment();
+
+  void setEnvironment(String environment);
+
+  void load();
+
+}

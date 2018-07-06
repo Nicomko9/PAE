@@ -1,0 +1,339 @@
+var logger = function(){
+	//public methods
+	return {
+		"log" : function(file, method, mess){
+			console.log("[" + file + " - " + method + "] " + mess);
+		}
+	}
+}();
+
+var notifications = function () {
+  // Attributes
+  var container = $("#notification-area");
+  var counter = 0;
+  var timeout = 5000;
+
+  // Stores running notification
+  var notifications = {};
+
+  // Private : return next notification id from 1 to 100
+  function nextId() {
+    counter = ((++counter % 100) + 1);
+
+    return counter;
+  }
+
+  // On action, hide notifications
+  $(".page-container").on("click", function () {
+    for (var id in notifications) {
+      notifications[id].fadeOut(function () {
+        delete notifications[id];
+      })
+    }
+  });
+
+  // Public "methods"
+  return {
+    "setTimeout": function (t) {
+      if (typeof t != "integer") {
+        throw "setTimeout require a integer";
+      }
+
+      timeout = t;
+    },
+    "notify": function (message, type, icon) {
+      var id = nextId();
+
+      if (typeof message != "string") {
+        throw "System notification require at least a string message";
+      }
+
+      container.prepend("<div id='notification_" + id
+          + "' class='alert alert-" + type + " notification'>"
+          + message + "</div>");
+
+      var notification = $("#notification_" + id);
+
+      notifications[id] = notification;
+
+      if (typeof icon == "string") {
+        notification.prepend("<i class='fa fa-fw fa-" + icon
+            + "'></i>&nbsp;&nbsp;");
+      }
+
+      setTimeout(function () {
+        notification.fadeOut(function () {
+          $("#notification_" + id).remove();
+          delete notifications[id];
+        });
+      }, timeout);
+    }
+  }
+}();
+
+var errors = function () {
+  // error id => message
+  var messages = {
+    0: "Erreur non-définie",
+    200: "Ok",
+    201: "Créé",
+    400: "Mauvaise requête",
+    401: "No Cookies",
+    404: "Page Fault",
+    409: "Conflit",
+    444: "Pas de Réponse",
+    460: "Données non correctes",
+    461: "Login utilisateur déjà utilisé",
+    462: "Login trop long",
+    463: "Format de l'email incorrect",
+    464: "Mot de passe incorrect",
+    465: "Login incorrect",
+    466: "Email déjà utilisé",
+    467: "Utilisateur déjà connecté",
+    468: "Erreur Json",
+    469: "Pas de Je a cette date la.",
+    470: "Il existe déja une JE à cette date",
+    471: "Date dans un format non reconnu par l'application",
+    472: "Informations incorrectes",
+    473: "Nom d'entreprise déjà utilisé",
+    500: "Erreur interne server",
+    503: "Service non disponible"
+  };
+
+  return {
+    notify: function (message, icon) {
+      if (message instanceof Number) {
+        message = application.errors.translate(message);
+      }
+      application.notifications.notify(message, "danger", icon);
+    },
+    translate: function (code) {
+      if (typeof messages[code] != "undefined") {
+        return messages[code];
+      } else {
+        return "Erreur serveur non répertoriée";
+      }
+    }
+  };
+}();
+
+var application = function () {
+  var loading = true;
+
+  var date = new Date();
+  var currentYear = date.getFullYear();
+
+  var views = {};
+
+  // Year : 2017, if september : current year is next one
+  if (date.getMonth() > 9) {
+    currentYear++;
+  }
+
+  currentYear++;
+  
+  /**
+   * User representation
+   *
+   * @method getters
+   * @method connect(username, login, successCallback, errorCallback)
+   * @method disconnect(successCallback)
+   */
+  var user = function () {
+    var connected = false;
+    var dto = {};
+
+    // Trigger when user log-in / is loaded
+    function dispatchUpdate() {
+      logger.log("script.js", "dispatchUpdate()", "dispatch update");
+      $("[data-toggle='user.full_name']").html(
+          user.getSurname() + " " + user.getName());
+      $("#container-application")
+      .attr("data-admin", user.isResponsible());
+    }
+
+    // Get user
+
+    return {
+      load: function (callback) {
+        $.ajax({
+          url: "/app/auth",
+          method: "post",
+          dataType: 'json',
+          success: function (re) {
+            connected = true;
+            dto = re;
+
+            dispatchUpdate();
+          },
+          error: function (Xhr) {
+            connected = false;
+            dto = {};
+
+            // User not auth
+            if (Xhr.responseJSON !== 401) {
+              logger.log("script.js", "user.load", getErrorMessage(Xhr.responseJSON));
+            }
+          }
+        }).always(function () {
+          loading = false;
+          callback();
+        });
+      },
+      // Getters
+      isResponsible: function () {
+        if (!connected) {
+          throw "User is not connected !";
+        }
+        return dto.responsible;
+      },
+      getName: function () {
+        if (!connected) {
+          throw "User is not connected !";
+        }
+        return dto.firstname;
+      },
+      getSurname: function () {
+        if (!connected) {
+          throw "User is not connected !";
+        }
+        return dto.lastname;
+      },
+      getLogin: function () {
+        if (!connected) {
+          throw "User is not connected !";
+        }
+        return dto.login;
+      },
+      isConnected: function () {
+        if (loading) {
+          throw "User is still loading";
+        }
+        return connected;
+      },
+
+      // Methods
+      connect: function (username, password, successCallback,
+          errorCallback) {
+        $.ajax("/app/connection", {
+          data: {
+            "login": username,
+            "password": password
+          },
+          method: "POST",
+          dataType: 'json',
+          success: function (data) {
+            dto = data;
+            connected = true;
+
+            successCallback(data);
+            dispatchUpdate();
+          },
+          error: errorCallback
+        });
+
+      },
+      disconnect: function (callback) {
+        $.ajax("/app/disconnect", {
+          method: 'POST',
+          dataType: 'json',
+          success: function () {
+            connected = false;
+            dto = {};
+
+            callback();
+          },
+          error: function (e) {
+            alert("Internal error while disconnecting");
+            window.location.reload();
+          }
+        })
+      }
+    };
+  }();
+
+  return {
+    datatable : {
+      translations : {
+        "sProcessing":     "Traitement en cours...",
+        "sSearch":         "Rechercher&nbsp;:",
+        "sLengthMenu":     "Afficher _MENU_ &eacute;l&eacute;ments",
+        "sInfo":           "Affichage de l'&eacute;l&eacute;ment _START_ &agrave; _END_ sur _TOTAL_ &eacute;l&eacute;ments",
+        "sInfoEmpty":      "Affichage de l'&eacute;l&eacute;ment 0 &agrave; 0 sur 0 &eacute;l&eacute;ment",
+        "sInfoFiltered":   "(filtr&eacute; de _MAX_ &eacute;l&eacute;ments au total)",
+        "sInfoPostFix":    "",
+        "sLoadingRecords": "Chargement en cours...",
+        "sZeroRecords":    "Aucun &eacute;l&eacute;ment &agrave; afficher",
+        "sEmptyTable":     "Aucune donn&eacute;e disponible dans le tableau",
+        "oPaginate": {
+          "sFirst":      "Premier",
+          "sPrevious":   "Pr&eacute;c&eacute;dent",
+          "sNext":       "Suivant",
+          "sLast":       "Dernier"
+        },
+        "oAria": {
+          "sSortAscending":  ": activer pour trier la colonne par ordre croissant",
+          "sSortDescending": ": activer pour trier la colonne par ordre d&eacute;croissant"
+        }
+      }
+    },
+    // Generic components
+    errors: errors,
+    notifications: notifications,
+
+    // attributes
+    currentYear: currentYear,
+
+    load: function () {
+      application.getUser().load(function () {
+        application.require("template", function (view) {
+          if (!application.getUser().isConnected()) {
+            view.unconnected();
+          } else {
+            view.connected();
+          }
+        });
+      });
+    },
+
+    // methods
+    isLoading: function () {
+      return loading;
+    },
+    getUser: function () {
+      return user;
+    },
+    define: function (id, data) {
+      views[id] = data;
+    },
+    require: function (id, callback, context, $e) {
+      if (typeof views[id] == "undefined") {
+        logger.log("script.js", "application.require",
+            "Deprecated ! Usage of require through AJAX ! This will lead to bugs");
+        logger.log("script.js", "application.require", "Exiting");
+        return;
+      }
+
+      if (typeof callback == "undefined") {
+        return views[id];
+      } else if (typeof callback == "string"
+          && typeof views[id][callback] == "function") {
+        return views[id][callback](views[id][callback], context, $e);
+      } else if (typeof callback == "function") {
+        return callback(views[id], context, $e);
+      }
+    }
+  };
+}();
+
+function alerteForm(form, message) {
+  $("#" + form + "FormAlert")
+  .html(
+      "<div class='tmp alert alert-danger alert-dismissable' "
+      + "style='display:none'><button type='button' class='close' data-dismiss='alert'"
+      + "aria-hidden='true'>&times;</button>"
+      + "<p><strong>Attention</strong></br>" + message
+      + "</p></div>");
+  $("#" + form + "FormAlert > .tmp").show(1000);
+  $("#Btn" + form + " i").hide();
+}

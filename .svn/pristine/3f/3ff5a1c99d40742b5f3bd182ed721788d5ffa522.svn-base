@@ -1,0 +1,113 @@
+application.define("contacts", function() {
+	function listContact(list){
+		$("#contact-table tbody").html("");
+
+		if(list.length === 0){
+			$("#contact-table tbody").append ("<tr><td class='col-lg-2 col-md-2'></td>"
+				+ "<td class='col-lg-2 col-md-2'></td>"
+				+ "<td class='col-lg-3 col-md-3'></td>"
+				+ "<td class='col-lg-3 col-md-3'></td>"
+				+ "<td class='col-lg-2 col-md-2 text-center'>"
+				+ "<button name='edit-contact' class='btn btn-active'>"
+				+ "Editer</button></td></tr>");
+		} else {
+			for(var i in list){
+				var o = list[i];
+				console.log(o);
+				$("#contact-table tbody").append ("<tr><td class='col-lg-2 col-md-2'>"
+						+ o.company.companyName + "</td>"
+						+ "<td class='col-lg-2 col-md-2'>" + o.firstname 
+						+ " " + o.lastname + "</td>"
+						+ "<td class='col-lg-3 col-md-3'>" + o.email + "</td>"
+						+ "<td class='col-lg-3 col-md-3'>" + o.phone + "</td>"
+						+ "<td class='col-lg-2 col-md-2 text-center'>"
+						+ "<button name='edit-contact' class='btn btn-active'>"
+						+ "Editer</button></td></tr>");
+			}
+		}
+	}
+	
+	function loadContact(){
+		console.log("contact - loadContact");
+		$.ajax({
+			url : "/app/contact/list",
+			method : "POST",
+			dataType : "JSON",
+			success: function(data){
+				listContact(data);
+				notifications.notify("Affichage des contacts", "info", "user");
+			},
+			error : 
+				function(){
+				console.log("Erreur");
+			}
+		});
+	}
+	function selectCompanies(list){
+		if(list.length === 0){
+			console.log("Pas d'entreprise");
+		} else {
+			for(var i in list){
+				var o = list[i];
+				$("#contact-form select").append("<option>" + o.companyName + "</option>");
+			}
+		}
+	}
+	
+	function loadCompaniesPopUp(){
+		$.ajax({
+			url : "/app/entreprise/list",
+			method : "POST",
+			dataType : "JSON",
+			success : 
+				function(data){
+					selectCompanies(data);
+			},
+			error : 
+				function(xhr){
+					console.log("erreur");
+			}
+		});
+	}
+	
+	return {
+		main : function(module, context) {
+			loadContact();
+			$("#NewContact").click(function() {
+				$("#btn-save-popup-contact").click(function() {
+					console.log("Click");
+					application.require("contacts", "create");
+				});
+			});
+			/*
+			 * Load Companies for popup
+			 */
+			loadCompaniesPopUp();
+		},
+		create : function() {
+			console.log("contacts - create");
+			application.require("utils/forms", function(module) {
+				// Management of the form
+				var form = module.getForm("#contact-form");
+				if (form.validate(true)) {
+					console.log("Ajax");
+					$.ajax({
+						url : "/app/contact/create",
+						data : {
+							json : JSON.stringify(form.getValues())
+						},
+						method : "POST",
+						datatype : "json",
+						success : function(data) {
+							form.clean();
+							console.log("Company created");
+						},
+						error : function(xhr) {
+							console.log()
+						}
+					});
+				}
+			});
+		}
+	};
+}());

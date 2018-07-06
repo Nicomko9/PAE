@@ -1,0 +1,12 @@
+package bizz;
+
+import bizz.objects.UserBizzImpl;
+import ucc.dto.UserDto;
+
+public class UserFactoryImpl implements UserFactory {
+
+  public UserDto getUserDto() {
+    return new UserBizzImpl();
+  }
+
+}

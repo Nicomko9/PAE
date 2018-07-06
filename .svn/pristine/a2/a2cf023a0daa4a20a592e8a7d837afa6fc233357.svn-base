@@ -1,0 +1,77 @@
+import ihm.ApplicationServlet;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Properties;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.DefaultServlet;
+import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.webapp.WebAppContext;
+
+/*
+ * Scripts de démarrage de l'application
+ */
+public class Main {
+
+  /* Le fichier properties chargé, visibilité package */
+  static Properties properties = new Properties();
+
+  /* L'état de l'application */
+  private static boolean dev = true;
+
+  /*
+   * Point d'entrée de l'application principale.
+   */
+  public static void main(String[] args) {
+    startProperties();
+    startJetty();
+  }
+
+  /*
+   * Démarre une nouvelle classe properties basee sur les fichiers de configuration de
+   * l'application.
+   */
+  private static void startProperties() {
+    String configurationFile = "conf/" + ((isDev()) ? "dev" : "prod") + ".properties";
+    try (FileInputStream file = new FileInputStream(configurationFile)) {
+      properties.load(file);
+    } catch (IOException exception) {
+      System.out.println("Internel system error : exiting application");
+      exception.printStackTrace();
+      System.exit(1);
+    }
+  }
+
+  /*
+   * Démarre une nouvelle instance jetty
+   *
+   * Note : les configurations de jetty peuvent etre override dans le fichier .properties lancé
+   */
+  private static void startJetty() {
+    try {
+      Server server = new Server(Integer.parseInt(properties.getProperty("server.port", "8000")));
+      WebAppContext context = new WebAppContext();
+
+      server.setHandler(context);
+
+      context.setContextPath(properties.getProperty("server.path", "/"));
+      context.setWelcomeFiles(new String[]{"index.html"});
+      context.setResourceBase(properties.getProperty("server.resources", "web"));
+      context.addServlet(new ServletHolder(new ApplicationServlet()), "/app");
+      context.addServlet(new ServletHolder(new DefaultServlet()), "/");
+
+      server.start();
+    } catch (Exception exception) {
+      System.out.println("Internel system error : exiting application");
+      exception.printStackTrace();
+      System.exit(1);
+    }
+  }
+
+  /*
+   * @return l'état de l'application (true => dev, false => prod)
+   */
+  static boolean isDev() {
+    return dev;
+  }
+
+}

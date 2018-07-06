@@ -1,0 +1,12 @@
+package dal.dao;
+
+import dal.dao.schema.UserSchema;
+import ucc.dto.UserDto;
+
+public interface UserDao extends UserSchema {
+
+  UserDto findByEmail(String email);
+
+  UserDto findByLogin(String login);
+
+}

@@ -1,0 +1,247 @@
+application.define("utils/loader", function(){
+	/**
+	 * Show the contact list.
+	 * 
+	 * @param list
+	 *            data to show
+	 * @param table
+	 *            id of table
+	 * @param cont
+	 *            true if contact false if company
+	 * @param edit
+	 *            true if edit mode false if visualisation
+	 */
+	function showContact(list, cont, table, edit){
+		$(""+ table + " tbody").html ("");
+		if(!cont && edit){
+			$("" + table + " tbody").html ("<tr><td class='"
+					+ "col-sm-2 col-xs-2'><input type='text'"
+					+ "id='firstname-contact-entreprise' placeholder='Prénom'>"
+					+ "</td><td class='col-sm-3 col-xs-3'><input type='text'"
+					+ "id='lastname-contact-entreprise' placeholder='Nom'>"
+					+ "</td><td class='col-sm-3 col-xs-3'><input type='tel'"
+					+ "id='tel-contact-entreprise' placeholder='0477/00.00.00'></td>"
+					+ "<td class='col-sm-3 col-xs-3'><input type='email'"
+					+ "id='email-contact-entreprise' placeholder="
+					+ "'nom.prenom@entreprise.be'></td><td class='col-sm-1 col-xs-1'>"
+					+ "<button class='fa fa-plus btn btn-success btn-circle"
+					+ "id='add-contact-entreprise'></button></td></tr>");
+		}
+		if(list.length === 0){
+			logger.log("loader.js", "showContact()", "No data");
+		} else {
+			for(var i in list){
+				var o = list[i];
+				var str = "<tr><td style='display:none'>" + o.pk;
+				if(cont){
+					if(o.company === null){
+						str += "<td></td>"
+					}else {
+						str += "<td>"+ o.company.companyName + "</td>";
+					}
+				}
+				if(cont){
+					str += "<td class='col-sm-2 col-xs-2'>" 
+						+ o.firstname + " "
+						+ o.lastname + "</td>";
+				}else {
+					str += "<td class='col-sm-2 col-xs-2'>" 
+						+ o.firstname + "</td><td class='col-sm-3 col-xs-3'>"
+						+ o.lastname + "</td>";
+				} 
+				str += "<td class='col-sm-2 col-xs-2'>" + o.phone +"</td>"
+							+ "<td class='col-sm-3 col-xs-3'>"+ o.email +"</td><td class='col-sm-2" 
+							+ " col-xs-2 text-center'>"; 
+				if (cont){
+					str += "<button name='edit-contact' class='btn btn-active'"
+						+ "data-toggle='modal' data-target='#popup-new-contact'>"
+						+ "Editer</button>";
+				}
+				str += "</td></tr>"
+				if(edit){
+					
+					$(table + " tbody").prepend(str);
+				}else {
+					$(table + " tbody").append(str);
+				}
+			}
+		}
+	}
+	
+	function showCompanies(list) {
+		$("#companies-table tbody").html("");
+
+		var fillHtml;
+		if (list.length === 0) {
+			$("#companies-table tbody").append("<tr><td style='display:none'></td>" 
+					+ "<td class='col-lg-2 col-md-2'></td>"
+					+ "<td class='col-lg-4 col-md-4'></td>"
+					+ "<td class='col-lg-2 col-md-2'></td>"
+					+ "<td class='col-lg-4 col-md-4 text-center'>"
+					+ "	<button name='vue_entreprise' class='btn btn-active'>"
+					+ "		Visualiser</button>"
+					+ "<button name='edit_entreprise' class='btn btn-active'>"
+					+ "Editer</button>" + "</td>" + "</tr>");
+		} else {
+			for( var i in list){
+				var o = list[i];
+				var boite = "";
+ 				if(o.address.box === 0) {
+					logger.log("loader.js", "listCompanies()", "empty");
+				} else {
+					boite = "boite " + o.address.box;
+				}
+				
+				$("#companies-table tbody").append("<tr><td style='display:none'>"
+						+ o.pk + "</td><td class='col-lg-2 col-md-2'>"
+						+ o.companyName + "</td><td class='col-lg-4 col-md-4'>"
+						+ o.address.street + ", " + o.address.streetNumber + " "
+						+ boite + ", " +o.address.zipCode + ", " + o.address.commune
+  						+"</td><td class='col-lg-2 col-md-2'>" + o.lastParticipationYear 
+  						+ "</td><td class='col-lg-4 col-md-4 text-center'><row>"
+						+ "<button name='vue-entreprise' class='col-lg-4 col-md-4"
+						+" col-lg-offset-1 col-md-offset-1 btn btn-active'"
+						+ "data-toggle='modal' data-target='#popup-new-entreprise'>"
+						+"Visualiser</button><button name='edit-entreprise'"
+						+" class='col-lg-4 col-md-4 col-lg-offset-2 col-md-offset-2"
+						+" btn btn-active' data-toggle='modal' data-target='#popup-new-entreprise'>"
+						+"Editer</button></row></td></tr>");
+			} 
+		}
+		
+	}
+	
+	return {
+		/**
+		 * LoadContact from server.
+		 * 
+		 * @param cont
+		 *            true if it is from contact.js
+		 * @param table
+		 *            id of table
+		 * @param data
+		 *            button clicked
+		 * @param edit
+		 *            true if edit mode false if visulasition
+		 */
+		loadContact : function(cont, table, data, edit){
+			logger.log("loader.js", "listContact()", "List");
+			var path = "/app/contact/list";
+			// case if company
+			if (!cont){
+				path += "ForCompany";
+				data = data.parents("tr").find("td:first");
+				data = data.next("td");
+				//data = $("#poup-name-entreprise").val();
+				console.log(data.text());
+			}
+			$.ajax({
+				url : path,
+				method : "POST",
+				data : {
+					json : data.text()
+				},
+				dataType : "JSON",
+				success : 
+					function(data){
+					showContact(data, cont, table, edit)
+				},
+				error : 
+					function(xhr){
+					logger.log("loader.js", "listContact()", xhr.responseJSON);
+				}
+			});
+		},
+		loadCompanies : function(){
+			$.ajax({
+				url : "/app/entreprise/list",
+				method : "POST",
+				dataType : "JSON",
+				success : function(data) {
+					showCompanies(data);
+					notifications.notify("Affichage des entreprises", "info",
+							"building");
+				},
+				error : function(data) {
+					logger.log("loader.js", "loadCompanies()", "Erreur");
+				}
+			});
+		},
+		fillColor : function(table){
+			$(table).find("input").each(function(){
+				if($(this).val() !== ""){
+					$(this).css("background-color", "#FAFAD2");
+				}
+			});
+		},
+		/**
+		 * Create - Update Contact or Company.
+		 * 
+		 * @param action
+		 *            true if update false if create
+		 * @param form
+		 *            the form with the values
+		 * @param object
+		 *            true if contact false if company
+		 * @param message
+		 *            the message to show
+		 */
+		crudAjax : function(action, form, object, message){
+			application.require("utils/forms", function(module) {
+				var formulaire = module.getForm(form);
+				var data = JSON.stringify(formulaire.getValues());
+				
+				if (!object){
+					object = "entreprise";
+				}else {
+					object = "contact"
+				}
+				if(!action){
+					action = "create";
+				}else {
+					action = "update";
+				}
+				if (formulaire.validate(true)) {
+					$.ajax({
+						url : "/app/" + object + "/" + action,
+						data : {
+							json : data
+						},
+						method : "POST",
+						dataType : "JSON",
+						success : function(data) {
+							formulaire.clean();
+							logger.log("loader.js", "crudAjax()", "Success");
+							if (object === "contact"){
+								application.require("utils/loader", function(module){
+									module.loadContact(true, "#contact-table", $(this), false);
+								});
+							} else {
+								application.require("utils/loader", function(module){
+									module.loadCompanies();
+								});
+							}
+							$("#popup-new-" + object).modal('hide');
+							notifications.notify(message, "success",
+									"user");
+						},
+						error : function(xhr) {
+							logger.log("loader.js", "crudAjax()", xhr.responseJSON);
+							
+							if (xhr.responseJSON == 473) {
+								module.tagInput($("#popup-name-entreprise"),
+										"danger", errors
+												.translate(xhr.repsonseJSON));
+							} else {
+								notifications
+										.notify(errors
+												.translate(xhr.responseJSON),
+												"warning");
+							}
+						}
+					});
+				}
+			});
+		}
+	}
+}());

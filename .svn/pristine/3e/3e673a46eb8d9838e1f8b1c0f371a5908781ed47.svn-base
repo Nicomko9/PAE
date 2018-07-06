@@ -1,0 +1,119 @@
+<div name="page-title" class="row">
+	<div class="col-lg-12 col-md-12">
+		<h1 class="page-header">Contacts</h1>
+	</div>
+</div>
+<div class="row">
+	<div id="contact-table"
+		class="col-lg-10 col-md-10 col-lg-offset-1 col-md-offset-1">
+		<div class="panel panel-default">
+			<div class="panel-heading">Tous les contacts</div>
+			<div class="panel-body">
+				<div class="table-responsive">
+					<table class="table table-bordered table-hover">
+						<div id="contact-loading" style="display:none">
+							<i class="fa fa-spinner fa-spin"></i>
+							Loading...
+						</div>
+						<thead class="thead-inverse">
+							<tr>
+								<th style='display: none'>Id</th>
+								<th style='display: none'>N° Version</th>
+								<th>Entreprise</th>
+								<th>Contact</th>
+								<th>Téléphone</th>
+								<th>Email</th>
+								<th>Action</th>
+							</tr>
+						</thead>
+						<tbody>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="row">
+	<div class="col-lg-offset-9 col-md-offset-9 col-lg-2 col-md-2">
+		<button id="btn-new-contact" class="btn btn-info btn-rigth"
+			data-toggle="modal" data-target="#popup-new-contact">
+			Nouveau contact</button>
+	</div>
+</div>
+<div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog"
+	aria-labelledby="titrePopUp" aria-hidden="true" id="popup-new-contact">
+	<div class="container-fluid">
+		<div class="row">
+			<div class="modal-dialog modal-lg">
+				<div class="modal-content">
+					<div class="col-lg-12 col-md-12">
+						<div class="panel panel-default">
+							<div class="panel-heading text-right">
+								<div
+									class="col-lg-2 col-md-2 col-lg-offset-5 col-lg-offset-5 text-center">Contact</div>
+								<p class="fa fa-times col-md-offset-4 col-lg-offset-4"
+									data-dismiss="modal" data-target="#popup-new-contact"></p>
+							</div>
+							<div class="panel-body">
+								<form role="form" id="contact-form">
+									<fieldset>
+
+										<div class="form-group" >
+											<input style='display: none' id="popup-pk-contact" type="text" name="pk">
+										</div>
+										<div class="form-group" >
+											<input style='display: none' id="popup-version-contact" type="text" name="version">
+										</div>
+										<div class="row">
+											<div class="form-group col-lg-8 col-md-8">
+												<label for="popup-entreprise-contact">Entreprise</label> <select
+													class="form-control" data-required="true" name="entreprise"
+													id="popup-entreprise-contact">
+													<option></option>
+												</select>
+											</div>
+										</div>
+										<div class="row">
+											<div class="form-group col-lg-5 col-md-5">
+												<label for="popup-lastname-contact">Nom</label> <input
+													type="text" class="form-control"
+													id="popup-lastname-contact" name="lastname-contact"
+													data-required="true" placeholder="Nom">
+											</div>
+											<div
+												class="form-group col-lg-5 col-md-5 col-md-offset-1 col-lg-offset-1">
+												<label for="popup-firstname-contact">Prénom</label> <input
+													type="text" class="form-control"
+													id="popup-firstname-contact" name="firstname-contact"
+													data-required="true" placeholder="Prénom">
+											</div>
+										</div>
+										<div class="row">
+											<div class="form-group 	col-lg-5 col-md-5">
+												<label for="popup-email-contact">Email</label> <input
+													type="text" class="form-control" id="popup-email-contact"
+													name="email-contact" placeholder="contact@entreprise.be">
+
+											</div>
+											<div
+												class="form-group col-lg-5 col-md-5 col-lg-offset-1 col-md-offset-1">
+												<label for="popup-tel-contact">N° téléphone</label> <input
+													type="text" class="form-control" id="popup-tel-contact"
+													name="tel-contact" placeholder="0471/00.00.00">
+											</div>
+										</div>
+									</fieldset>
+								</form>
+								<button class="btn btn-info pull-right col-lg-2 col-md-2"
+									id="btn-save-popup-contact">Enregistrer</button>
+								<button class="btn btn-info pull-right col-lg-2 col-md-2"
+									id="btn-update-popup-contact" style="display: none">Modifier</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

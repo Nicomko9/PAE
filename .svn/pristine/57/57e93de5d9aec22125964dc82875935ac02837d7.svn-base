@@ -1,0 +1,19 @@
+package biz.dto;
+
+import biz.exceptions.BusinessException;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.time.LocalDate;
+
+public interface JeDto {
+
+  LocalDate getDayDate();
+
+  void setDate(Timestamp date);
+
+  void setDate(String date) throws ParseException;
+
+  int getDayYear();
+
+  void prepareForInsert() throws BusinessException;
+}

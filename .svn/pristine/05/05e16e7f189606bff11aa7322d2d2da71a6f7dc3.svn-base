@@ -1,0 +1,182 @@
+var inAnimation = false;
+
+/** Main function */
+$(function() {
+	checkConnection(loadApp, function() {
+		switchContainer("container-login");
+	});
+
+	$(document).on("click", "body#page_login #BtnConn", connection);
+	$(document).on("submit", "body#page_login #ConnForm", connection);
+	$(document).on("submit", "body#page_login #InscForm", signUp);
+	$(document).on("click", "body#page_login #BtnIns", signUp);
+
+	$(document).on("click", "body#page_application #disconnect", logout)
+
+});
+
+function switchContainer(event) {
+	var display;
+
+	if (typeof event == "object") {
+		event.preventDefault();
+		display = $(this).attr("data-toggle");
+	} else {
+		display = event;
+	}
+
+	var id = "page_" + display.slice("container-".length);
+
+	if (inAnimation || $("body").attr("id") === id) {
+		return;
+	}
+
+	inAnimation = true;
+
+	$("body > .page-container:not(" + display + ")").hide(250);
+	$("#" + display).show(250, function() {
+		inAnimation = false;
+		$("body").attr("id", id);
+	});
+}
+
+function connection(event) {
+	event.preventDefault();
+	$("#BtnConn i").show();
+	if (verifChampVide("Conn")) {
+
+		$.ajax("/app/connection", {
+			data : {
+				"login" : $("#connexion_login").val(),
+				"password" : $("#connexion_password").val()
+			},
+			method : "POST",
+			dataType : 'json',
+			success : function(data) {
+				if (typeof data["error"] == "undefined") {
+					loadApp(data);
+				} else {
+					alerteForm("Conn", data["error"]);
+				}
+			},
+			error : function(xhr, error) {
+				alerteForm("Conn", error);
+			}
+		});
+	}
+}
+
+function signUp(event) {
+	event.preventDefault();
+	$("#BtnIns i").show();
+	if (verifChampVide("Insc")) {
+		var json = FORMtoJSON("Insc");
+		$.ajax("/app/signup", {
+			data : {
+				json : json,
+			},
+			method : "POST",
+			dataType : "json",
+			success : function(data) {
+				if (data == false) {
+					alerteForm("Insc", "Error creating user");
+				} else if (typeof data["error"] == "undefined") {
+					loadApp(data);
+				} else {
+					console.log("Error signup");
+					alerteForm("Insc", data["error"]);
+				}
+			},
+			error : function(xhr, error) {
+				alerteForm("Insc", "Erreur de connexion au server");
+			}
+		});
+	}
+}
+
+function logout(event) {
+	event.preventDefault();
+
+	$.ajax("/app/disconnect", {
+		method : 'POST',
+		dataType : 'json',
+		success : function(e) {
+			console.log("Disconnected");
+			switchContainer("container-login");
+		},
+		error : function(e) {
+			alert("Internal error while disconnecting");
+			window.location.reload();
+		}
+	})
+}
+
+function loadApp(loadedUser) {
+	var user;
+
+	if (typeof loadedUser != "undefined") {
+		user = loadedUser;
+	}
+
+	$("[data-toggle='user.full_name']").html(
+			user.firstname + " " + user.lastname);
+	switchContainer("container-application");
+}
+
+function unhandledAjaxException(text) {
+
+}
+
+function checkConnection(connectedCallback, unconnectedCallback) {
+	$.ajax({
+		url : "/app/auth",
+		method : "GET",
+		dataType : 'json',
+		success : function(re) {
+			if (typeof re.error == "undefined") {
+				loadApp(re);
+			} else {
+				unconnectedCallback(re.error);
+			}
+		},
+		error : function(re) {
+			console.log(re);
+		}
+	});
+}
+
+function FORMtoJSON(form) {
+	var o = {};
+
+	$("#" + form + "Form").find("input").each(function() {
+		if ($(this).attr('type') === 'checkbox') {
+			o[$(this).attr('name')] = $(this).is(':checked');
+		} else {
+			o[$(this).attr('name')] = $(this).val();
+		}
+	});
+
+	return JSON.stringify(o);
+}
+
+function verifChampVide(form) {
+	var ret = true;
+	$("#" + form + "Form").find("input").each(function() {
+		if ($(this).val() === "") {
+			alerteForm(form, "Tous les champs ne sont pas remplits!");
+			ret = false;
+		}
+	});
+	return ret;
+}
+
+function alerteForm(form, message) {
+	$("#" + form + "FormAlert")
+			.html(
+					"<div id='tmp' class='alert alert-danger alert-dismissable' "
+							+ "style='display:none'><button type='button' class='close' data-dismiss='alert'"
+							+ "aria-hidden='true'>&times;</button>"
+							+ "<p><strong>Attention</strong></br>" + message
+							+ "</p></div>");
+	$("#tmp").show(1000);
+}

@@ -1,0 +1,270 @@
+application.define("entreprise", function() {
+	// show all the companies
+	function listCompanies(list) {
+		$("#companies-table tbody").html("");
+
+		var fillHtml;
+		if (list.length === 0) {
+			$("#companies-table tbody").append("<tr>" + "<td class='col-lg-2 col-md-2'></td>"
+					+ "<td class='col-lg-4 col-md-4'></td>"
+					+ "<td class='col-lg-2 col-md-2'></td>"
+					+ "<td class='col-lg-4 col-md-4 text-center'>"
+					+ "	<button name='vue_entreprise' class='btn btn-active'>"
+					+ "		Visualiser</button>"
+					+ "<button name='edit_entreprise' class='btn btn-active'>"
+					+ "Editer</button>" + "</td>" + "</tr>");
+		} else {
+			for( var i in list){
+				var o = list[i];
+				var boite = "";
+ 				if(o.address.box === 0) {
+					console.log("empty");
+				} else {
+					boite = "boite " + o.address.box;
+				}
+				
+				$("#companies-table tbody").append("<tr><td class='col-lg-2 col-md-2'>"
+						+ o.companyName + "</td><td class='col-lg-4 col-md-4'>"
+						+ o.address.street + ", " + o.address.streetNumber + " "
+						+ boite + ", " +o.address.zipCode + ", " + o.address.commune
+  						+"</td><td class='col-lg-2 col-md-2'>" + o.lastParticipationYear 
+  						+ "</td><td class='col-lg-4 col-md-4 text-center'><row>"
+						+ "<button name='vue-entreprise' class='col-lg-4 col-md-4"
+						+" col-lg-offset-1 col-md-offset-1 btn btn-active'"
+						+ "data-toggle='modal' data-target='#popup-new-entreprise'>"
+						+"Visualiser</button><button name='edit-entreprise'"
+						+" class='col-lg-4 col-md-4 col-lg-offset-2 col-md-offset-2"
+						+" btn btn-active' data-toggle='modal' data-target='#popup-new-entreprise'>"
+						+"Editer</button></row></td></tr>");
+			} 
+		}
+		
+	}
+
+	// load all the Companies
+	function loadCompanies() {
+		console.log("entreprise - loadCompanies");
+		$.ajax({
+			url : "/app/entreprise/list",
+			method : "POST",
+			dataType : "JSON",
+			success : function(data) {
+				listCompanies(data);
+				notifications.notify("Affichage des entreprises", "info",
+						"building");
+			},
+			error : function(data) {
+				console.log("Erreur");
+			}
+		});
+	}
+	
+	function fillColor(){
+		$("#popup-new-entreprise").find("input").each(function(){
+			if($(this).val() !== ""){
+				$(this).css("background-color", "#FAFAD2");
+			}
+		});
+	}
+	
+	function fillPopup(cont){
+		cont = cont.parents("tr").find("td:first");
+		$("#name-entreprise").val(cont.text());
+		//$("#name-entreprise").css("background-color", "#FAFAD2");
+		cont = cont.next("td");
+		//Address
+		var val = cont.text().substr(0, cont.text().indexOf(','));
+		var tmp = cont.text().substr(cont.text().indexOf(',')+2);
+		$("#street-entreprise").val(val);
+		//Mise en couleur générique
+		//gestion numero et boite
+		val = tmp.substr(0, tmp.indexOf(','));
+		tmp = tmp.substr(tmp.indexOf(',')+2);
+		var valad = val.substr(0, val.indexOf(' '));
+		$("#number-entreprise").val(valad);
+		var reste =  val.substr(val.indexOf(' ') + 1);
+		reste = reste.substr(reste.indexOf(' ') + 1);
+		$("#box-number-entreprise").val(reste);
+		//Gestion Code Postal
+		val = tmp.substr(0, tmp.indexOf(','));
+		tmp = tmp.substr(tmp.indexOf(',')+2);
+		$("#postal-code-entreprise").val(val);
+		//Gestion Ville
+		$("#city-name-entreprise").val(tmp);
+		fillColor();
+	}
+	
+	function companiesAjax(action, mess){
+		application.require("utils/forms", function(module) {
+			// Gestion du formulaire d'inscription d'une entreprise
+			var form = module.getForm("#CompForm");
+
+			if (form.validate(true)) {
+				console.log("Ajax");
+				$.ajax({
+					url : "/app/entreprise/" + action,
+					data : {
+						json : JSON.stringify(form.getValues())
+					},
+					method : "POST",
+					dataType : "json",
+					success : function(data) {
+						form.clean();
+						console.log("Success");
+						loadCompanies();
+						$("#popup-new-entreprise").modal('hide');
+						notifications.notify(mess, "success",
+								"building");
+					},
+					error : function(xhr) {
+						console.log("Error create company : "
+								+ xhr.responseJSON);
+
+						if (xhr.responseJSON == 473) {
+							module.tagInput($("#name-entreprise"),
+									"danger", errors
+											.translate(xhr.repsonseJSON));
+						} else {
+							notifications
+									.notify(errors
+											.translate(xhr.responseJSON),
+											"warning");
+						}
+					}
+				});
+			}
+		});
+	}
+	function showContact(list, edit){
+		/*
+		 * Clean the table contact in the popup
+		 */
+		if(edit){
+			$("#company-contact-popup tbody").html ("<tr><td class='"
+					+ "col-sm-2 col-xs-2'><input type='text'"
+					+ "id='firstname-contact-entreprise' placeholder='Prénom'>"
+					+ "</td><td class='col-sm-3 col-xs-3'><input type='text'"
+					+ "id='lastname-contact-entreprise' placeholder='Nom'>"
+					+ "</td><td class='col-sm-3 col-xs-3'><input type='tel'"
+					+ "id='tel-contact-entreprise' placeholder='0477/00.00.00'></td>"
+					+ "<td class='col-sm-3 col-xs-3'><input type='email'"
+					+ "id='email-contact-entreprise' placeholder="
+					+ "'nom.prenom@entreprise.be'></td><td class='col-sm-1 col-xs-1'>"
+					+ "<button class='fa fa-plus btn btn-success btn-circle"
+					+ "id='add-contact-entreprise'></button></td></tr>");
+		} else {
+			$("#company-contact-popup tbody").html ("<tr></tr>");
+		}
+		/*
+		 * Fill the table contact in the popup
+		 */
+		console.log("showContact(list)");
+		if(list.length === 0){
+			console.log("No contact for that company");
+		} else {
+			for(var i in list){
+				var o = list[i];
+				console.log(o);
+				var str = "<tr><td class='"
+					+ "col-sm-2 col-xs-2'>" + o.firstname + "</td><td class='col-sm-3 col-xs-3'>"
+					+ o.lastname + "</td><td class='col-sm-3 col-xs-3'>"+ o.phone +"</td>"
+					+ "<td class='col-sm-3 col-xs-3'>"+ o.email +"</td><td class='col-sm-1 col-xs-1'>"
+					+ "</td></tr>";
+				if(edit){
+					$("#company-contact-popup tbody").prepend (str);
+				}else {
+					$("#company-contact-popup tbody").append (str);
+				}
+			}
+		}
+	}
+
+	function listContact(cont, edit){
+		cont = cont.parents("tr").find("td:first");
+		console.log(cont.text());
+		console.log("entreprise - listContact");
+		$.ajax({
+			url : "/app/contact/listForCompany",
+			method : "POST",
+			data : "entreprise=" + cont.text(),
+			dataType : "JSON",
+			success : 
+				function(data){
+					console.log("success");
+					showContact(data, edit);
+			},
+			error : 
+				function (xhr){
+					console.log(xhr.responseJSON);
+			}
+		});
+	}
+	
+	return {
+		main : function(module, context) {
+			// load companies
+			loadCompanies();
+
+			$("#NewEntreprise").click(
+					function() {
+						application.require("utils/forms", function(module){
+							var form = module.getForm("#CompForm");
+							form.clean();
+						});
+						$("#btn-save-popup-entreprise").show();
+						$("#btn-update-popup-entreprise").hide();
+						$("#popup-new-entreprise div[class='panel-heading']")
+								.html("Ajouter entreprise");
+						$("fieldset div[class='panel-heading']").html(
+								"Adresse de facturation");
+						$("#btn-save-popup-entreprise").click(function() {
+							console.log("Click");
+							application.require("entreprise", "create");
+						});
+					});
+			$(document).on("click", "#companies-table tbody button[name='edit-entreprise']", 
+					function(){
+				application.require("utils/forms", function(module){
+					var form = module.getForm("#CompForm");
+					form.clean();
+				});
+				$("#btn-save-popup-entreprise").hide();
+				$("#btn-update-popup-entreprise").show();
+				$("#popup-new-entreprise div[class='panel-heading']")
+					.html("Modifier entreprise");
+				$("fieldset div[class='panel-heading']").html(
+					"Adresse de facturation");
+				fillPopup($(this));
+				listContact($(this), true);
+				$("#btn-update-popup-entreprise").click(function() {
+					application.require("entreprise", "update");
+				});
+			});	
+			
+			$(document).on("click", "#companies-table tbody button[name='vue-entreprise']",
+					function (){
+				application.require("utils/forms", function(module){
+					var form = module.getForm("#CompForm");
+					form.clean();
+				});
+				$("#btn-save-popup-entreprise").hide();
+				$("#btn-update-popup-entreprise").hide();
+				var cont = $(this).parents("tr").find("td:first");
+				$("#popup-new-entreprise div[class='panel-heading']")
+					.html("Visualisation de l'entreprise : " + cont.text());
+				$("fieldset div[class='panel-heading']").html(
+					"Adresse de facturation");
+				fillPopup($(this));
+				listContact($(this), false);
+			});
+		},
+		update : function() {
+			console.log("entreprise - update");
+			companiesAjax("update", "Entreprise modifiée");
+		},
+		create : function() {
+			console.log("entreprise - create");
+			companiesAjax("create", "Entreprise créée");
+		}
+	};
+}());

@@ -1,0 +1,352 @@
+application.define("contacts", function() {
+	/**
+	 * Initialize datatable
+	 * @type {jQuery}
+	 */
+	var datatable = $("#contact-table").find("table:first").DataTable(
+			{ columns : [
+				{ className : "col-md-2 col-sm-2 col-xs-2" } ,
+				{ className : "col-md-2 col-sm-2 col-xs-2" } ,
+				{ className : "col-md-2 col-sm-2 col-xs-2" } ,
+				{ className : "col-md-2 col-sm-2 col-xs-2" } ,
+				{ className : "col-md-1 col-sm-1 col-xs-1 text-center" } ,
+				{ className : "col-md-3 col-sm-3 col-xs-3 text-center", sortable : false }
+			], language : application.datatable.translations,
+				"order": [[ 0, "asc"], [1, "asc"]]
+			}
+		);
+
+	function listCompanies(preselect) {
+		return $.ajax({
+			url : "/app/entreprise/list",
+			method : "POST",
+			dataType : "JSON",
+			success : function(data) {
+				$("#popup-entreprise-contact").html("");
+
+				for (var k in data) {
+					if (!data.hasOwnProperty(k))
+						continue;
+
+					$("#popup-entreprise-contact").append("<option value='" +
+							+ data[k]["pk"] + "'>" + data[k]["companyName"] + "</option>")
+				}
+				$("#popup-entreprise-contact").val(preselect);
+			},
+			error : function(data) {
+				logger.log("loader.js", "loadCompanies()", "Erreur");
+			}
+		});
+	}
+
+	function getContact(pk) {
+		var data = $("#contact-table").find("tbody tr[data-pk='"+ pk +"']").data("json");
+		return {
+			"pk"      : data.pk,
+			"version" : data.version,
+			"firstname"    : data.firstname,
+			"lastname" : data.lastname,
+			"phone" : data.phone,
+			"email"  : data.email,
+			"active" : data.active,
+			"company.pk"  : data.company.pk,
+			"company.name" : data.company.companyName
+		}
+	}
+
+	function insertContact(contact) {
+		if ($(datatable.row("[data-pk='" + contact.pk + "']").node()).length != 0) {
+			updateContact(contact);
+			return;
+		}
+
+		var row = datatable.row.add([
+			contact.company.companyName,
+			contact.firstname + " " + contact.lastname,
+			contact.email,
+			contact.phone,
+			(contact.active) ? "<span class='label label-success'>Actif</span>"
+					: "<span class='label label-warning'>Inactif</span>",
+			"<div class='btn-group'> <button data-view='contacts:display' "
+			+ "class='btn btn-active' data-context='{ \"pk\" : \"" + contact.pk + "\" }'>Visualiser</button>"
+			+ "<button class='btn btn-primary' data-view='contacts:showEdit' "
+			+ "data-context='{ \"pk\" : \"" + contact.pk + "\" }'>Editer</button></div>"
+		]).draw().node();
+
+		var $row = $(row);
+		$row.attr("data-pk", contact.pk);
+		$row.data("pk", contact.pk);
+		$row.data("version", contact.version);
+		$row.data("json", contact);
+	}
+
+	function updateContact(contact) {
+		var row = datatable.row("[data-pk='" + contact.pk + "']");
+
+		if (contact.version === $(row.node()).data("version")) {
+			console.log("Déja a jour");
+		}
+
+		row.remove().draw();
+		insertContact(contact);
+	}
+
+	function listContact(){
+		$("#contact-loading").show(250);
+		$.ajax({
+			url : "/app/contact/list",
+			method : "POST",
+			dataType : "JSON",
+			success : function (data) {
+				for (var k in data) {
+					if (!data.hasOwnProperty(k))
+						continue;
+
+					insertContact(data[k]);
+				}
+				$("#contact-loading").hide(250);
+			},
+			error : function(data) {
+				logger.log("loader.js", "loadContacts()", "Erreur");
+			}
+		});
+	}
+	
+	function updateContactFromPopup(module, context, $elem){
+		var form = application.require("utils/forms").getForm("#contact-form");
+
+		if (!form.validate(true)) {
+			console.log("Formulaire incomplet !");
+			return;
+		}
+
+		var values = form.getValues();
+
+		$.ajax({
+			url: "/app/contact/update",
+			data: {
+				json: JSON.stringify(values)
+			},
+			method: "POST",
+			dataType: "JSON"
+		}).done(function(resp) {
+			updateContact(resp);
+			application.require("utils/popups").unload("contact");
+			notifications.notify("Mise à jour réussie", "success", "user");
+		}).fail(function(xhr) {
+			if (xhr.responseJSON == 473) {
+				form.tagInput($("#popup-name-entreprise"), "danger",
+						errors.translate(xhr.repsonseJSON));
+			} else {
+				notifications.notify(errors.translate(xhr.responseJSON), "warning");
+			}
+		});
+	}
+	
+	function createContact(){
+		var form = application.require("utils/forms").getForm("#contact-form");
+
+		if (!form.validate(true)) {
+			console.log("Formulaire incomplet !");
+			return;
+		}
+
+		$.ajax({
+			url: "/app/contact/create",
+			data: {
+				json: JSON.stringify(form.getValues())
+			},
+			method: "POST",
+			dataType: "JSON"
+		}).done(function(resp) {
+			insertContact(resp);
+			application.require("utils/popups").unload("contact");
+			notifications.notify("Inscription du contact réussie", "success", "user");
+		}).fail(function(xhr) {
+			if (xhr.responseJSON == 473) {
+				form.tagInput($("#popup-name-entreprise"), "danger",
+						errors.translate(xhr.repsonseJSON));
+			} else {
+				notifications.notify(errors.translate(xhr.responseJSON), "warning");
+			}
+		});
+	}
+
+	function displayContact(module, context){
+		var data = getContact(context.pk);
+
+		data["title"] = "Profil de l'entreprise " + data["company.name"];
+
+		application.require("utils/popups").load("contact", data, function (modal) {
+			$("#popup-entreprise-contact").html("<option value='" + data["company.pk"]
+					+ "'>" + data["company.name"] + "</option>");
+
+			modal.$.find(".panel-footer").hide(0);
+			modal.$.find("input").each(function() { $(this).attr("disabled", "disabled"); });
+			$("#popup-entreprise-contact").val(data["company.pk"]);
+			if (data.active == true) {
+				modal.$.find(".state-inactive").hide(0);
+			} else {
+				modal.$.find(".state-inactive").show(0);
+			}
+			modal.$.find("#contact-active-row").hide(0);
+		});
+	}
+	
+	function showCreateContact(){
+		application.require("utils/popups").load("contact", {
+			title : "Créer un nouveau contact",
+			"button-text" : "Créer"
+		}, function (modal) {
+			modal.$.find(".state-inactive").hide(0);
+			modal.$.find(".popup-confirm:first").attr("data-view", "contacts:create");
+			modal.$.find(".panel-footer").show(0);
+			modal.$.find("#contact-active-row").hide(0);
+			modal.$.find("input").each(function() { $(this).removeAttr("disabled"); });
+		}, listCompanies());
+	}
+	
+	function showEditContact(module, context){
+		var data = getContact(context.pk);
+
+		data["title"]  = "Mettre à jour " + data.lastname + " " + data.firstname;
+		data["button-text"] = "Mettre à jour";
+
+		application.require("utils/popups").load("contact", data, function (modal) {
+			modal.$.find(".popup-confirm:first").attr("data-view", "contacts:update");
+			modal.$.find(".panel-footer").show(0);
+			modal.$.find("input").each(function() { $(this).removeAttr("disabled"); });
+			modal.$.find("#contact-active-row").show(0);
+			if (data.active == true) {
+				modal.$.find(".state-inactive").hide(0);
+			} else {
+				modal.$.find(".state-inactive").show(0);
+			}
+		}, listCompanies(data["company.pk"]));
+	}
+	// loadCompaniesPopUp();
+	// function selectCompanies(list){
+	// 	if(list.length === 0){
+	// 		logger.log("contact.js", "selectCompanies()", "Pas d'entreprise");
+	// 	} else {
+	// 		for(var i in list){
+	// 			var o = list[i];
+	// 			$("#contact-form select").append("<option value='" + o.companyName
+	// 					+"'>" + o.companyName + "</option>");
+	// 		}
+	// 	}
+	// }
+	// function loadCompaniesPopUp(){
+	// 	$.ajax({
+	// 		url : "/app/entreprise/list",
+	// 		method : "POST",
+	// 		dataType : "JSON",
+	// 		success :  function(data){
+	// 				selectCompanies(data);
+	// 		},
+	// 		error :
+	// 			function(xhr){
+	// 				logger.log("contact.js", "loadCompaniesPopUp()", "Erreur");
+	// 		}
+	// 	});
+	// }
+	//
+	// function showPopup(action, id){
+	// 	logger.log("contact.js", "showPopup()", "in");
+	// 	 if (action != "edit" && action != "create" && action != "view") {
+	//       return false;
+	//     }
+	// 	 $("#popup-new-contact").modal("show");
+	//
+	// 	application.require("utils/forms", function(module){
+	// 		module.getForm("#contact-form").clean();
+	// 	});
+  //
+	// 	if(action === "create"){
+	// 		$("#btn-save-popup-contact").show();
+	// 		$("#btn-update-popup-contact").hide();
+	// 		$("#popup-new-contact span[data-toggle='contact-name']").text(": Créer");
+	// 	}else {
+	// 		var row = $("#contact-table").find("table tr[data-pk='" + id + "']");
+	// 		fillPopup(row);
+  //
+	// 		$("#btn-save-popup-contact").hide();
+  //
+	// 		if (action == "view") {
+	// 			$("#btn-update-popup-entreprise").hide();
+	// 		} else {
+	// 			$("#btn-update-popup-contact").show();
+	// 		}
+  //
+	// 		$("#popup-new-contact span[data-toggle='contact-name']")
+	// 			.text(row.children("td:first").text());
+  //
+	// 		//$("#btn-update-popup-contact").click(function() {
+	// 		//	application.require("contacts", "update");
+	// 		//});
+	// 	}
+	// 	$("#popup-new-contact .modal-dialog:first").removeClass("modal-lg modal-xl");
+	// 	if (action !=="edit"){
+	// 		$("#popup-new-contact .modal-dialog:first").addClass("modal-lg");
+	// 	}else {
+	// 		$("#popup-new-contact .modal-dialog:first").addClass("modal-xl");
+	// 	}
+	// }
+	//
+	// function fillPopup(cont){
+	// 	$("#popup-pk-contact").val(cont.data("pk"));
+	// 	$("#popup-version-contact").val(cont.data("version"));
+	// 	cont = cont.find("td:first");
+	// 	$("#popup-pk-comp-contact").val(cont.data("pk"));
+	// 	$("#popup-new-contact select option[value='" + cont.text()
+	// 			+ "']").prop('selected', true);
+	// 	$("#popup-new-contact select").css("background-color", "#FAFAD2");
+	// 	$("#popup-new-contact select").change(function(){
+	// 		$("#popup-new-contact select").css("background-color", "");
+	// 	});
+	// 	cont = cont.next("td");
+	// 	var first = cont.text().substr(0, cont.text().indexOf(' '));
+	// 	$("#popup-firstname-contact").val(first);
+	// 	$("#poup-firstname-contact").focus();
+	// 	var last = cont.text().substr(cont.text().indexOf(' ')+1);
+	// 	$("#popup-lastname-contact").val(last);
+	// 	cont = cont.next("td");
+	// 	if(cont.text() !== ""){
+	// 		$("#popup-tel-contact").val(cont.text());
+	// 	}
+	// 	cont = cont.next("td");
+	// 	if(cont.text() !== ""){
+	// 		$("#popup-email-contact").val(cont.text());
+	// 	}
+	// 	application.require("utils/loader", function(module){
+	// 		module.fillColor("#popup-new-contact")
+	// 	});
+	// }
+	
+	return {
+		main : function() {
+			logger.log("contact.js", "main", "");
+			listContact();
+		},
+		showCreate : function(){
+			logger.log("contact.js", "showCreate", "");
+			showCreateContact();
+		},
+		showEdit : function (module, context) {
+			logger.log("contact.js", "showCreate", "");
+			showEditContact(module, context);
+		},
+		display : function (module, context) {
+			logger.log("contact.js", "display", "");
+			displayContact(module, context);
+		},
+		update : function(module, context, $elem){
+			logger.log("contact.js", "update", "");
+			updateContactFromPopup(module, context, $elem);
+		},
+		create : function() {
+			logger.log("contact.js", "create", "");
+			createContact();
+		}
+	};
+}());

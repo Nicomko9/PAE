@@ -1,0 +1,94 @@
+package mock;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import biz.objects.Address;
+import biz.objects.Company;
+import biz.objects.Contact;
+import biz.objects.User;
+
+public class DataBaseMock {
+
+  private List<User> users = new ArrayList<>();
+  private List<Address> addresses = new ArrayList<>();
+  private List<Company> companies = new ArrayList<>();
+  private List<Contact> contacts = new ArrayList<>();
+  
+  {
+    
+  }
+  
+  public DataBaseMock() {
+    
+  }
+  
+  private int getUser(User user) {
+    return users.indexOf(user);
+  }
+  
+  public boolean addUser(User user) {
+    return users.add(user);
+  }
+  
+  public boolean updateUser(User user) {
+    int index = getUser(user);
+    if(index == -1) {
+      return false;
+    }
+    users.set(index, user);
+    return true;
+  }
+  
+  private int getAddress(Address address) {
+    return addresses.indexOf(address);
+  }
+  
+  public boolean addAddress(Address address) {
+    return addresses.add(address);
+  }
+  
+  public boolean updateAddress(Address address) {
+    int index = getAddress(address);
+    if(index == -1) {
+      return false;
+    }
+    addresses.set(index, address);
+    return true;
+  }
+  
+  private int getCompany(Company company) {
+    return companies.indexOf(company);
+  }
+  
+  public boolean addCompany(Company company) {
+    return companies.add(company);
+  }
+  
+  public boolean updateCompany(Company company) {
+    int index = getCompany(company);
+    if(index == -1) {
+      return false;
+    }
+    companies.set(index, company);
+    return true;
+  }
+  
+  private int getContact(Contact contact) {
+    return contacts.indexOf(contact);
+  }
+  
+  public boolean addContact(Contact contact) {
+    return contacts.add(contact);
+  }
+  
+  public boolean updateContact(Contact contact) {
+    int index = getContact(contact);
+    if(index == -1) {
+      return false;
+    }
+    contacts.set(index, contact);
+    return true;
+  }
+  
+}

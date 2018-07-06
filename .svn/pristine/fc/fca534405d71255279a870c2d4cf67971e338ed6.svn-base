@@ -1,0 +1,65 @@
+package biz.objects;
+
+import static org.junit.Assert.*;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import static util.Util.*;
+
+public class UserBizTest {
+
+  private User user1, user2;
+  
+  @Before
+  public void setUp() throws Exception {
+    user1 = BusinessFactory.getUser();
+    fillUser(user1, "zakaria.lamrini@student.vinci.be", "Zakaria", "Lamrini", "zak", "secret", 0);
+    user2 = BusinessFactory.getUser();
+    fillUser(user2, "prenom.nom@student.vinci.be", "prenom", "nom", "pre", "motdepasse", 1);
+  }
+
+  @Test
+  public void testHashCode1() {
+    assertNotEquals("user1 must be different of user2",user1.hashCode(), user2.hashCode());
+  }
+  
+  @Test
+  public void testHashCode2() {
+    user2.setLogin("zak");
+    assertEquals("users must be equals",user1.hashCode(),user2.hashCode());
+  }
+
+  @Test
+  public void testComparePassword1() {
+    assertFalse(user1.comparePassword("msg"));
+  }
+
+  @Test
+  public void testComparePassword2() {
+    assertTrue(user1.comparePassword("secret"));
+  }
+  
+  @Test
+  public void testComparePassword3() {
+    assertFalse(user1.comparePassword(null));
+  }
+
+  @Test
+  public void testComparePassword4() {
+    user1.setPassword("secrets");
+    assertFalse(user1.comparePassword("secret"));
+  }
+  
+  @Test
+  public void testEquals1() {
+    assertFalse("user must be different of user2", user1.equals(user2));
+  }
+  
+  @Test
+  public void testEquals2() {
+    user2.setLogin("zak");
+    assertTrue("users must be equals", user1.equals(user2));
+  }
+
+}

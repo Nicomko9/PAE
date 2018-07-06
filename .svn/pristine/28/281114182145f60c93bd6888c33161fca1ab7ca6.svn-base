@@ -1,0 +1,167 @@
+package biz;
+
+import java.util.List;
+
+import biz.dto.ContactDto;
+import biz.exceptions.BusinessErrorException;
+import biz.exceptions.BusinessException;
+import biz.exceptions.ErrorsCode;
+import biz.objects.Contact;
+import dal.DalFrontEndServices;
+import dal.dao.ContactDao;
+import ihm.utils.DataValidator;
+import ihm.utils.Logger;
+
+/**
+ * Implementation of the Contact's Use Case Controller.
+ */
+class ContactUccImpl implements ContactUcc {
+
+  private DalFrontEndServices dal;
+
+  private ContactDao contactDao;
+
+  ContactUccImpl(DalFrontEndServices dal, ContactDao contactDao) {
+    this.dal = dal;
+    this.contactDao = contactDao;
+  }
+
+  /**
+   * Persists a contact.
+   *
+   * @param contactDto to persists.
+   * @return the contactDto with the information added in the DataBase
+   */
+  public ContactDto createNewContact(ContactDto contactDto) {
+    Logger.log("ContactUccImpl", "createNewContact", "Creating contact");
+    if (!DataValidator.validateString(contactDto.getFirstname())
+        || !DataValidator.validateString(contactDto.getLastname())
+        || !DataValidator.validateString(contactDto.getCompany().getCompanyName())) {
+      throw new BusinessException(ErrorsCode.BUSINESS_INVALID_CONTACT);
+    }
+    /*
+     * if (null != this.contactDao.findByPk(contact.getPk())) { Logger.log("JeUccImpl",
+     * "createNewJe", "another contact already exists for this ID"); throw new
+     * BusinessException(ErrorsCode.BUSINESS_ALREADY_CONTACT_FOR_ID); }
+     */
+    Contact contact = (Contact) contactDto;
+    contact.prepareForInsert();
+    
+    if (null != this.contactDao.findByEmail(contactDto.getEmail())) {
+      throw new BusinessErrorException(ErrorsCode.BUSINESS_EMAIL_CONTACT_EXISTED);
+    }
+
+    try {
+      this.dal.startTransaction();
+
+
+      contactDto = this.contactDao.create(contact);
+      if (null == contactDto) {
+        throw new BusinessErrorException(ErrorsCode.INTERNAL_UNKNOWN_ERROR);
+      }
+
+      this.dal.commitTransaction();
+
+      return contactDto;
+    } catch (BusinessException exception) {
+      Logger.log("ContactUccImpl", "createNewContact",
+          "Error inserting contact : " + exception.getErrorCode());
+      throw exception;
+    } catch (Exception exception) {
+      Logger.log("ContactUccImpl", "createNewContact",
+          "Error inserting contact : " + exception.getMessage());
+      this.dal.rollbackTransaction();
+
+      throw new BusinessException(ErrorsCode.UNDEFINED_ERROR);
+    }
+  }
+
+  /**
+   * Get All the contacts.
+   *
+   * @return {@link List} of {@link ContactDto}
+   * @throws IllegalArgumentException if there's an error with the query
+   */
+  public List<ContactDto> getAllContact() {
+    try {
+      Logger.log("ContactUccImp", "getAllContact", "Finding");
+      return this.contactDao.findAllContacts();
+    } catch (Exception exception) {
+      Logger.log("ContactUccImpl", "getAllContact", "Error querying contacts");
+      throw new IllegalArgumentException(exception.getMessage());
+    }
+  }
+
+  /**
+   * Get All the contacts for the given company name.
+   *
+   * @return {@link List} of {@link ContactDto}
+   * @throws IllegalArgumentException if there's an error with the query
+   */
+  public List<ContactDto> getContactsForCompany(String name) {
+    try {
+      if (!DataValidator.validateString(name)) {
+        throw new BusinessException(ErrorsCode.BUSINESS_INVALID_COMPANY_NAME);
+      }
+      return this.contactDao.findContactsForCompany(name);
+    } catch (Exception exception) {
+      Logger.log("ContactUccImpl", "getContactsForCompany", "Error querying contacts");
+      throw new IllegalArgumentException(exception.getMessage());
+    }
+  }
+
+  /**
+   * Update a contact already present in the database.
+   *
+   * @param contactDto {@link ContactDto} to persist
+   * @return the information of the contact updated in the database
+   */
+  public ContactDto update(ContactDto contactDto) {
+    Logger.log("ContactUccImpl", "update", "Updating contact");
+
+    Contact contact = (Contact) contactDto;
+    contact.checkConstraints();
+
+    // Si on modifie l'email, cela ne fonctionne pas. De même s'il n'y a pas d'email
+    // if (!contactDto.equals(this.contactDao.findByEmail(contactDto.getEmail()))) {
+    // throw new BusinessErrorException(ErrorsCode.BUSINESS_EMAIL_CONTACT_EXISTED);
+    // }
+    
+    try {
+      this.dal.startTransaction();
+      Logger.log("ContactUccImpl", "update", "Start transaction");
+
+      contactDto = this.contactDao.update(contact);
+
+      if (null == contactDto) {
+        Logger.log("ContactUccImpl", "update", "Throw Exception because of null");
+        throw new BusinessErrorException(ErrorsCode.INTERNAL_UNKNOWN_ERROR);
+      }
+
+      this.dal.commitTransaction();
+
+      return contactDto;
+    } catch (Exception exception) {
+      Logger.log("ContactUccImpl", "update", "Error updating contact : " + exception.getMessage());
+      this.dal.rollbackTransaction();
+      throw new BusinessException(ErrorsCode.UNDEFINED_ERROR);
+    }
+  }
+
+  /**
+   * Give a {@link ContactDto} based on her firstname, her lastname and her company's name.
+   * 
+   * @param firstname the contact's firstname to match
+   * @param lastname the contact's lastname to match
+   * @param companyName the contact's company's name to match
+   * @return the {@link ContactDto} found whith the information
+   */
+  public ContactDto getContact(String firstname, String lastname, String companyName) {
+    try {
+      return this.contactDao.findContact(firstname, lastname, companyName);
+    } catch (IllegalArgumentException exception) {
+      Logger.log("ContactUccImpl", "getContact", "Error querying Contact");
+      throw new IllegalArgumentException(exception.getMessage());
+    }
+  }
+}

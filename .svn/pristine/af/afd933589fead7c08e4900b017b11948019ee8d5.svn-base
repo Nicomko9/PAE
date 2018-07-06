@@ -1,0 +1,130 @@
+package ihm;
+
+import bizz.DtoFactory;
+import bizz.dto.UserDto;
+import com.auth0.jwt.JWTSigner;
+import com.auth0.jwt.JWTVerifier;
+import com.auth0.jwt.JWTVerifyException;
+import config.AppConfig;
+import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
+import java.util.HashMap;
+import java.util.Map;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+class SessionManager {
+
+  private static final String USER_SESSION_ID = "jwtUser";
+
+  private JWTSigner jwtSigner = new JWTSigner(AppConfig.INSTANCE.getProperty("jwt.secret"));
+  private JWTVerifier jwtVerifier = new JWTVerifier(AppConfig.INSTANCE.getProperty("jwt.secret"));
+
+  private DtoFactory dtoFactory;
+
+  SessionManager(DtoFactory dtoFactory) {
+    this.dtoFactory = dtoFactory;
+  }
+
+  /**
+   * Supprimer une session.
+   *
+   * @param request la requete en cours
+   * @param response la réponse en cours
+   */
+  void deleteSession(HttpServletRequest request, HttpServletResponse response) {
+    request.getSession().removeAttribute(USER_SESSION_ID);
+
+    Cookie cookie = new Cookie(USER_SESSION_ID, null);
+    cookie.setMaxAge(0);
+    response.addCookie(cookie);
+  }
+
+  /**
+   * Démarre une session.
+   *
+   * @param req requete en cours
+   * @param resp réponse en cours
+   * @param userDto l'utilisateur pour lequel démarrer la session
+   * @return l'objet DTO enregistré
+   */
+  UserDto createSession(HttpServletRequest req, HttpServletResponse resp, UserDto userDto) {
+    Map<String, Object> map = new HashMap<>();
+
+    map.put("login", userDto.getLogin());
+    map.put("lastname", userDto.getLastname());
+    map.put("firstname", userDto.getFirstname());
+    map.put("email", userDto.getEmail());
+    map.put("responsible", userDto.isResponsible() ? "1" : "0");
+
+    String signer = jwtSigner.sign(map);
+
+    req.getSession().setAttribute(USER_SESSION_ID, userDto);
+    req.getSession().setMaxInactiveInterval(5 * 60);
+
+    Cookie cookie = new Cookie(USER_SESSION_ID, signer);
+    cookie.setComment("JWT cookie container");
+    cookie.setMaxAge(Integer.parseInt(AppConfig.INSTANCE.getProperty("cookie.max-age", "6480000")));
+    resp.addCookie(cookie);
+
+    return userDto;
+  }
+
+  /**
+   * Retourne la session liée à la requete en cours.
+   *
+   * @param req requete en cours
+   * @return l'objet DTO stocké
+   */
+  UserDto readSession(HttpServletRequest req) {
+    try {
+      try {
+        UserDto user = (UserDto) req.getSession().getAttribute(USER_SESSION_ID);
+
+        if (null != user) {
+          return user;
+        }
+      } catch (ClassCastException e) { /* continue */ }
+
+      Cookie[] cookies = req.getCookies();
+      if (req.getCookies() == null) {
+        return null;
+      }
+
+      String token = null;
+      for (Cookie c : cookies) {
+        if (c.getName().equals(USER_SESSION_ID)) {
+          token = c.getValue();
+
+          break;
+        }
+      }
+
+      if (token == null) {
+        return null;
+      }
+
+      Map<String, Object> decodedPayload = jwtVerifier.verify(token);
+      UserDto user = this.dtoFactory.getUser();
+
+      user.setLogin((String) decodedPayload.get("login"));
+      user.setFirstname((String) decodedPayload.get("firstname"));
+      user.setLastname((String) decodedPayload.get("lastname"));
+      user.setEmail((String) decodedPayload.get("email"));
+      user.setResponsible(decodedPayload.get("responsible").equals("1"));
+
+      req.getSession().setAttribute(USER_SESSION_ID, user);
+
+      return user;
+    } catch (InvalidKeyException | NoSuchAlgorithmException | IllegalStateException
+        | SignatureException | IOException | JWTVerifyException e) {
+      e.printStackTrace();
+
+      return null;
+    }
+  }
+
+}

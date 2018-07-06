@@ -1,0 +1,73 @@
+package ihm;
+
+import java.io.IOException;
+import java.util.Map;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import ucc.dto.UserDto;
+
+public class ApplicationServlet extends HttpServlet {
+
+  // Map pour json
+  Map<String, Object> m;
+  UserDto user;
+
+  @Override
+  protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+      throws ServletException, IOException {
+
+    System.out.println("doPost");
+    switch (req.getPathInfo()) {
+      case "/conn":
+        // Traitement Json
+        m = IhmUtilitaire.traitementJsonConn(req.getParameter("json").toString());
+
+        // Création et Remplissage du UserDTO
+        user = IhmUtilitaire.setUserDto(m.get("login").toString(), m.get("password").toString());
+
+        // Appel verificaiton correspondance mdp
+        if (IhmUtilitaire.connectUser(user)) {
+          resp.getWriter().print("Ok");
+        } else {
+          resp.getWriter().print("Nok");
+        }
+        break;
+      case "/insc":
+        System.out.println("Inscription");
+        // traitement du Json
+        m = IhmUtilitaire.traitementJsonConn(req.getParameter("json"));
+
+        // Création et Remplissage du UserDTO
+        user = IhmUtilitaire.setUserDto(m.get("login").toString(), m.get("name").toString(),
+            m.get("first_name").toString(), m.get("password").toString(),
+            m.get("email").toString());
+
+        String ret = IhmUtilitaire.inscriptionUser(user);
+        if (ret.equals("Ok")) {
+          resp.getWriter().print("Ok");
+        } else if (ret.equals("Login")) {
+          resp.getWriter().print("Login");
+        } else if (ret.equals("Email")) {
+          resp.getWriter().print("Email");
+        }
+        break;
+      default:
+        System.out.println("Default");
+        System.out.println(req.getPathInfo());
+        break;
+    }
+  }
+
+
+  /*
+   * @Override public void service(HttpServletRequest req, HttpServletResponse res) throws
+   * ServletException, IOException { String resp = "Hello world response from path " +
+   * req.getPathInfo() + " !"; System.out.println(resp); res.getWriter().write(resp); }
+   */
+
+
+}

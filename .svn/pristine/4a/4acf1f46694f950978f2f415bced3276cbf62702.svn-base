@@ -1,0 +1,137 @@
+package ihm;
+
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.HashMap;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import bizz.exceptions.BusinessErrorException;
+import bizz.exceptions.BusinessException;
+import ucc.DtoEmptyFactory;
+import ucc.UserUcc;
+import ucc.dto.UserDto;
+import utils.Logger;
+
+public class ApplicationServlet extends HttpServlet {
+
+  private JsonUtil jsonutil;
+  private UserUcc userUcc;
+
+  public ApplicationServlet(UserUcc userUcc) {
+    this.jsonutil = new JsonUtil();
+    this.userUcc = userUcc;
+  }
+
+  @Override
+  protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+      throws ServletException, IOException {
+
+    UserDto userDto;
+
+    switch (req.getPathInfo()) {
+      case "/connection":
+        userDto = DtoEmptyFactory.INSTANCE.getUser();
+
+        userDto.setLogin(req.getParameter("login"));
+        userDto.setPassword(req.getParameter("password"));
+
+        this.handleResponse(resp, this.userUcc.connect(req, resp, userDto));
+
+        break;
+      case "/signup":
+
+        userDto = DtoEmptyFactory.INSTANCE.getUser();
+
+
+        userDto.setLogin(req.getParameter("login"));
+        userDto.setLastname(req.getParameter("name"));
+        userDto.setFirstname(req.getParameter("surname"));
+        userDto.setPassword(req.getParameter("password"));
+        userDto.setEmail(req.getParameter("email"));
+
+        this.handleResponse(resp, this.userUcc.subscribe(userDto));
+        break;
+      case "/disconnect":
+        this.userUcc.disconnect(req, resp);
+        this.handleResponse(resp, true);
+
+        break;
+      default:
+        this.handleResponse(resp, "Page not found", 404);
+    }
+  }
+
+  protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+      throws ServletException, IOException {
+    switch (req.getPathInfo()) {
+      case "/auth":
+        this.handleResponse(resp, this.userUcc.getUser(req));
+
+        break;
+      default:
+        this.handleResponse(resp, "Page not found", 404);
+    }
+  }
+
+  /**
+   * In case of business exception, render a JSON response "{ error : message }" .
+   */
+  @Override
+  protected void service(HttpServletRequest req, HttpServletResponse resp)
+      throws ServletException, IOException {
+    try {
+      System.out.println("===================== new request ========================");
+      Logger.log("ihm", "servlet", "handling path " + req.getPathInfo());
+      super.service(req, resp);
+    } catch (BusinessException e) {
+      System.out.println("Business Exception => " + e.getMessage() + " \n\tin "
+          + e.getStackTrace()[0].getFileName() + ":" + e.getStackTrace()[0].getLineNumber());
+      this.handleResponse(resp, new HashMap<String, String>() {
+        {
+          put("error", e.getMessage());
+        }
+      }, (e instanceof BusinessErrorException) ? 500 : 200);
+    }
+  }
+
+  /**
+   * Send a response to backend.
+   *
+   * @param resp response object
+   * @param data the data to send to front-end
+   * @param code page status code (200, 404, etc)
+   */
+  private void handleResponse(HttpServletResponse resp, Object data, int code) {
+    try {
+      String str = this.jsonutil.encode(data);
+      byte[] bytes = str.getBytes(Charset.forName("UTF-8"));
+
+      resp.setContentLength(bytes.length);
+      resp.setContentType("application/javascript");
+      resp.getOutputStream().write(bytes);
+      resp.setStatus(code);
+    } catch (IOException exception) {
+      try {
+        resp.sendError(500);
+      } catch (IOException e) {
+        System.out.println("System internal error : " + e.getMessage());
+      }
+    } finally {
+      Logger.log("ihm", "servlet", "sending response with code " + resp.getStatus());
+      System.out.println("===================== end request ========================");
+    }
+  }
+
+  /**
+   * Default status code is 200.
+   */
+  private void handleResponse(HttpServletResponse resp, Object data) {
+    handleResponse(resp, data, 200);
+  }
+
+
+}

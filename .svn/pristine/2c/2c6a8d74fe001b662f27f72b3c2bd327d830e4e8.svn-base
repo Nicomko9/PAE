@@ -1,0 +1,44 @@
+package dal.dao;
+
+
+import java.util.List;
+
+import biz.dto.ContactDto;
+import biz.dto.ParticipationDto;
+import biz.objects.Contact;
+import biz.objects.Participation;
+import dal.dao.schema.ParticipationSchema;
+
+public interface ParticipationDao extends ParticipationSchema {
+
+  /**
+   * Persist a contact into the table contacts in database.
+   *
+   * @param contact the {@link Contact} to persist
+   * @return the {@link ContactDto} persisted
+   */
+  ParticipationDto create(Participation participation);
+  
+  /**
+   * Update a contact already present in the database.
+   * 
+   * @param contact {@link Contact} to persist
+   * @return the new value of the {@link Contact} casted in {@link ContactDto}
+   */
+  ParticipationDto update(Participation participation);
+  
+  /**
+   * Get All the participation for the given year.
+   *
+   * @return {@link List} of {@link ParticipationDto}
+   */
+  List<ParticipationDto> findByYear(int year);
+  
+  /**
+   * Get All the participation for the given company number.
+   *
+   * @return {@link List} of {@link ParticipationDto}
+   */
+  List<ParticipationDto> findByCompanyNumber(int companyNumber);
+  
+}

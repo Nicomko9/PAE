@@ -1,0 +1,20 @@
+<div name="page-title" class="row">
+  <div class="col-lg-12 col-md-12">
+    <h1 class="page-header">
+      Résultats de recherche
+      (<span data-attribute="view"></span>)
+    </h1>
+  </div>
+
+  <table class="table">
+    <thead>
+      <tr>
+
+      </tr>
+    </thead>
+    <tbody>
+
+    </tbody>
+  </table>
+
+</div>

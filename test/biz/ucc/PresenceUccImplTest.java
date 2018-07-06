@@ -1,0 +1,57 @@
+package biz.ucc;
+
+import static org.junit.Assert.*;
+import static util.Util.fillPresence;
+
+import java.time.LocalDate;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import biz.PresenceUcc;
+import biz.objects.BusinessFactory;
+import biz.objects.Company;
+import biz.objects.Contact;
+import biz.objects.Je;
+import biz.objects.Participation;
+import biz.objects.Presence;
+import config.AppConfig;
+import mock.DataBaseMock;
+
+public class PresenceUccImplTest {
+
+  private static AppConfig appConfig;
+  private static PresenceUcc presenceUcc;
+  private static Presence presence;
+  private static Participation participation;
+  private static Je je;
+  private static Company company;
+  private static Contact contact;
+
+  @BeforeClass
+  public static void setUpBeforeClass() throws Exception {
+    appConfig = new AppConfig(AppConfig.APP_MOCK_DAO);
+    if(!appConfig.load())
+      throw new Exception();
+    presenceUcc = appConfig.newInstanceOf(PresenceUcc.class);
+
+    DataBaseMock dataBaseMock = appConfig.newInstanceOf(DataBaseMock.class);
+    je = (Je) dataBaseMock.getJeByYear(LocalDate.now().minusYears(1).getYear());
+    participation = (Participation) dataBaseMock.getParticipationByYear(je.getDayYear()).get(0);
+    company = (Company) participation.getCompany();
+    contact = (Contact) dataBaseMock.getContactsByCompany(company).get(0);
+    presence = BusinessFactory.getPresence();
+  }
+
+  @Test
+  public void testRegister() {
+    fillPresence(presence, company, contact, participation);
+    assertNotNull(presenceUcc.register(presence));
+  }
+
+  @Test
+  public void testGetAllPresencesOf() {
+    assertTrue(presenceUcc.getAllPresencesOf(je).isEmpty());
+  }
+}
+

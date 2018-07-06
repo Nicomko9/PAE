@@ -1,0 +1,33 @@
+package biz;
+
+import biz.dto.CompanyDto;
+import biz.dto.ContactDto;
+import biz.dto.UserDto;
+
+/**
+ * Data Transfer Object Factory.
+ */
+public interface DtoFactory {
+
+  /**
+   * Give an empty User.
+   *
+   * @return empty {@link UserDto}
+   */
+  UserDto getUser();
+
+  /**
+   * Give an empty Company.
+   *
+   * @return empty {@link CompanyDto}
+   */
+  CompanyDto getCompany();
+
+  /**
+   * Give an empty Contact.
+   * 
+   * @return empty {@link ContactDto}
+   */
+  ContactDto getContact();
+
+}

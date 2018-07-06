@@ -1,0 +1,161 @@
+package biz.objects;
+
+import biz.dto.CompanyDto;
+import biz.exceptions.BusinessException;
+
+/**
+ * Contact's business object.
+ */
+class ContactBiz extends BizObject implements Contact {
+
+  /**
+   * Value of the primary key of the Object Contact.
+   */
+  private int primaryKey;
+
+  /**
+   * Contact's company.
+   */
+  private Company company;
+
+  /**
+   * Contact's lastname.
+   */
+  private String lastname;
+
+  /**
+   * Contact's firstname.
+   */
+  private String firstname;
+
+  /**
+   * Contact's email.
+   */
+  private String email;
+
+  /**
+   * Contact's phone.
+   */
+  private String phone;
+
+  /**
+   * Contact's activity.
+   */
+  private boolean active = true;
+
+  ContactBiz() {
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    ContactBiz other = (ContactBiz) obj;
+    return primaryKey == other.primaryKey;
+  }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + primaryKey;
+    return result;
+  }
+
+  /**
+   * Prepare the {@link Contact} to be insert in the database.
+   */
+  public void prepareForInsert() {
+    this.checkConstraints();
+  }
+
+  /**
+   * Check some Constraints.
+   *
+   * @throws BusinessException if of no respect of the constraints.
+   */
+  public void checkConstraints() throws BusinessException {
+    // Autres vérifications style taille des champs etc
+  }
+  
+  /*
+   * Getters & setters.
+   */
+
+
+  public CompanyDto getCompany() {
+    return company;
+  }
+
+  public void setCompany(Company company) {
+    this.company = company;
+  }
+
+  public String getLastname() {
+    return lastname;
+  }
+
+  public void setLastname(String lastname) {
+    this.lastname = lastname;
+  }
+
+  public String getFirstname() {
+    return firstname;
+  }
+
+  public void setFirstname(String firstname) {
+    this.firstname = firstname;
+  }
+
+  public String getEmail() {
+    return email;
+  }
+
+  public void setEmail(String email) {
+    this.email = email;
+  }
+
+  public String getPhone() {
+    return phone;
+  }
+
+  public void setPhone(String phone) {
+    this.phone = phone;
+  }
+
+  public boolean isActive() {
+    return active;
+  }
+
+  public void setActive(boolean active) {
+    this.active = active;
+  }
+
+  @Override
+  public int getPk() {
+    return primaryKey;
+  }
+
+  @Override
+  public void setPk(int primaryKey) {
+    this.primaryKey = primaryKey;
+  }
+
+  @Override
+  int getVersion() {
+    return version;
+  }
+
+  @Override
+  void setVersion(int version) {
+    this.version = version;
+  }
+
+}

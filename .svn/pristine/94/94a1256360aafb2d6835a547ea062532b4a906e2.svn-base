@@ -1,0 +1,90 @@
+package biz.ucc;
+
+import static org.junit.Assert.*;
+import static util.Util.fillPresence;
+
+import java.time.LocalDate;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import biz.PresenceUcc;
+import biz.objects.BusinessFactory;
+import biz.objects.Company;
+import biz.objects.Contact;
+import biz.objects.Je;
+import biz.objects.Participation;
+import biz.objects.Presence;
+import config.AppConfig;
+import mock.DataBaseMock;
+
+public class PresenceUccImplTest {
+
+  private static AppConfig appConfig;
+  private static PresenceUcc presenceUcc;
+  private static Presence presence;
+  private static Participation participation;
+  private static Je je;
+  private static Company company;
+  private static Contact contact;
+//  private static Address address;
+//  private static User creator;
+//  private static int pkAddress, pkCreator, pkCompany, pkContact;
+
+  @BeforeClass
+  public static void setUpBeforeClass() throws Exception {
+    appConfig = new AppConfig(AppConfig.APP_MOCK_DAO);
+    if(!appConfig.load())
+      throw new Exception();
+    presenceUcc = appConfig.newInstanceOf(PresenceUcc.class);
+
+//    address = createAddress(appConfig);
+//    pkAddress = address.getPk();
+
+//    creator = createUser(appConfig);
+//    pkCreator = creator.getPk();
+
+//    company = createCompany(appConfig, address, creator);
+//    pkCompany = company.getPk();
+
+//    contact = createContact(appConfig, company);
+//    pkContact = contact.getPk();
+
+//    je = createJe(appConfig);
+
+//    participation = createParticipation(appConfig, company, je, "facturée", "payée");
+    DataBaseMock dataBaseMock = DataBaseMock.getInstance();
+    je = (Je) dataBaseMock.getJeByYear(LocalDate.now().minusYears(1).getYear());
+    participation = (Participation) dataBaseMock.getParticipationByYear(je.getDayYear()).get(0);
+    company = (Company) participation.getCompany();
+    contact = (Contact) dataBaseMock.getContactsByCompany(company).get(0);
+//    presence = createPresence(appConfig, company, contact, participation);
+    presence = BusinessFactory.getPresence();
+  }
+
+//  @AfterClass
+//  public static void tearDownAfterClass() throws Exception {
+//    deleteTestRecord(appConfig);
+//  }
+
+//  @Before
+//  public void setUp() throws Exception {
+//    fillAddress(address, BOX, COMMUNE, pkAddress, STREET, STREET_NUMBER, ZIP_CODE);
+//    fillUser(creator, EMAIL, FIRSTNAME, LASTNAME, LOGIN, PASSWORD, pkCreator);
+//    fillCompany(company, address, COMPANY_NAME, creator, pkCompany);
+//    fillContact(contact, company, EMAIL, FIRSTNAME, LASTNAME, PHONE, pkContact);
+//    fillPresence(presence, company, contact, participation);    
+//  }
+
+  @Test
+  public void testRegister() {
+    fillPresence(presence, company, contact, participation);
+    presenceUcc.register(presence);
+  }
+
+  @Test
+  public void testGetAllPresencesOf() {
+    assertTrue(presenceUcc.getAllPresencesOf(je).isEmpty());
+  }
+}
+

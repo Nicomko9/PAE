@@ -1,0 +1,331 @@
+package dal.dao;
+
+import biz.DtoFactory;
+import biz.dto.CompanyDto;
+import biz.dto.ContactDto;
+import biz.objects.Company;
+import biz.objects.Contact;
+import dal.DalBackEndServices;
+import dal.dao.schema.ContactSchema;
+import ihm.utils.Logger;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * Contact's Data Access Object Class.
+ */
+class ContactDaoImpl extends AbstractDao implements ContactDao, ContactSchema {
+
+  /**
+   * Insert Contact auto generated query.
+   */
+  private static final String CONTACT_CREATE_QUERY =
+      "INSERT INTO " + TABLE + " (" + String.join(",", FIELDS_MAP) + ") VALUES ("
+          + String.join(",", Collections.nCopies(FIELDS_MAP.size(), "?")) + ") RETURNING *";
+
+  /**
+   * A compiled expression finding all fields from the table contacts in database.
+   */
+  private static final String CONTACT_FIND_ALL_QUERY = "SELECT * FROM " + TABLE;
+
+  private static final String CONTACT_FIND_QUERY = "SELECT * FROM " + TABLE + " WHERE ";
+
+  /**
+   * Update Contact auto generated query.
+   */
+  private static final String CONTACT_UPDATE_QUERY =
+      "UPDATE " + TABLE + " SET (" + String.join(",", FIELDS_MAP) + ") = ("
+          + String.join(",", Collections.nCopies(FIELDS_MAP.size(), "?")) + ") WHERE "
+          + FIELD_CONTACT_PK + " = ? AND " + FIELD_VERSION + " = ? returning *";
+
+  /**
+   * Constructor.
+   *
+   * @param dal services provider
+   * @param factory {@link DtoFactory} object
+   */
+  ContactDaoImpl(DalBackEndServices dal, DtoFactory factory) {
+    super(dal, factory);
+  }
+
+  /**
+   * Find a single contact based on a pk.
+   *
+   * @param pk the value to lookup
+   * @return the {@link ContactDto} instance found in the research
+   */
+  @Override
+  public ContactDto findByPk(int pk) {
+    return findBy(FIELD_CONTACT_PK, "" + pk);
+  }
+
+  /**
+   * Find a single contact based on an email.
+   *
+   * @param email the value to lookup
+   * @return the {@link ContactDto} instance found in the research
+   */
+  @Override
+  public ContactDto findByEmail(String email) {
+    return findBy(FIELD_CONTACT_EMAIL, email);
+  }
+
+  /**
+   * Find a contact based on a couple of key<->value.
+   *
+   * @param key field to lookup
+   * @param value value to match
+   * @return the {@link ContactDto} instance found in the research
+   */
+  private ContactDto findBy(String key, String value) {
+    ContactDto contact;
+
+    if ("".equals(value)) {
+      return null;
+    }
+    
+    if (!key.equals(FIELD_CONTACT_PK) && !FIELDS_MAP.contains(key)) {
+      throw new IllegalArgumentException("You cannot lookup contact based on " + key);
+    }
+
+    try {
+      PreparedStatement stmt = this.dal.prepareStatement(CONTACT_FIND_QUERY + key + " = ?");
+      
+      if (key.equals(FIELD_CONTACT_PK)) {
+        stmt.setInt(1, Integer.parseInt(value));
+      } else {
+        stmt.setString(1, value);
+      }
+      ResultSet rs = stmt.executeQuery();
+
+      if (!rs.next()) {
+        rs.close();
+        return null;
+      }
+
+      contact = populateDto(rs);
+      rs.close();
+
+      return contact;
+    } catch (SQLException sqle) {
+      Logger.log("ContactDaoImpl", "findBy", sqle.getMessage());
+      throw new IllegalArgumentException(
+          "Error querrying contact : " + CONTACT_FIND_QUERY + key + " = ?");
+    }
+  }
+
+  /**
+   * Find a contact based on his firstname, lastname and company.
+   *
+   * @param firstname the firstname to match
+   * @param lastname the lastname to match
+   * @param companyName the contact's company's name to match
+   * @return the {@link ContactDto} instance found in the research
+   */
+  @Override
+  public ContactDto findContact(String firstname, String lastname,
+      String companyName) {
+    Logger.log("ContactDaoImpl", "findContact", "In");
+
+    try {
+      PreparedStatement stmt = this.dal.prepareStatement(CONTACT_FIND_ALL_QUERY
+          + " con, pae.companies comp WHERE comp.company_number = con.company_number "
+          + " AND comp.company_name = ? and " + FIELD_CONTACT_FIRSTNAME + " = ? and "
+          + FIELD_CONTACT_LASTNAME + " = ?");
+
+      stmt.setString(1, companyName);
+      stmt.setString(2, firstname);
+      stmt.setString(3, lastname);
+      ResultSet rs = stmt.executeQuery();
+
+      if (!rs.next()) {
+        rs.close();
+        return null;
+      }
+      Contact contact = populateDto(rs);
+      rs.close();
+
+      return contact;
+    } catch (SQLException sqle) {
+      Logger.log("ContactDaoImpl", "findContact", sqle.getMessage());
+      throw new IllegalArgumentException("Error querrying contact : " + CONTACT_FIND_QUERY);
+    }
+  }
+
+  /**
+   * Create an instance of DTO contact based on result set.
+   *
+   * @param rs {@link ResultSet} coming directly from database
+   * @return a {@link Contact} object with the information of the {@link ResultSet}
+   * @throws SQLException if an error occurs during result set access
+   */
+  private Contact populateDto(ResultSet rs) throws SQLException {
+    Contact contact = (Contact) this.factory.getContact();
+
+    CompanyDao compDao = new CompanyDaoImpl(this.dal, this.factory);
+    CompanyDto compDto = compDao.findByPk(rs.getInt(FIELD_CONTACT_COMPANY));
+    contact.setCompany((Company) compDto);
+
+    contact.setLastname(rs.getString(FIELD_CONTACT_LASTNAME));
+    contact.setFirstname(rs.getString(FIELD_CONTACT_FIRSTNAME));
+    contact.setEmail(rs.getString(FIELD_CONTACT_EMAIL));
+    contact.setPhone(rs.getString(FIELD_CONTACT_PHONE));
+    contact.setActive(rs.getBoolean(FIELD_CONTACT_ACTIVE));
+    contact.setPk(rs.getInt(FIELD_CONTACT_PK));
+    contact.setVersion(rs.getInt(FIELD_VERSION));
+
+    return contact;
+  }
+
+  public List<ContactDto> findContactsForCompany(String companyName) {
+    List<ContactDto> allContacts = new ArrayList<ContactDto>();
+    try {
+      PreparedStatement stmt = this.dal.prepareStatement(CONTACT_FIND_ALL_QUERY
+          + " con, pae.companies comp WHERE comp.company_number = con.company_number "
+          + " AND comp.company_name = ?");
+      stmt.setString(1, companyName);
+      ResultSet rs = stmt.executeQuery();
+
+      while (rs.next()) {
+        allContacts.add(populateDto(rs));
+      }
+      rs.close();
+
+    } catch (SQLException sqle) {
+      Logger.log("ContactDaoImpl", "findContactsForCompany ", sqle.getMessage());
+      throw new IllegalArgumentException("Error querying contacts : " + CONTACT_FIND_ALL_QUERY
+          + " con, pae.companies comp WHERE comp.company_number = con.company_number "
+          + " AND comp.company_name = ?");
+    }
+    return allContacts;
+  }
+
+  /**
+   * Return the contact list for a given company.
+   *
+   * @param companyId given company's pk
+   * @return list of contact
+   */
+  public List<ContactDto> findContactsForCompany(int companyId) {
+    List<ContactDto> allContacts = new ArrayList<ContactDto>();
+    try {
+      PreparedStatement stmt = this.dal.prepareStatement(
+          CONTACT_FIND_ALL_QUERY + " WHERE " + FIELD_CONTACT_COMPANY + " = ?");
+
+      stmt.setInt(1, companyId);
+      ResultSet rs = stmt.executeQuery();
+
+      while (rs.next()) {
+        allContacts.add(populateDto(rs));
+      }
+      rs.close();
+
+      return allContacts;
+    } catch (SQLException sqle) {
+      Logger.log("ContactDaoImpl", "findContactsForCompany ", sqle.getMessage());
+      throw new IllegalArgumentException("Error querying contacts : "
+          + CONTACT_FIND_ALL_QUERY + " WHERE " + FIELD_CONTACT_COMPANY + " = ?");
+    }
+  }
+
+  /**
+   * Persist a contact into the table contacts in database.
+   *
+   * @param contact the {@link Contact} to persist
+   * @return the value of the {@link Contact} casted in {@link ContactDto}
+   */
+  public ContactDto create(Contact contact) {
+    Logger.log("ContactDaoImpl", "create", "Creating contact");
+    try {
+      PreparedStatement stmt = this.dal.prepareStatement(CONTACT_CREATE_QUERY);
+      stmt.setInt(1, contact.getCompany().getPk());
+      stmt.setString(2, contact.getLastname());
+      stmt.setString(3, contact.getFirstname());
+      stmt.setString(4, contact.getEmail());
+      stmt.setString(5, contact.getPhone());
+      stmt.setBoolean(6, true);
+      stmt.setInt(7, 1);
+      ResultSet rs = stmt.executeQuery();
+
+      if (!rs.next()) {
+        rs.close();
+        return null;
+      }
+      contact = populateDto(rs);
+      Logger.log("ContactDaoImpl", "create", "Contact Saved");
+      return contact;
+    } catch (Exception exc) {
+      Logger.log("ContactDaoImpl", "create", "Failed : " + exc.getMessage());
+      return null;
+    }
+  }
+
+  /**
+   * Update a contact already present in the database.
+   * 
+   * @param contact {@link Contact} with the changing information
+   * @return the new value of the {@link Contact} casted in {@link ContactDto}
+   */
+  @Override
+  public ContactDto update(Contact contact) {
+    Logger.log("ContactDaoImpl", "update", "Updating contact");
+    try {
+      PreparedStatement stmt = this.dal.prepareStatement(CONTACT_UPDATE_QUERY);
+      stmt.setInt(1, contact.getCompany().getPk());
+      stmt.setString(2, contact.getLastname());
+      stmt.setString(3, contact.getFirstname());
+      stmt.setString(4, contact.getEmail());
+      stmt.setString(5, contact.getPhone());
+      stmt.setBoolean(6, contact.isActive());
+      stmt.setInt(7, contact.getVersion() + 1);
+      stmt.setInt(8, contact.getPk());
+      stmt.setInt(9, contact.getVersion());
+      ResultSet rs = stmt.executeQuery();
+
+      if (!rs.next()) {
+        rs.close();
+        return null;
+        // problème de version;
+      }
+      
+      contact = populateDto(rs);
+      
+      Logger.log("ContactDaoImpl", "update", "Contact Saved");
+      return contact;
+    } catch (Exception exc) {
+      exc.printStackTrace();
+      Logger.log("ContactDaoImpl", "update", "Failed : " + exc.getMessage());
+      return null;
+    }
+  }
+
+  /**
+   * Get all the contacts from the database.
+   *
+   * @return a {@link ContactDto} list of contacts data transfer object with the information of the
+   *         {@link ResultSet}
+   * @throws SQLException if an error occurs during result set access
+   */
+  public List<ContactDto> findAllContacts() {
+    List<ContactDto> allContacts = new ArrayList<ContactDto>();
+    try {
+      PreparedStatement ps = this.dal.prepareStatement(CONTACT_FIND_ALL_QUERY);
+      ResultSet rs = ps.executeQuery();
+
+      while (rs.next()) {
+        allContacts.add(populateDto(rs));
+      }
+      rs.close();
+
+    } catch (SQLException sqle) {
+      Logger.log("ContactDaoImpl", "findAllJe", sqle.getMessage());
+      throw new IllegalArgumentException("Error querying contacts : " + CONTACT_FIND_ALL_QUERY);
+    }
+    return allContacts;
+  }
+  
+}

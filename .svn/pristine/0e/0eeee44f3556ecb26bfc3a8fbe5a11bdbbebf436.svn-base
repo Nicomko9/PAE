@@ -1,0 +1,102 @@
+package biz.ucc;
+
+import static org.junit.Assert.*;
+import static util.Util.*;
+
+import org.junit.*;
+
+import biz.ParticipationUcc;
+import biz.exceptions.BusinessException;
+import biz.objects.Address;
+import biz.objects.Company;
+import biz.objects.Je;
+import biz.objects.Participation;
+import biz.objects.User;
+import config.AppConfig;
+
+public class ParticipationUccImplTest {
+
+  private static AppConfig appConfig;
+  private static ParticipationUcc participationUcc;
+  private static Participation participation;
+  private static Je je;
+  private static Company company; 
+  private static Address address;
+  private static User creator;
+  private static int pkAddress, pkCreator, pkCompany;
+  
+  @BeforeClass
+  public static void setUpBeforeClass() throws Exception {
+    appConfig = new AppConfig(AppConfig.APP_DEV);
+    if(!appConfig.load())
+      throw new Exception();
+    participationUcc = appConfig.newInstanceOf(ParticipationUcc.class);
+    
+    address = createAddress(appConfig);
+    pkAddress = address.getPk();
+    
+    creator = createUser(appConfig);
+    pkCreator = creator.getPk();
+    
+    company = createCompany(appConfig, address, creator);
+    pkCompany = company.getPk();
+    
+    je = createJe(appConfig);
+    
+    participation = createParticipation(appConfig, company, je, "facturée", "payée");
+    System.out.println(participation.getLastState());
+  }
+
+  @AfterClass
+  public static void tearDownAfterClass() throws Exception {
+    deleteTestRecord(appConfig);
+  }
+
+  @Before
+  public void setUp() throws Exception {
+    fillAddress(address, BOX, COMMUNE, pkAddress, STREET, STREET_NUMBER, ZIP_CODE);
+    fillUser(creator, EMAIL, FIRSTNAME, LASTNAME, LOGIN, PASSWORD, pkCreator);
+    fillCompany(company, address, COMPANY_NAME, creator, pkCompany);
+  }
+
+  @Test (expected = BusinessException.class)
+  public void testInvite() {
+    participationUcc.invite(participation);
+  }
+
+  @Test (expected = BusinessException.class)
+  public void testConfirm() {
+    participationUcc.confirm(participation);
+  }
+
+  @Test (expected = BusinessException.class)
+  public void testRefuse() {
+    participationUcc.refuse(participation);
+  }
+
+  @Test (expected = BusinessException.class)
+  public void testInvoice() {
+    participationUcc.invoice(participation);
+  }
+
+  @Test (expected = BusinessException.class)
+  public void testPay() {
+    participationUcc.pay(participation);
+  }
+
+  @Test
+  public void testCancel() {
+    assertNotNull(participationUcc.cancel(participation));
+  }
+
+  @Test
+  public void testGetAllParticipationsOfJeDto() {
+    assertFalse(participationUcc.getAllParticipationsOf(je).isEmpty());
+  }
+
+  @Test
+  public void testGetAllParticipationsOfCompanyDto() {
+    assertFalse(participationUcc.getAllParticipationsOf(company).isEmpty());
+  }
+
+}

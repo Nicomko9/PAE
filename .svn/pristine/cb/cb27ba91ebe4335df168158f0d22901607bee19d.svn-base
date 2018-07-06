@@ -1,0 +1,172 @@
+package biz.objects;
+
+import biz.dto.CompanyDto;
+import biz.dto.PresenceDto;
+import biz.exceptions.BusinessException;
+import biz.exceptions.ErrorsCode;
+import ihm.utils.DataValidator;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Contact's business object.
+ */
+class ContactBiz extends BizObject implements Contact {
+
+  /**
+   * Contact's company.
+   */
+  private Company company;
+
+  /**
+   * Contact's lastname.
+   */
+  private String lastname;
+
+  /**
+   * Contact's firstname.
+   */
+  private String firstname;
+
+  /**
+   * Contact's email.
+   */
+  private String email;
+
+  /**
+   * Contact's phone.
+   */
+  private String phone;
+
+  /**
+   * Contact's activity.
+   */
+  private boolean active = true;
+  
+  /**
+   * List of presences.
+   */
+  private List<Presence> presences = new ArrayList<>();
+
+  ContactBiz() {}
+
+  /**
+   * Prepare the {@link Contact} to be insert in the database.
+   */
+  public void prepareForInsert() {
+    this.checkConstraints();
+  }
+
+  /**
+   * Check some Constraints.
+   *
+   * @throws BusinessException if of no respect of the constraints.
+   */
+  public void checkConstraints() {
+    if (!DataValidator.validateString(firstname)
+        || !DataValidator.validateString(lastname)
+        || company == null) {
+      throw new BusinessException(ErrorsCode.BUSINESS_INVALID_CONTACT);
+    }
+    company.checkConstraints();
+  }
+
+  /*
+   * Getters & setters.
+   */
+
+  public boolean addPresence(Presence presence) {
+    if (!this.equals(presence.getContact()) || presences.contains(presence)) {
+      return false;
+    }
+    return presences.add((Presence) presence.clone());
+  }
+
+  public boolean addPresence(Presence presence, boolean check) {
+    if (check) {
+      return this.addPresence(presence);
+    }
+    return presences.add((Presence) presence.clone());
+  }
+
+  public boolean removePresence(Presence presence) {
+    return presences.remove(presence);
+  }
+  
+  public List<PresenceDto> presences() {
+    List<PresenceDto> presences = new ArrayList<>();
+    this.presences.stream().forEach(p -> presences.add((PresenceDto) p.clone()));
+    return presences;
+  }
+  
+  public CompanyDto getCompany() {
+    if (company == null) {
+      return null;
+    }
+    return (CompanyDto) company.clone();
+  }
+
+  public void setCompany(Company company) {
+    this.company = (company != null) ? (Company) company.clone() : null;
+  }
+
+  public String getLastname() {
+    return lastname;
+  }
+
+  public void setLastname(String lastname) {
+    this.lastname = lastname;
+  }
+
+  public String getFirstname() {
+    return firstname;
+  }
+
+  public void setFirstname(String firstname) {
+    this.firstname = firstname;
+  }
+
+  public String getEmail() {
+    return email;
+  }
+
+  public void setEmail(String email) {
+    this.email = email;
+  }
+
+  public String getPhone() {
+    return phone;
+  }
+
+  public void setPhone(String phone) {
+    this.phone = phone;
+  }
+
+  public boolean isActive() {
+    return active;
+  }
+
+  public void setActive(boolean active) {
+    this.active = active;
+  }
+
+  @Override
+  public ContactBiz clone() {
+    try {
+      ContactBiz clone = (ContactBiz) super.clone();
+      clone.company = (company != null) ? (Company) company.clone() : null;
+      return clone;
+    } catch (CloneNotSupportedException exception) {
+      throw new InternalError();
+    }
+  }
+
+  @Override
+  public String toString() {
+    return "ContactBiz [primaryKey=" + primaryKey + ", company="
+        + ((company != null) ? company.getCompanyName() : null) + ", lastname=" + lastname
+        + ", firstname=" + firstname + ", email=" + email + ", phone=" + phone + ", active="
+        + active + "]";
+  }
+
+}

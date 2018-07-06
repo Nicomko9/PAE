@@ -1,0 +1,109 @@
+<div id="inner-popup-contacts" class="modal fade bd-example-modal-lg"
+	tabindex="-1" role="dialog" aria-labelledby="titrePopUp"
+	aria-hidden="true" id="popup-new-contact">
+	<div class="container-fluid">
+		<div class="row">
+			<div class="modal-dialog modal-lg">
+				<div class="modal-content">
+					<div class="col-lg-12 col-md-12">
+						<div class="panel panel-default">
+							<div class="panel-heading clearfix">
+								<div class="col-xs-10 col-xs-offset-1 text-center">
+									<span data-attribute="title"></span>
+								</div>
+								<div class="pull-right" data-dismiss="modal" data-target="#popup-new-contact">
+									<div class="col-xs-1 pull-right" data-dismiss="modal" data-target="#popup-new-contact">
+										<i class="fa fa-times"></i>
+									</div>
+								</div>
+							</div>
+							<div class="panel-body">
+								<div class="alert alert-warning state-inactive">
+									<strong>Attention, ce contact est indiqué comme ne
+										travaillant plus pour l'entreprise !</strong>
+								</div>
+								<form role="form" id="contact-form">
+									<fieldset>
+										<input data-attribute="pk" type="hidden" name="pk"> <input
+											data-attribute="version" type="hidden" name="version">
+										<div class="row">
+											<div class="form-group col-lg-8 col-md-8">
+												<label for="popup-entreprise-contact">Entreprise</label>
+												<select data-attribute="company.pk" class="form-control"
+													data-required="true" name="companyPk"
+													id="popup-entreprise-contact">
+													<option></option>
+												</select>
+											</div>
+										</div>
+										<div class="row">
+											<div class="form-group col-lg-5 col-md-5">
+												<label for="popup-lastname-contact">Nom</label> <input
+													type="text" class="form-control" data-attribute="lastname"
+													id="popup-lastname-contact" name="lastname-contact"
+													data-required="true" placeholder="Nom">
+											</div>
+											<div
+												class="form-group col-lg-5 col-md-5 col-md-offset-1 col-lg-offset-1">
+												<label for="popup-firstname-contact">Prénom</label> <input
+													type="text" class="form-control"
+													id="popup-firstname-contact" data-attribute="firstname"
+													name="firstname-contact" data-required="true"
+													placeholder="Prénom">
+											</div>
+										</div>
+										<div class="row">
+											<div class="form-group 	col-lg-5 col-md-5">
+												<label for="popup-email-contact">Email</label> <input
+													type="email" class="form-control" data-attribute="email"
+													id="popup-email-contact" name="email-contact"
+													placeholder="contact@entreprise.be">
+
+											</div>
+											<div
+												class="form-group col-lg-5 col-md-5 col-lg-offset-1 col-md-offset-1">
+												<label for="popup-tel-contact">N° téléphone</label> <input
+													type="tel" class="form-control" data-attribute="phone"
+													id="popup-tel-contact" name="tel-contact"
+													placeholder="0471/00.00.00">
+											</div>
+										</div>
+										<div class="row" id="contact-active-row">
+											<div class="col-md-12 checkbox">
+												<label> <input type="checkbox"
+													data-attribute="active" name="active"> Ce contact
+													est toujours actif dans la société <span
+													data-attribute="company.name"></span>
+												</label>
+											</div>
+										</div>
+									</fieldset>
+								</form>
+								<div id="popup-presences-list">
+									<div class="col-lg-12">
+										<legend>Presences</legend>
+										<table id="contact-presences-table"
+											class="table table-bordered table-condensed">
+											<thead>
+												<tr>
+													<th>Année</th>
+												</tr>
+											</thead>
+											<tbody>
+
+											</tbody>
+										</table>
+									</div>
+								</div>
+								<div class="col-xs-12" id="ContPopupFormAlert"></div>
+							</div>
+							<div class="panel-footer clearfix">
+								<a href="#" data-attribute="button-text"
+									class="popup-confirm btn btn-primary pull-right"> </a>
+							</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

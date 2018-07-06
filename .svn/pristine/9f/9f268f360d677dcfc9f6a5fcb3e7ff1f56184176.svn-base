@@ -1,0 +1,279 @@
+package bizz.objects;
+
+import static utils.DataValidator.validateString;
+
+import bizz.exceptions.BusinessException;
+import com.auth0.jwt.JWTSigner;
+import com.auth0.jwt.JWTVerifier;
+import com.auth0.jwt.JWTVerifyException;
+import config.AppConfig;
+import config.DependencyManager;
+import dal.dao.UserDao;
+import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.mindrot.jbcrypt.BCrypt;
+import ucc.dto.UserDto;
+
+
+class UserBizzImpl extends BizzObject implements UserBizz, UserDto {
+
+  private static final String USER_SESSION_ID = "jwtUser";
+
+  private UserDao dao = DependencyManager.INSTANCE.getClassForName(UserDao.class);
+
+  private JWTSigner jwtSigner = new JWTSigner(AppConfig.INSTANCE.getProperty("jwt.secret"));
+  private JWTVerifier jwtVerifier = new JWTVerifier(AppConfig.INSTANCE.getProperty("jwt.secret"));
+  private String login;
+  private String password;
+  private String lastname;
+  private String firstname;
+  private String email;
+  private boolean responsible;
+
+  /*
+   * DTO
+   */
+  private LocalDateTime inscriptionDate;
+
+  /**
+   * Register a new User.
+   *
+   * @param userDto the user dto to register
+   * @return true if registration went ok, false otherwise
+   */
+  public boolean register(UserDto userDto) {
+    System.out.println("Business - Registering user ");
+
+    if (null != dao.findByLogin(userDto.getLogin())) {
+      throw new BusinessException("Un utilisateur existe déja avec cet identifiant");
+    } else if (null != dao.findByEmail(userDto.getEmail())) {
+      throw new BusinessException("Un utilisateur existe déja avec cet email");
+    }
+
+    userDto.setPassword(BCrypt.hashpw(userDto.getPassword(), BCrypt.gensalt()));
+    userDto.setInscriptionDate(LocalDateTime.now());
+
+    return true;
+  }
+
+  /**
+   * Verify the userDto is fully populated with correct values.
+   *
+   * @param userDto the user to test
+   * @return true if UserDto contains a full and valid data set
+   */
+  public boolean validateUser(UserDto userDto) {
+    return true;
+  }
+
+  /**
+   * Load a user DTO object from session.
+   *
+   * @param request the request to analyze
+   * @return a user dto object if user is found, null otherwise
+   */
+  public UserDto loadFromSession(HttpServletRequest request) {
+    UserDto userDto;
+
+    try {
+      userDto = (UserDto) request.getSession().getAttribute(USER_SESSION_ID);
+
+      if (userDto != null) {
+        return userDto;
+      }
+    } catch (ClassCastException e) {
+      // continue
+    }
+
+    if (null != request.getCookies()) {
+      for (int i = 0; i < request.getCookies().length; i++) {
+        if (request.getCookies()[i].getName().equals(USER_SESSION_ID)) {
+          System.out.println("Parsing JWT !");
+          String jwt = request.getCookies()[i].getValue();
+          Map<String, Object> decodedPayload;
+          try {
+            decodedPayload = jwtVerifier.verify(jwt);
+
+            userDto = DependencyManager.INSTANCE.getClassForName(UserDto.class);
+
+            userDto.setLogin((String) decodedPayload.get("login"));
+            userDto.setLastname((String) decodedPayload.get("lastname"));
+            userDto.setFirstname((String) decodedPayload.get("firstname"));
+            userDto.setEmail((String) decodedPayload.get("email"));
+            userDto.setResponsible(decodedPayload.get("responsible").equals("1"));
+
+            request.getSession().setAttribute(USER_SESSION_ID, userDto);
+
+            return userDto;
+          } catch (ClassCastException | SignatureException | JWTVerifyException
+              | NoSuchAlgorithmException | IOException | InvalidKeyException e) {
+            e.printStackTrace();
+
+            return null;
+          }
+        }
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Persist an user into session.
+   *
+   * @param response the response to save user into
+   * @param userDto the user to save
+   */
+  public void saveToSession(HttpServletResponse response, UserDto userDto) {
+    Map<String, Object> map = new HashMap<>();
+
+    map.put("login", userDto.getLogin());
+    map.put("lastname", userDto.getLastname());
+    map.put("firstname", userDto.getFirstname());
+    map.put("email", userDto.getEmail());
+    map.put("responsible", userDto.isResponsible() ? "1" : "0");
+
+    String signer = jwtSigner.sign(map);
+
+    Cookie cookie = new Cookie(USER_SESSION_ID, signer);
+    cookie.setComment("JWT cookie container");
+    cookie.setMaxAge(Integer.parseInt(AppConfig.INSTANCE.getProperty("cookie.max-age", "6480000")));
+    response.addCookie(cookie);
+  }
+
+  /**
+   * Remove all user-related elements from session & cookies.
+   */
+  public void cleanSession(HttpServletRequest request, HttpServletResponse response) {
+    request.getSession().removeAttribute(USER_SESSION_ID);
+
+    Cookie cookie = new Cookie(USER_SESSION_ID, null);
+    cookie.setMaxAge(0);
+    response.addCookie(cookie);
+  }
+
+  /**
+   * Verify the login/password match for given user.
+   *
+   * @param userDto a user object
+   * @return a
+   */
+  public UserDto verifyPassword(UserDto userDto) {
+    try {
+      if (!validateString(userDto.getLogin()) || !validateString(userDto.getPassword())) {
+        throw new BusinessException("Vos informations sont vides");
+      }
+
+      UserDto userMatch = dao.findByLogin(userDto.getLogin());
+
+      if (null == userMatch || !BCrypt.checkpw(userDto.getPassword(), userMatch.getPassword())) {
+        throw new BusinessException("Veuillez vérifier vos informations");
+      }
+
+      return userMatch;
+    } catch (BusinessException exception) {
+      throw exception;
+    } catch (Exception exception) {
+      System.out.println("Exception in business : " + exception.getMessage());
+      throw new BusinessException("Une erreur interne est survenue");
+    }
+  }
+
+  @Override
+  public String toString() {
+    return "UserDtoImpl [login=" + login + ", password=" + password + ", lastname=" + lastname
+        + ", firstname=" + firstname + ", email=" + email + ", responsible=" + responsible
+        + ", inscriptionDate=" + inscriptionDate + "]";
+  }
+
+  public String getLogin() {
+    return login;
+  }
+
+  public void setLogin(String login) {
+    this.login = login;
+  }
+
+  @Override
+  public String getPassword() {
+    return this.password;
+  }
+
+  @Override
+  public void setPassword(String password) {
+    this.password = password;
+  }
+
+  public String getLastname() {
+    return lastname;
+  }
+
+  public void setLastname(String lastname) {
+    this.lastname = lastname;
+  }
+
+  public String getFirstname() {
+    return firstname;
+  }
+
+  public void setFirstname(String firstname) {
+    this.firstname = firstname;
+  }
+
+  public String getEmail() {
+    return email;
+  }
+
+  public void setEmail(String email) {
+    this.email = email;
+  }
+
+  public boolean isResponsible() {
+    return responsible;
+  }
+
+  public void setResponsible(boolean responsible) {
+    this.responsible = responsible;
+  }
+
+  public LocalDateTime getInscriptionDate() {
+    return inscriptionDate;
+  }
+
+  public void setInscriptionDate(LocalDateTime inscriptionDate) {
+    this.inscriptionDate = inscriptionDate;
+  }
+
+  public void login() {
+    // TODO Auto-generated method stub
+
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+
+    UserBizz user = (UserBizz) o;
+
+    return getLogin().equals(user.getLogin());
+  }
+
+  @Override
+  public int hashCode() {
+    return getLogin().hashCode();
+  }
+
+}

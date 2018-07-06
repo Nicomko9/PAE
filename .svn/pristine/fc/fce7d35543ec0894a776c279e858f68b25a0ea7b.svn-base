@@ -1,0 +1,164 @@
+package ihm;
+
+import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
+import java.text.SimpleDateFormat;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.auth0.jwt.JWTSigner;
+import com.auth0.jwt.JWTVerifier;
+import com.auth0.jwt.JWTVerifyException;
+import com.owlike.genson.Genson;
+import com.owlike.genson.GensonBuilder;
+
+import config.AppConfig;
+import config.DependencyManager;
+import ucc.dto.UserDto;
+
+class IhmUtilitaire {
+
+  private static final String USER_SESSION_ID = "jwtUser";
+  private static JWTSigner jwtSigner = new JWTSigner(AppConfig.INSTANCE.getProperty("jwt.secret"));
+  private static JWTVerifier jwtVerifier =
+      new JWTVerifier(AppConfig.INSTANCE.getProperty("jwt.secret"));
+
+  private static Genson genson = new GensonBuilder().useIndentation(true)
+      .useDateFormat(new SimpleDateFormat("dd/MM/yyyy")).useConstructorWithArguments(true).create();
+
+  @SuppressWarnings("unchecked")
+  static Map<String, Object> traitementJsonConn(String json) {
+
+    Map<String, Object> m = new HashMap<String, Object>();
+    m = genson.deserialize(json, Map.class);
+    return m;
+
+  }
+
+  static UserDto getEmptyUser() {
+
+    return DependencyManager.INSTANCE.getClassForName(UserDto.class);
+
+  }
+
+  static UserDto setUserDto(String log, String pwd) {
+
+    UserDto user = getEmptyUser();
+    user.setLogin(log);
+    user.setPassword(pwd);
+    return user;
+
+  }
+
+  static UserDto setUserDto(String log, String name, String first_name, String pwd, String email) {
+
+    UserDto user = setUserDto(log, pwd);
+    user.setFirstname(first_name);
+    user.setLastname(name);
+    user.setEmail(email);
+    return user;
+
+  }
+
+
+  /*
+   *
+   * Gestion des session et connexions
+   * 
+   */
+
+  static void cleanSession(HttpServletRequest request, HttpServletResponse response) {
+    request.getSession().removeAttribute(USER_SESSION_ID);
+
+    Cookie cookie = new Cookie(USER_SESSION_ID, null);
+    cookie.setMaxAge(0);
+    response.addCookie(cookie);
+
+  }
+
+  static void addCookie(HttpServletResponse resp, HttpServletRequest req, UserDto userDto) {
+    Map<String, Object> map = new HashMap<>();
+
+    map.put("login", userDto.getLogin());
+    map.put("lastname", userDto.getLastname());
+    map.put("firstname", userDto.getFirstname());
+    map.put("email", userDto.getEmail());
+    map.put("responsible", userDto.isResponsible() ? "1" : "0");
+
+    String signer = jwtSigner.sign(map);
+
+    req.getSession().setAttribute(USER_SESSION_ID, userDto);
+    req.getSession().setMaxInactiveInterval(5 * 60);
+
+    Cookie cookie = new Cookie(USER_SESSION_ID, signer);
+    cookie.setComment("JWT cookie container");
+    cookie.setMaxAge(Integer.parseInt(AppConfig.INSTANCE.getProperty("cookie.max-age", "6480000")));
+    resp.addCookie(cookie);
+  }
+
+
+  static UserDto checkSession(HttpServletRequest req) {
+    // UserDto userDto;
+
+    System.out.println("[ihm]IhmUtilitaire.loadFromSession()");
+    try {
+      if (req.getSession().getAttribute(USER_SESSION_ID) != null) {
+        System.out.println("[ihm]IhmUtilitaire.checkConnection()-Return session");
+         return (UserDto) req.getSession().getAttribute(USER_SESSION_ID);
+      }
+      System.out.println("[ihm]IhmUtilitaire.loadFromSession()-No session");
+      Cookie[] cookies = req.getCookies();
+      if (req.getCookies() == null) {
+        System.out.println("[ihm]IhmUtilitaire.loadFromSession()-No cookies");
+        return null;
+      }
+      String token = null;
+      for (Cookie c : cookies) {
+        if (c.getName().equals(USER_SESSION_ID)) {
+          System.out.println("[ihm]IhmUtilitaire.loadFromSession()-Get cookie");
+          token = c.getValue();
+        }
+      }
+      if (token == null) {
+        System.out.println("[ihm]IhmUtilitaire.loadFromSession() - Token empty");
+        return null;
+      }
+
+      Map<String, Object> decodedPayload = jwtVerifier.verify(token);
+      UserDto user = setUserDto((String) decodedPayload.get("login"),
+          (String) decodedPayload.get("name"), (String) decodedPayload.get("first_name"), "",
+          (String) decodedPayload.get("email"));
+      user.setResponsible(decodedPayload.get("responsible").equals("1"));
+
+      req.getSession().setAttribute(USER_SESSION_ID, user);
+      System.out.println("[ihm]IhmUtilitaire.loadFromSession()-Return cookie's content");
+      return user;
+    } catch (InvalidKeyException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (NoSuchAlgorithmException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (IllegalStateException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (SignatureException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (JWTVerifyException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    return null;
+  }
+
+}

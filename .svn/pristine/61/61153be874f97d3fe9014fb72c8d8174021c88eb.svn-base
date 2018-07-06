@@ -1,0 +1,154 @@
+package ihm;
+
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import bizz.exceptions.BusinessErrorException;
+import bizz.exceptions.BusinessException;
+import ucc.UserUcc;
+import ucc.dto.UserDto;
+import utils.Logger;
+
+public class ApplicationServlet extends HttpServlet {
+
+  private JsonUtil jsonutil;
+  private UserUcc userUcc;
+
+  public ApplicationServlet(UserUcc userUcc) {
+    this.jsonutil = new JsonUtil();
+    this.userUcc = userUcc;
+  }
+
+  @Override
+  protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+      throws ServletException, IOException {
+
+    UserDto userDto;
+
+    switch (req.getPathInfo()) {
+      case "/connection":
+
+        if (null != IhmUtilitaire.checkSession(req)) {
+          throw new BusinessException("Un utilisateur est déja connecté");
+        }
+
+        userDto = IhmUtilitaire.setUserDto(req.getParameter("login"), req.getParameter("password"));
+
+        userDto = this.userUcc.connect(userDto);
+
+        if (userDto == null) {
+          // This situation should NEVER OCCUR !
+          throw new BusinessException("Internal server error");
+        }
+
+        IhmUtilitaire.addCookie(resp, req, userDto);
+
+        this.handleResponse(resp, userDto);
+        break;
+      case "/signup":
+        System.out.println(req.getParameter("json"));
+
+        Map<String, Object> m = IhmUtilitaire.traitementJsonConn(req.getParameter("json"));
+        System.out.println(m.get("lastname") + " - " + m.get("firstname"));
+        userDto = IhmUtilitaire.setUserDto(m.get("login").toString(), m.get("lastname").toString(),
+            m.get("firstname").toString(), m.get("password").toString(), m.get("email").toString());
+
+        if (this.userUcc.subscribe(userDto)) {
+          System.out.println(userDto);
+          IhmUtilitaire.addCookie(resp, req, userDto);
+          this.handleResponse(resp, userDto);
+        }
+
+        break;
+      case "/disconnect":
+        IhmUtilitaire.cleanSession(req, resp);
+        this.handleResponse(resp, true);
+
+        break;
+      default:
+        this.handleResponse(resp, "Page not found", 404);
+    }
+  }
+
+  protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+      throws ServletException, IOException {
+    switch (req.getPathInfo()) {
+      case "/auth":
+
+        UserDto userDto = IhmUtilitaire.checkSession(req);
+        if (userDto == null) {
+          throw new BusinessException("Unauthorized used");
+        }
+
+        this.handleResponse(resp, userDto);
+        break;
+      default:
+        this.handleResponse(resp, "Page not found", 404);
+    }
+  }
+
+  /**
+   * In case of business exception, render a JSON response "{ error : message }" .
+   */
+  @Override
+  protected void service(HttpServletRequest req, HttpServletResponse resp)
+      throws ServletException, IOException {
+    try {
+      System.out.println("===================== new request ========================");
+      Logger.log("ihm", "servlet", "handling path " + req.getPathInfo());
+      super.service(req, resp);
+    } catch (BusinessException e) {
+      System.out.println("Business Exception => " + e.getMessage() + " \n\tin "
+          + e.getStackTrace()[0].getFileName() + ":" + e.getStackTrace()[0].getLineNumber());
+      this.handleResponse(resp, new HashMap<String, String>() {
+        {
+          put("error", e.getMessage());
+        }
+      }, (e instanceof BusinessErrorException) ? 500 : 200);
+    }
+  }
+
+  /**
+   * Send a response to backend.
+   *
+   * @param resp response object
+   * @param data the data to send to front-end
+   * @param code page status code (200, 404, etc)
+   */
+  private void handleResponse(HttpServletResponse resp, Object data, int code) {
+    try {
+      String str = this.jsonutil.encode(data);
+      byte[] bytes = str.getBytes(Charset.forName("UTF-8"));
+
+      resp.setContentLength(bytes.length);
+      resp.setContentType("application/javascript");
+      resp.getOutputStream().write(bytes);
+      resp.setStatus(code);
+    } catch (IOException exception) {
+      try {
+        resp.sendError(500);
+      } catch (IOException e) {
+        System.out.println("System internal error : " + e.getMessage());
+      }
+    } finally {
+      Logger.log("ihm", "servlet", "sending response with code " + resp.getStatus());
+      System.out.println("===================== end request ========================");
+    }
+  }
+
+  /**
+   * Default status code is 200.
+   */
+  private void handleResponse(HttpServletResponse resp, Object data) {
+    handleResponse(resp, data, 200);
+  }
+
+
+}

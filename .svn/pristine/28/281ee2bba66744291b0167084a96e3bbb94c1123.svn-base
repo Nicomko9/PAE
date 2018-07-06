@@ -1,0 +1,69 @@
+import config.AppConfig;
+import config.DependencyManager;
+import ihm.ApplicationServlet;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.DefaultServlet;
+import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.webapp.WebAppContext;
+import utils.Logger;
+
+/*
+ * Scripts de démarrage de l'application
+ */
+public class Main {
+
+  /**
+   * Point d'entrée de l'application principale.
+   */
+  public static void main(String[] args) {
+    AppConfig.INSTANCE.setEnvironment(AppConfig.APP_DEV);
+
+    if (!AppConfig.INSTANCE.load()) {
+      Logger.log("global", "main", "Unable to load app configuration !");
+
+      return;
+    }
+
+    Main app = new Main();
+    if (!app.startJetty()) {
+      Logger.log("global", "main", "Server failed starting");
+    } else {
+      Logger.log("global", "main", "Server started !");
+    }
+
+  }
+
+  /**
+   * Démarre une nouvelle instance jetty
+   * Note : les configurations de jetty peuvent etre override dans le fichier .properties lancé
+   */
+  private boolean startJetty() {
+    try {
+      Server server;
+      WebAppContext context;
+
+      server = new Server(Integer.parseInt(AppConfig.INSTANCE.getProperty("server.port", "8000")));
+      context = new WebAppContext();
+      server.setHandler(context);
+
+      context.setContextPath(AppConfig.INSTANCE.getProperty("server.path", "/"));
+      context.setWelcomeFiles(new String[]{"index.html"});
+      context.setResourceBase(AppConfig.INSTANCE.getProperty("server.resources", "web"));
+      context.addServlet(
+          new ServletHolder(DependencyManager.INSTANCE.getClassForName(ApplicationServlet.class)),
+          "/app/*");
+      context.addServlet(new ServletHolder(new DefaultServlet()), "/");
+      context.setInitParameter("cacheControl", "no-store, no-cache, must-revalidate");
+
+      server.start();
+
+      return true;
+    } catch (Exception exception) {
+      System.out.println("Internel system error - unable to start server: exiting application");
+      exception.printStackTrace();
+
+      return false;
+    }
+  }
+
+}

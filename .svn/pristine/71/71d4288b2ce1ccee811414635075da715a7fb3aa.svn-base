@@ -1,0 +1,18 @@
+package biz.exceptions;
+
+/**
+ * Business Exception.
+ */
+public class BusinessException extends RuntimeException {
+
+
+  /**
+   * Constructor.
+   * 
+   * @param message message of the {@link Exception}
+   */
+  public BusinessException(String message) {
+    super(message);
+  }
+
+}

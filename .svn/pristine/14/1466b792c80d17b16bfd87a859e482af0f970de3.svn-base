@@ -1,0 +1,26 @@
+package ihm.utils;
+
+import config.annotation.Service;
+import java.lang.reflect.Method;
+import java.time.Instant;
+import java.time.LocalDateTime;
+
+public class Logger {
+
+  @Service
+  public Logger() {
+  }
+
+  /**
+   * Print a formatted data to output e.g. 1028302 [generic - server] server started.
+   *
+   * @param classe {@link Class} from where the output comes
+   * @param method {@link Method} form where the output comes
+   * @param message the message
+   */
+  public static void log(String classe, String method, String message) {
+    System.out.format("%d.%d\t [%s - %s] %s %n", LocalDateTime.now().getSecond(),
+        Instant.now().getNano() / 100000, classe, method, message);
+  }
+
+}

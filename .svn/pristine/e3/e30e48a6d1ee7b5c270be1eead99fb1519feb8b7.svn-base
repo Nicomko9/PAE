@@ -1,0 +1,34 @@
+package mock.ucc;
+
+import static util.Util.BOX;
+import static util.Util.fillAddress;
+
+import biz.AddressUcc;
+import biz.DtoFactory;
+import biz.dto.AddressDto;
+import biz.objects.Address;
+
+public class AddressUccMock implements AddressUcc {
+
+  private DtoFactory dtoFactory;
+  
+  AddressUccMock(DtoFactory dtoFactory) {
+    this.dtoFactory = dtoFactory;
+  }
+  
+  @Override
+  public boolean register(AddressDto biz) {
+    return biz != null;
+  }
+
+  @Override
+  public AddressDto getAddress(String street, int streetNumber, int zipCode, String commune) {
+    if(street == null || streetNumber <= 0 || zipCode <= 0 || commune == null) {
+      return null;
+    }
+    Address address = (Address) dtoFactory.getAddress();
+    fillAddress(address, BOX, commune, 1, street, streetNumber, zipCode);
+    return address;
+  }
+
+}

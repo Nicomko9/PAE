@@ -1,0 +1,12 @@
+package dal.dao;
+
+import biz.DtoFactory;
+import dal.DalBackEndServices;
+
+public class ParticipationDaoImpl extends AbstractDao implements ParticipationDao {
+
+  public ParticipationDaoImpl(DalBackEndServices dal, DtoFactory factory) {
+    super(dal, factory);
+  }
+
+}

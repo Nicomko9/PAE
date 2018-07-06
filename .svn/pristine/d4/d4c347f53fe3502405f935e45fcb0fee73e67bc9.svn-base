@@ -1,0 +1,120 @@
+application.define("utils/popups", function() {
+  /**
+   * Patch for closing popups
+   */
+  $(".modal").each(function() {
+    var id = $(this).attr("id");
+
+    if (typeof id == "undefined" || id == "") {
+      return false;
+    }
+
+    var e = $("#" + id + " .row:first");
+
+    if (!e.hasClass("clearfix")) {
+      e.addClass("clearfix");
+    }
+
+    e.click(function(event) {
+      if (event.target == e[0]) {
+        $("#" + id).modal("hide");
+        $("#popup-background").fadeOut();
+      }
+    });
+
+    return true;
+  });
+
+  /**
+   * Retourne un element DOM de type "modal"
+   *
+   * @param id
+   * @returns {*}
+   */
+  function loadModal(id) {
+    var modal = $("#popup-collection").find(".template-popup[data-template='"
+        + id + "'] > div:first");
+
+    if (modal.length == 0) {
+      console.log("No modal " + id);
+
+      return null;
+    }
+
+    return {
+      $       : modal,
+      setSize : function (size) {
+        if (size != "lg" && size != "xl" && size != "sm") {
+          return;
+        }
+
+        modal.find(".modal-dialog")
+          .removeClass("modal-lg modal-xl modal-sm")
+          .addClass("modal-" + size);
+      }
+    };
+  }
+
+
+  return {
+    unload : function(id) {
+      loadModal(id).$.modal('hide');
+    },
+    load : function (id, data, configure, prepare, post) {
+      var modal = loadModal(id);
+
+      if (typeof configure === "function") {
+        configure(modal);
+      }
+
+      function run() {
+        modal.$.find("form").each(function() {
+            var id = $(this).attr("id");
+
+            if (typeof id === "undefined" || id === "") {
+              return;
+            }
+
+            application.require("utils/forms").getForm("#"+id).clean();
+        });
+        modal.$.find("[data-attribute]").each(function() {
+          var a = $(this).data("attribute");
+          var v = typeof data[a] != "undefined" ? data[a] : "";
+
+          switch ($(this).prop("tagName").toLowerCase()) {
+            case "select":
+              $(this).val(v);
+              break;
+            case "input" :
+              switch($(this).attr("type").toLocaleLowerCase()) {
+                case "checkbox":
+                  console.log(v);
+                  if (v == true) {
+                    $(this).prop("checked", true);
+                  } else {
+                    $(this).prop("checked", false);
+                  }
+                  break;
+                default:
+                  $(this).val(v);
+              }
+              break;
+            default:
+              $(this).html(v);
+              break;
+          }
+        });
+
+        modal.$.modal("show");
+
+        if (typeof post === "function"){ post(modal); }
+      }
+
+      if (typeof prepare === "function") {
+        $.when(prepare).then(run);
+      } else {
+        run();
+      }
+    }
+  }
+} ());

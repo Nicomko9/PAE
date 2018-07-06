@@ -1,0 +1,95 @@
+package biz.objects;
+
+import java.time.LocalDateTime;
+
+import biz.dto.AddressDto;
+import biz.dto.UserDto;
+
+/**
+ * Company's business object.
+ */
+class CompanyBiz extends BizObject implements Company {
+
+  /**
+   * Company's name.
+   */
+  private String companyName;
+
+  /**
+   * Company's creator.
+   */
+  private UserDto creator;
+
+  /**
+   * Company's address.
+   */
+  private AddressDto address;
+
+  /**
+   * Company's inscription date.
+   */
+  private LocalDateTime inscriptionDate;
+
+  /**
+   * Company's last year of participation.
+   */
+  private int lastParticipationYear;
+
+  CompanyBiz() {}
+
+
+  /*
+   * Getters & setters.
+   */
+
+  public String getCompanyName() {
+    return companyName;
+  }
+
+  public void setCompanyName(String companyName) {
+    this.companyName = companyName;
+  }
+
+  public UserDto getCreator() {
+    return creator;
+  }
+
+  public void setCreator(UserDto creator) {
+    this.creator = creator;
+  }
+
+  public AddressDto getAddress() {
+    return address;
+  }
+
+  public void setAddress(AddressDto address) {
+    this.address = address;
+  }
+
+  public LocalDateTime getInscriptionDate() {
+    return inscriptionDate;
+  }
+
+  public void setInscriptionDate(LocalDateTime inscriptionDate) {
+    this.inscriptionDate = inscriptionDate;
+  }
+
+  public int getLastParticipationYear() {
+    return lastParticipationYear;
+  }
+
+  public void setLastParticipationYear(int lastParticipationYear) {
+    this.lastParticipationYear = lastParticipationYear;
+  }
+
+  @Override
+  int getVersion() {
+    return version;
+  }
+
+  @Override
+  void setVersion(int version) {
+    this.version = version;
+  }
+
+}

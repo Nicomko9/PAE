@@ -1,0 +1,337 @@
+package mock;
+
+import static util.Util.*;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import biz.DtoFactory;
+import biz.dto.*;
+import biz.objects.*;
+import config.AppConfig;
+
+public class DataBaseMock {
+
+  private List<User> users = new ArrayList<>();
+  private List<Address> addresses = new ArrayList<>();
+  private List<Company> companies = new ArrayList<>();
+  private List<Contact> contacts = new ArrayList<>();
+  private List<Je> jes = new ArrayList<>();
+  private List<Participation> participations = new ArrayList<>();
+
+  {
+    AppConfig appConfig = new AppConfig(AppConfig.APP_MOCK);
+    DtoFactory dtoFactory = null;
+    try {
+      dtoFactory = appConfig.newInstanceOf(DtoFactory.class);
+    } catch (Exception e) {
+      e.printStackTrace();
+      throw new UnsupportedOperationException();
+    }
+
+    // adds users
+    User user = (User) dtoFactory.getUser();
+    fillUser(user, "zakaria.lamrini@student.vinci.be", "Zakaria", "Lamrini", "zak", "motdepasse", users.size()+1);
+    users.add(user);
+    user = (User) dtoFactory.getUser();
+    fillUser(user, "benjamin.pierre@student.vinci.be", "Benjamin", "Pierre", "ben", "motdepasse", users.size()+1);
+    user.setResponsible(true);
+    users.add(user);
+    user = (User) dtoFactory.getUser();
+    fillUser(user, "clément.dujardin@student.vinci.be", "Clément", "Du Jardin", "cdj", "motdepasse", users.size()+1);
+    users.add(user);
+    user = (User) dtoFactory.getUser();
+    fillUser(user, "thomas.ronsmans@student.vinci.be", "Thomas", "Ronsmans", "tho", "motdepasse", users.size()+1);
+    users.add(user);
+    user = (User) dtoFactory.getUser();
+    fillUser(user, "nicolas.christodoulou@student.vinci.be", "Nicolas", "Christodoulou", "nic", "motdepasse", users.size()+1);
+    users.add(user);
+
+    //adds addresses
+    Address address = (Address) dtoFactory.getAddress();
+    fillAddress(address, 12, "Molenbeek", addresses.size()+1, "rue de la prospérité", 112, 1080);
+    addresses.add(address);
+    address = (Address) dtoFactory.getAddress();
+    fillAddress(address, 12, "Anderlecht", addresses.size()+1, "rue saint guidon", 141, 1070);
+    addresses.add(address);
+    address = (Address) dtoFactory.getAddress();
+    fillAddress(address, 12, "Jette", addresses.size()+1, "rue de la loire", 112, 1080);
+    addresses.add(address);
+    address = (Address) dtoFactory.getAddress();
+    fillAddress(address, 12, "Schaarbeek", addresses.size()+1, "rue de la tranquilité", 112, 1080);
+    addresses.add(address);
+
+    //adds companies
+    Company company = (Company) dtoFactory.getCompany();
+    fillCompany(company, addresses.get(0), "Apple", users.get(0), companies.size()+1);
+    companies.add(company);
+    company = (Company) dtoFactory.getCompany();
+    fillCompany(company, addresses.get(1), "Microsoft", user, companies.size()+1);
+    companies.add(company);
+    company = (Company) dtoFactory.getCompany();
+    fillCompany(company, addresses.get(2), "Samsung", user, companies.size()+1);
+    companies.add(company);
+    company = (Company) dtoFactory.getCompany();
+    fillCompany(company, addresses.get(3), "Mainsys", user, companies.size()+1);
+    companies.add(company);
+
+    //adds contacts
+    Contact contact = (Contact) dtoFactory.getContact();
+    fillContact(contact, companies.get(0), "richard.watterson.apple.be", "Richard", "Watterson", "0474636845", contacts.size()+1);
+    contacts.add(contact);
+    contact = (Contact) dtoFactory.getContact();
+    fillContact(contact, companies.get(1), "ronald.weasley.microsoft.be", "Ronald", "Weasley", "0482368451", contacts.size()+1);
+    contacts.add(contact);
+    contact = (Contact) dtoFactory.getContact();
+    fillContact(contact, companies.get(2), "emmanuelle.lepoint.samsung.be", "Emmanuelle", "Le Point", "0484626736", contacts.size()+1);
+    contacts.add(contact);
+    contact = (Contact) dtoFactory.getContact();
+    fillContact(contact, companies.get(3), "valérie.elisabeth.Mainsys.be", "Valérie", "Elisabeth", "0489639473", contacts.size()+1);
+    contacts.add(contact);
+
+    //adds je
+    Je je = (Je) dtoFactory.getCompanyDay();
+    je.setDate(LocalDate.now().minusYears(2));
+    jes.add(je);
+    je = (Je) dtoFactory.getCompanyDay();
+    je.setDate(LocalDate.now().minusYears(1));
+    jes.add(je);
+
+    //adds participations
+
+  }
+
+  public DataBaseMock() {
+
+  }
+
+  // USER
+
+  private int getUser(User user) {
+    return users.indexOf(user);
+  }
+
+  public UserDto getUserByPk(int pk) {
+    for (int i = 0; i < users.size(); i++) {
+      if(users.get(i).getPk() == pk) {
+        return users.get(i);
+      }
+    }
+    return null;
+  }
+
+  public UserDto getUserByLogin(String login) {
+    for (int i = 0; i < users.size(); i++) {
+      if(users.get(i).getLogin().equals(login))
+        return users.get(i);
+    }
+    return null;
+  }
+
+  public UserDto getUserByEmail(String email) {
+    for (int i = 0; i < users.size(); i++) {
+      if(users.get(i).getEmail().equals(email))
+        return users.get(i);
+    }
+    return null;
+  }
+
+  public UserDto addUser(User user) {
+    user.setPk(users.size()+1);
+    users.add(user);
+    return user;
+  }
+
+  public UserDto updateUser(User user) {
+    int index = getUser(user);
+    if(index == -1) {
+      return null;
+    }
+    users.set(index, user);
+    return user;
+  }
+
+  // ADDRESS
+
+  private int getAddress(Address address) {
+    return addresses.indexOf(address);
+  }
+
+  public AddressDto getAddressByPk(int pk) {
+    for (int i = 0; i < addresses.size(); i++) {
+      if(addresses.get(i).getPk() == pk) {
+        return addresses.get(i);
+      }
+    }
+    return null;
+  }
+
+  public AddressDto getAddressByField(String street, int streetNumber, int zipCode, String commune) {
+    for (int i = 0; i < addresses.size(); i++) {
+        if(addresses.get(i).getCommune().equals(commune) 
+            && addresses.get(i).getStreet().equals(street)
+            && addresses.get(i).getStreetNumber() == streetNumber
+            && addresses.get(i).getZipCode() == zipCode) {
+          return addresses.get(i);
+        }
+    }
+    return null;
+  }
+
+  public AddressDto addAddress(Address address) {
+    address.setPk(addresses.size()+1);
+    addresses.add(address);
+    return address;
+  }
+
+  public AddressDto updateAddress(Address address) {
+    int index = getAddress(address);
+    if(index == -1) {
+      return null;
+    }
+    addresses.set(index, address);
+    return address;
+  }
+
+  // COMPANY
+
+  private int getCompany(Company company) {
+    return companies.indexOf(company);
+  }
+
+  public CompanyDto getCompanyByName(String companyName) {
+    for (int i = 0; i < companies.size(); i++) {
+      if(companies.get(i).getCompanyName().equals(companyName))
+        return companies.get(i);
+    }
+    return null;
+  }
+
+  public CompanyDto getCompanyByPk(int pk) {
+    for (int i = 0; i < companies.size(); i++) {
+      if(companies.get(i).getPk() == pk)
+        return companies.get(i);
+    }
+    return null;
+  }
+
+  public List<CompanyDto> getCompanies() {
+    List<CompanyDto> companiesDto = new ArrayList<>();
+    companiesDto.addAll(companies);
+    return companiesDto;
+  }
+
+  public Company addCompany(Company company) {
+    company.setPk(companies.size()+1);
+    companies.add(company);
+    return company;
+  }
+
+  public Company updateCompany(Company company) {
+    int index = getCompany(company);
+    if(index == -1) {
+      return null;
+    }
+    companies.set(index, company);
+    return company;
+  }
+
+  // CONTACT
+
+  private int getContact(Contact contact) {
+    return contacts.indexOf(contact);
+  }
+
+  public List<ContactDto> getContacts() {
+    List<ContactDto> contactsDto = new ArrayList<>();
+    contactsDto.addAll(contacts);
+    return contactsDto;
+  }
+
+  public ContactDto getContactDtoByPk(int pk) {
+    for (int i = 0; i < contacts.size(); i++) {
+      if(contacts.get(i).getPk() == pk) {
+        return contacts.get(i);
+      }
+    }
+    return null;
+  }
+
+  public ContactDto getContactByFirstname(String firstname) {
+    for (int i = 0; i < contacts.size(); i++) {
+      if(contacts.get(i).getFirstname().equals(firstname)) {
+        return contacts.get(i);
+      }
+    }
+    return null;
+  }
+
+  public ContactDto getContactByLastname(String lastname) {
+    for (int i = 0; i < contacts.size(); i++) {
+      if(contacts.get(i).getLastname().equals(lastname)) {
+        return contacts.get(i);
+      }
+    }
+    return null;
+  }
+
+  public ContactDto getContactByEmail(String email) {
+    for (int i = 0; i < contacts.size(); i++) {
+      if(contacts.get(i).getEmail().equals(email)) {
+        return contacts.get(i);
+      }
+    }
+    return null;
+  }
+
+  public List<ContactDto> getContactByCompany(Company company) {
+    return contacts.stream().filter(c -> c.getCompany().equals(company)).collect(Collectors.toList());
+  }
+
+  public ContactDto addContact(Contact contact) {
+    contact.setPk(contacts.size()+1);
+    contacts.add(contact);
+    return contact;
+  }
+
+  public ContactDto updateContact(Contact contact) {
+    int index = getContact(contact);
+    if(index == -1) {
+      return null;
+    }
+    contacts.set(index, contact);
+    return contact;
+  }
+
+  // JE
+
+  public JeDto getJeByYear(int year) {
+    for (int i = 0; i < jes.size(); i++) {
+      if(jes.get(i).getDayYear() == year) {
+        return jes.get(i);
+      }
+    }
+    return null;
+  }
+
+  public List<JeDto> getJes() {
+    List<JeDto> jesDto = new ArrayList<>();
+    jesDto.addAll(jes);
+    return jesDto;
+  }
+
+  public JeDto addJe(Je je) {
+    jes.add(je);
+    return je;
+  }
+
+  // PARTICIPATION
+
+  public ParticipationDto addParticipation(Participation participation) {
+    participations.add(participation);
+    return participation;
+  }
+
+}

@@ -1,0 +1,95 @@
+<div class="page-container" style="display: none;" id="container-login">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-4 col-md-4
+					col-lg-offset-2 col-md-offset-2">
+        <div class="login-panel panel panel-default">
+          <div class="panel-heading text-center">
+            <h3 class="panel-title">Connexion</h3>
+          </div>
+          <div class="panel-body">
+            <form role="form" id="ConnForm" data-view="connection:connect">
+              <fieldset>
+                <div class="form-group">
+                  <label class="control-label" for="connexion_login">Login</label>
+                  <input class="form-control" placeholder="Login" id="connexion_login"
+                         name="login" type="text" autofocus data-required="true">
+                </div>
+                <div class="form-group">
+                  <label class="control-label" for="connexion_password">Mot de Passe</label>
+                  <input class="form-control" placeholder="Password"
+                         id="connexion_password" name="password" type="password"
+                         value="" data-required="true">
+                </div>
+                <div id="ConnFormAlert"></div>
+                <button id="BtnConn" class="btn btn-lg btn-success btn-rigth">
+                  Connexion<i class="fa fa-spinner fa-spin"
+                              style="display: none"></i>
+                </button>
+              </fieldset>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div
+          class="col-lg-4 col-md-4
+					col-lg-offset-1 col-md-offset-1  ">
+        <div class="login-panel panel panel-default">
+          <div class="panel-heading text-center">
+            <h3 class="panel-title">Inscription</h3>
+          </div>
+          <div class="panel-body">
+            <form role="form" data-view="connection:subscribe" id="InscForm">
+              <fieldset>
+                <div class="form-group">
+                  <label class="control-label" for="subscribe_login"> Login</label>
+                  <input
+                      class="form-control" placeholder="Login" id="subscribe_login"
+                      name="login" type="text" autofocus data-required="true"
+                      data-min="3"
+                  >
+                </div>
+                <div class="form-group">
+                  <label class="control-label" for="subscribe_last_name">Nom</label>
+                  <input
+                      class="form-control" id="subscribe_last_name" name="lastname"
+                      type="text" placeholder="Nom" data-required="true"/>
+                </div>
+                <div class="form-group">
+                  <label class="control-label" for="subscribe_first_name"> Prenom</label> <input
+                    class="form-control" id="subscribe_first_name"
+                    name="firstname" type="text" placeholder="Prenom" data-required="true"/>
+                </div>
+                <div class="form-group">
+                  <label class="control-label" for="subscribe_password"> Mot de Passe</label> <input
+                    class="form-control" id="subscribe_password" name="password"
+                    type="password" placeholder="Mot de passe" data-required="true"
+                    data-min="8" data-max="32"
+                />
+                </div>
+                <div class="form-group">
+                  <label class="control-label" for="subscribe_password"> Confirmer le mot de passe</label>
+                  <input class="form-control" id="subscribe_password2" name="password" data-required="true"
+                    type="password" placeholder="Mot de passe" data-copy-of="#subscribe_password" />
+                </div>
+                <div class="form-group">
+                  <label class="control-label" for="subscribe_email"> Email</label> <input
+                    class="form-control" id="subscribe_email" name="email"
+                    type="text" placeholder="Email" data-required="true"
+                    data-pattern="^(.+)@(.+){2,}\.(.+){2,}$"
+                    data-pattern-message="Requiert un email valide"/>
+                </div>
+                <div id="InscFormAlert"></div>
+                <button id="BtnInsc"
+                        class="btn btn-lg btn-success btn-rigth btn-primary">
+                  Inscription <i class="fa fa-spinner fa-spin"
+                                 style="display: none"></i>
+                </button>
+              </fieldset>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

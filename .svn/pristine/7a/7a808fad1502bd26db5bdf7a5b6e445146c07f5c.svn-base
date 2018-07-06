@@ -1,0 +1,105 @@
+$( function() {
+    $( "form" ).find( "input" ).each( function() {
+        $( this ).click( function( e ) {
+            $( this ).css( "background-color", "white" );
+        });
+    });
+
+
+    $( "#BtnConn" ).click( function( e ) {
+        connexion( e );
+    });
+
+    $( "#BtnIns" ).click( function( e ) {
+        inscription( e );
+    });
+});
+
+
+//Fonction Accueil
+
+function inscription( e ) {
+    e.preventDefault();
+    //Business
+    if ( verifChampVide( "Insc" ) !== false ) {
+        var o = FORMtoJSON( "Insc" );
+        ajCon( "insc", o );
+    }
+}
+
+function connexion( e ) {
+    e.preventDefault();
+    //Business
+    if ( verifChampVide( "Conn" ) !== false ) {
+        console.log( "Ok!" );
+        var o = FORMtoJSON( "Conn" );
+        ajCon( "conn", o );
+    }
+}
+
+function ajCon( action, json ) {
+    //Ajax
+    $.ajax( {
+        url: "/app",
+        type: "POST",
+        data: "action=/" + action + "&json=" + JSON.stringify( JSON.parse( json ) ),
+        success:
+        function( e ) {
+            if ( e === "OK" ) {
+                if ( action === "conn" ) {
+                    console.log( e );
+                    connOk();
+                } else {
+                    console.log( e );
+                    inscOk();
+                }
+            } else if ( e === "NOK" ) {
+                console.log( "NOK" );
+            }
+        },
+        error:
+        function( e ) {
+            console.log( e );
+        }
+    });
+}
+
+function connOk() {
+    //to DO
+}
+
+function inscOk() {
+    //to DO
+}
+
+function FORMtoJSON( form ) {
+    var o = {};
+
+    $( "#" + form + "Form" ).find( "input" ).each( function() {
+        console.log( $( this ).val() );
+        if ( $( this ).attr( 'type' ) === 'checkbox' ) {
+            o[$( this ).attr( 'name' )] = $( this ).is( ':checked' );
+        } else {
+            o[$( this ).attr( 'name' )] = $( this ).val();
+        }
+    });
+
+    return JSON.stringify( o );
+}
+
+function verifChampVide( form ) {
+    var ret = true;
+    $( "#" + form + "Form" ).find( "input" ).each( function() {
+        if ( $( this ).val() === "" ) {
+            champVide( $( this ), form );
+            ret = false;
+        }
+    });
+    return ret;
+}
+
+function champVide( champ, form ) {
+    $( "#" + form + "FormAlert" ).show( 1000 );
+}
+
+

@@ -1,0 +1,12 @@
+package biz;
+
+import biz.dto.UserDto;
+import biz.objects.BusinessFactory;
+
+class DtoFactoryImpl implements DtoFactory {
+
+  public UserDto getUser() {
+    return BusinessFactory.getUser();
+  }
+
+}

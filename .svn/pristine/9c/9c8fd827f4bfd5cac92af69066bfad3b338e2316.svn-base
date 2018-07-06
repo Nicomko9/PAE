@@ -1,0 +1,137 @@
+package dal.dao;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import biz.DtoFactory;
+import biz.dto.PresenceDto;
+import biz.objects.Company;
+import biz.objects.Contact;
+import biz.objects.Participation;
+import biz.objects.Presence;
+import dal.DalBackEndServices;
+import dal.dao.schema.PresenceSchema;
+import ihm.utils.Logger;
+
+class PresenceDaoImpl extends AbstractDao implements PresenceDao, PresenceSchema {
+
+  /**
+   * Insert Presence auto generated query.
+   */
+  private static final String PRESENCE_CREATE_QUERY =
+      "INSERT INTO " + TABLE + " (" + String.join(",", FIELDS_MAP) + ") VALUES ("
+          + String.join(",", Collections.nCopies(FIELDS_MAP.size(), "?")) + ") RETURNING *";
+
+  /**
+   * A compiled expression finding all fields from the table presence in database.
+   */
+  private static final String PRESENCE_FIND_QUERY = "SELECT * FROM " + TABLE + " WHERE ";
+
+  private ParticipationDao participationDao;
+  private CompanyDao companyDao;
+  private ContactDao contactDao;
+
+  PresenceDaoImpl(DalBackEndServices dal, DtoFactory factory, CompanyDao companyDao,
+      ContactDao contactDao, ParticipationDao participationDao) {
+    super(dal, factory);
+    this.companyDao = companyDao;
+    this.contactDao = contactDao;
+    this.participationDao = participationDao;
+  }
+
+  @Override
+  public PresenceDto create(Presence presence) {
+    Logger.log("PresenceDaoImpl", "create", "Creating presence");
+
+    try {
+      PreparedStatement stmt = this.dal.prepareStatement(PRESENCE_CREATE_QUERY);
+
+      stmt.setInt(1, presence.getParticipation().getJe().getDayYear());
+      stmt.setInt(2, presence.getCompany().getPk());
+      stmt.setInt(3, presence.getContact().getPk());
+
+      Logger.log("PresenceDaoImpl", "create", "Presence Saved");
+
+      ResultSet rs = stmt.executeQuery();
+
+      if (!rs.next()) {
+        rs.close();
+        return null;
+      }
+
+      presence = populateDto(rs);
+
+      return presence;
+    } catch (Exception exc) {
+      exc.printStackTrace();
+      Logger.log("CompanyDaoImpl", "create",
+          "registration of : " + presence.getParticipation().getJe().getDayYear() + ", company :"
+              + presence.getCompany().getCompanyName() + ", contact :"
+              + presence.getContact().getEmail() + " failed : " + exc.getMessage());
+      return null;
+    }
+  }
+
+  /**
+   * Get All the presence for the given year.
+   *
+   * @return {@link List} of {@link PresenceDto}
+   */
+  @Override
+  public List<PresenceDto> findByYear(int year) {
+    List<PresenceDto> presences = new ArrayList<>();
+    try {
+      PreparedStatement stmt = this.dal
+          .prepareStatement(PRESENCE_FIND_QUERY + FIELD_PRESENCE_PARTICIPATION_YEAR + " = ?");
+
+      stmt.setInt(1, year);
+      ResultSet rs = stmt.executeQuery();
+
+      while (rs.next()) {
+        presences.add(populateDto(rs));
+      }
+      rs.close();
+
+    } catch (SQLException exception) {
+      Logger.log("PresenceDaoImpl", "findByYear", exception.getMessage());
+    }
+    System.out.println("Presences = " + presences.toString());
+    return presences;
+  }
+
+  /**
+   * Create an instance of DTO presence based on result set.
+   *
+   * @param rs {@link ResultSet} coming directly from database
+   * @return a {@link Presence} object with the information of the {@link ResultSet}
+   * @throws SQLException if an error occurs during result set access
+   */
+  private Presence populateDto(ResultSet rs) throws SQLException {
+    Presence presence = (Presence) this.factory.getPresence();
+
+    Company company = (Company) companyDao.findByPk(rs.getInt(FIELD_PRESENCE_COMPANY_NUMBER));
+    presence.setCompany(company);
+
+    /*
+     * List<ParticipationDto> participations =
+     * participationDao.findByYear(rs.getInt(FIELD_PRESENCE_PARTICIPATION_YEAR)); Participation
+     * participation = (Participation) participations.stream() .filter(p ->
+     * p.getCompany().equals(company)).findAny().get();
+     */
+    Participation participation = (Participation) participationDao.findByYearAndCompany(
+        rs.getInt(FIELD_PRESENCE_PARTICIPATION_YEAR), rs.getInt(FIELD_PRESENCE_COMPANY_NUMBER));
+
+    presence.setParticipation(participation);
+
+    Contact contact = (Contact) contactDao.findByPk(rs.getInt(FIELD_PRESENCE_CONTACT_NUMBER));
+    presence.setContact(contact);
+
+    return presence;
+  }
+
+
+}

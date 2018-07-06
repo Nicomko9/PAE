@@ -1,0 +1,91 @@
+.btn-rigth {
+  float: right;
+}
+
+header {
+  margin: 0;
+  padding: 0;
+}
+
+.sidebar {
+  margin-top: 0px;
+}
+
+#logo {
+  height: 150px;
+  margin-left: 20px;
+  width: 200px;
+}
+
+.fa {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+i {
+  margin-right: 5px;
+}
+
+h5 {
+	font-weight : 700;
+}
+
+.panel-heading {
+  text-decoration: underline;
+  font-weight: bold;
+  font-size: medium;
+}
+
+label {
+  padding-top: 10px;
+}
+
+fieldset {
+  padding-bottom: 10px;
+}
+
+.btn-circle {
+  width: 30px;
+  height: 30px;
+  text-align: center;
+  padding: 6px 0;
+  font-size: 12px;
+  line-height: 1.428571429;
+  border-radius: 15px;
+}
+
+/*
+ * Admin / non admin
+ */
+#container-application[data-admin='false'] .admin-block {
+  display: none;
+}
+
+/*
+ * Notifications
+ */
+#notification-area {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  width: auto;
+  /*  IF IE10+ */
+  pointer-events: none;
+}
+
+#notification-area > .notification {
+  float: right;
+  width: 440px;
+  z-index: 100;
+  margin-bottom: 12px;
+  margin-right: 12px;
+  pointer-events: auto;
+}
+
+#divNewJe {
+  padding-bottom: 25px;
+}
+
+.modal-xl {
+  width: 1080px !important;
+}

@@ -1,0 +1,55 @@
+package mock.dao;
+
+import java.util.List;
+import java.util.Set;
+
+import biz.dto.CompanyDto;
+import biz.objects.Company;
+import dal.dao.CompanyDao;
+import mock.DataBaseMock;
+
+public class CompanyDaoMock implements CompanyDao {
+
+  private DataBaseMock dataBaseMock;
+  
+  CompanyDaoMock() {
+    this.dataBaseMock = DataBaseMock.getInstance();
+  }
+  
+  @Override
+  public CompanyDto create(Company company) {
+    return dataBaseMock.addCompany(company);
+  }
+
+  @Override
+  public CompanyDto update(Company company) {
+    return dataBaseMock.updateCompany(company);
+  }
+
+  @Override
+  public CompanyDto findByPk(int pk) {
+    return dataBaseMock.getCompanyByPk(pk);
+  }
+
+  @Override
+  public CompanyDto findByName(String name) {
+    return dataBaseMock.getCompanyByName(name);
+  }
+
+  @Override
+  public List<CompanyDto> findAllCompanies() {
+    return dataBaseMock.getCompanies();
+  }
+
+  @Override
+  public List<CompanyDto> findAllNewCompanies() {
+    return dataBaseMock.getCompaniesForSelection();
+  }
+
+  @Override
+  public Set<CompanyDto> search(String[] criteria) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+}

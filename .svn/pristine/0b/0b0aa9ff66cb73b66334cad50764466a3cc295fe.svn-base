@@ -1,0 +1,55 @@
+.btn-rigth {
+	float: right;
+}
+
+header {
+	margin: 0;
+	padding: 0;
+}
+
+.sidebar {
+	margin-top: 0px;
+}
+
+#logo {
+	height: 150px;
+	margin-left: 20px;
+	width: 200px;
+}
+
+.fa {
+	padding-left: 10px;
+	padding-right: 10px;
+}
+
+div[name='page_title'] {
+	margin-bottom: 50px;
+}
+
+i {
+	margin-right: 5px;
+}
+
+.panel-heading {
+	text-decoration: underline;
+	font-weight: bold;
+	font-size: medium;
+}
+
+label {
+	padding-top: 10px;
+}
+
+fieldset {
+	padding-bottom: 10px;
+}
+
+.btn-circle {
+	width: 30px;
+	height: 30px;
+	text-align: center;
+	padding: 6px 0;
+	font-size: 12px;
+	line-height: 1.428571429;
+	border-radius: 15px;
+}

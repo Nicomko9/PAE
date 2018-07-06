@@ -1,0 +1,15 @@
+package mock.dao;
+
+import dal.dao.ParticipationDao;
+import mock.DataBaseMock;
+
+public class ParticipationDaoMock implements ParticipationDao {
+
+  @SuppressWarnings("unused")
+  private DataBaseMock dataBaseMock;
+  
+  ParticipationDaoMock(DataBaseMock dataBaseMock) {
+    this.dataBaseMock = dataBaseMock;
+  }
+  
+}

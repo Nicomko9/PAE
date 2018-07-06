@@ -1,0 +1,7 @@
+package biz.objects;
+
+import biz.dto.PresenceDto;
+
+public interface Presence extends PresenceDto {
+
+}

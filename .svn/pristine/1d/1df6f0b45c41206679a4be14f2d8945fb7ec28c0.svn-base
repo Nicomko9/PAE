@@ -1,0 +1,53 @@
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.DefaultServlet;
+import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.webapp.WebAppContext;
+
+import config.AppConfig;
+import ihm.ApplicationServlet;
+
+/*
+ * Scripts de démarrage de l'application
+ */
+public class Main {
+
+  /**
+   * Point d'entrée de l'application principale.
+   */
+  public static void main(String[] args) {
+    AppConfig.INSTANCE.setEnvironment(AppConfig.APP_DEV);
+    AppConfig.INSTANCE.load();
+
+    Main app = new Main();
+    app.startJetty();
+  }
+
+  /**
+   * Démarre une nouvelle instance jetty
+   * Note : les configurations de jetty peuvent etre override dans le fichier .properties lancé
+   */
+  private void startJetty() {
+    try {
+      Server server;
+      WebAppContext context;
+
+      server = new Server(Integer.parseInt(AppConfig.INSTANCE.getProperty("server.port", "8000")));
+      context = new WebAppContext();
+      server.setHandler(context);
+
+      context.setContextPath(AppConfig.INSTANCE.getProperty("server.path", "/"));
+      context.setWelcomeFiles(new String[]{"index.html"});
+      context.setResourceBase(AppConfig.INSTANCE.getProperty("server.resources", "web"));
+      context.addServlet(new ServletHolder(new ApplicationServlet()), "/app/*");
+      context.addServlet(new ServletHolder(new DefaultServlet()), "/");
+      context.setInitParameter("cacheControl", "no-store, no-cache, must-revalidate");
+
+      server.start();
+    } catch (Exception exception) {
+      System.out.println("Internel system error - unable to start server: exiting application");
+      exception.printStackTrace();
+      System.exit(1);
+    }
+  }
+
+}

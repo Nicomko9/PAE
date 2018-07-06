@@ -1,0 +1,33 @@
+# Jetty server configuration
+server.path=/
+server.resources=web
+server.port=8080
+
+# Database connection configuration
+db.driver=jdbc:postgresql://
+db.path=studentittools.ipl.be:5432
+db.db_name=dbnicolas_christodoulou
+db.login=nicolas_christodoulou
+db.password=jacquouille9
+db.schema=pae
+
+# cookies :
+cookie.max-age=6480000
+jwt.secret=QQPlitzYVYitz0tL8nvsEDfA4ilWoBNWFntavHPLsefL4SB7kFDzEm1XKckQ
+
+# Plugins
+plugin.dal.DalBackEndServices=dal.DalBackEndServicesImpl
+plugin.dal.dao.UserDao=dal.dao.UserDaoImpl
+
+# Business
+plugin.bizz.objects.UserBizz=bizz.objects.UserBizzImpl
+
+# UCC's
+plugin.ucc.UserUcc=ucc.UserUccImpl
+
+# DTO's
+plugin.ucc.DtoEmptyFactory=ucc.DtoEmptyFactoryImpl
+plugin.ucc.dto.UserDto=ucc.dto.UserDtoImpl
+
+# IHM
+plugin.ihm.ApplicationServlet=ihm.ApplicationServlet

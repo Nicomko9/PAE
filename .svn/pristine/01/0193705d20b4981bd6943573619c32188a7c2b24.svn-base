@@ -1,0 +1,67 @@
+package biz;
+
+import java.util.List;
+
+import biz.dto.CompanyDto;
+import biz.dto.JeDto;
+import biz.dto.ParticipationDto;
+
+public interface ParticipationUcc {
+
+  /**
+   * 
+   * @param participationDto the participation to add in the DataBase
+   * @return the particpationDto with the information added in the DataBase
+   */
+  ParticipationDto invite(ParticipationDto participationDto);
+  
+  /**
+   * 
+   * @param participationDto the participationDto to update in the DataBase
+   * @return the participationDto with the information updated
+   */
+  ParticipationDto confirm(ParticipationDto participationDto);
+  
+  /**
+   * 
+   * @param participationDto the participationDto to update in the DataBase
+   * @return the participationDto with the information updated
+   */
+  ParticipationDto refuse(ParticipationDto participationDto);
+  
+  /**
+   * 
+   * @param participationDto the participationDto to update in the DataBase
+   * @return the participationDto with the information updated
+   */
+  ParticipationDto invoice(ParticipationDto participationDto);
+  
+  /**
+   * 
+   * @param participationDto the participationDto to update in the DataBase
+   * @return the participationDto with the information updated
+   */
+  ParticipationDto pay(ParticipationDto participationDto);
+  
+  /**
+   * 
+   * @param participationDto the participationDto to update in the DataBase
+   * @return the participationDto with the information updated
+   */
+  ParticipationDto cancel(ParticipationDto participationDto);
+  
+  /**
+   * 
+   * @param jeDto the jeDto to recover all its participations
+   * @return a list of ParticipationDto
+   */
+  List<ParticipationDto> getAllParticipationsOf(JeDto jeDto);
+  
+  /**
+   * 
+   * @param companyDto the companyDto to recover all its participations
+   * @return a list of ParticipationDto
+   */
+  List<ParticipationDto> getAllParticipationsOf(CompanyDto companyDto);
+  
+}

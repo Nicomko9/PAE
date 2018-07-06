@@ -1,0 +1,8 @@
+package config;
+
+
+public interface PluginFactory {
+
+  Object getPluginFor(String className);
+
+}

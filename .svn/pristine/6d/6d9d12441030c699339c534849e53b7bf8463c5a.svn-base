@@ -1,0 +1,26 @@
+package biz;
+
+import biz.dto.ContactDto;
+
+/**
+ * Contact's Use Case Controller.
+ */
+public interface ContactUcc {
+
+  /**
+   * Register a new contact in the database.
+   * 
+   * @param biz {@link ContactDto} to persist
+   * @return a boolean to indicate whether it worked or not
+   */
+  boolean register(ContactDto biz);
+
+  /**
+   * Update a contact already present in the database.
+   * 
+   * @param biz {@link ContactDto} to persist
+   * @return the information of the contact updated in the database
+   */
+  ContactDto update(ContactDto biz);
+
+}

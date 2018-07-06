@@ -1,0 +1,9 @@
+package config;
+
+class AppConfigImpl implements AppConfig, PluginFactory {
+
+  public Object getPluginFor(String className) {
+    return null;
+  }
+
+}

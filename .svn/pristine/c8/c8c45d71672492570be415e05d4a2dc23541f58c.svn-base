@@ -1,0 +1,89 @@
+package biz;
+
+import biz.dto.UserDto;
+import biz.exceptions.BusinessErrorException;
+import biz.exceptions.BusinessException;
+import biz.exceptions.ErrorsCode;
+import biz.objects.User;
+import dal.DalFrontEndServices;
+import dal.dao.UserDao;
+import ihm.utils.DataValidator;
+import ihm.utils.Logger;
+
+/**
+ * Implementation of the User's Use Case Controller.
+ */
+class UserUccImpl implements UserUcc, ErrorsCode {
+
+  private DalFrontEndServices dal;
+
+  private UserDao userDao;
+
+  UserUccImpl(DalFrontEndServices dal, UserDao userDao) {
+    this.dal = dal;
+    this.userDao = userDao;
+  }
+
+  /**
+   * Start a connection.
+   *
+   * @param login login of the user to connect
+   * @param password password of the user to connect
+   * @return the information of the user in the Database.
+   */
+  public UserDto connect(String login, String password) {
+    Logger.log("ucc", "UserUccImpl", "connect triggered");
+
+    if (!DataValidator.validateString(login) || !DataValidator.validateString(password)) {
+      throw new BusinessException(HTTP_ERROR_BAD_REQUEST);
+    }
+
+    User user = (User) this.userDao.findByLogin(login);
+
+    if (user == null) {
+      throw new BusinessException(BUSINESS_INCORRECT_LOGIN);
+    }
+    if(!user.comparePassword(password)){
+      throw new BusinessException(BUSINESS_INCORRECT_PASSWORD);
+    }
+
+    return user;
+  }
+
+  /**
+   * Register a new user into the Database.
+   *
+   * @param userDto the user to persist
+   * @return a boolean to indicate whether or not it worked
+   */
+  @Override
+  public boolean subscribe(UserDto userDto) {
+    Logger.log("ucc", "UserUccImpl", "subscribe triggered");
+
+    User user = (User) userDto;
+    user.prepareForInsert();
+
+    if (null != this.userDao.findByLogin(user.getLogin())) {
+      throw new BusinessException(BUSINESS_LOGIN_USER_EXISTED);
+    } else if (null != this.userDao.findByEmail(user.getEmail())) {
+      throw new BusinessException(BUSINESS_EMAIL_USER_EXISTED);
+    }
+
+    try {
+      this.dal.startTransaction();
+
+      if (null == this.userDao.create(user)) {
+        throw new BusinessErrorException(INTERNAL_UNKNOWN_ERROR);
+      }
+
+      this.dal.commitTransaction();
+
+      return true;
+    } catch (Exception exc) {
+      this.dal.rollbackTransaction();
+
+      throw exc;
+    }
+  }
+
+}

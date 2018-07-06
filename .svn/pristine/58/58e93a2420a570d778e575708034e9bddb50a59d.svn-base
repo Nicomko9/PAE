@@ -1,0 +1,17 @@
+package biz.objects;
+
+/**
+ * {@link User} Factory.
+ */
+public class BusinessFactory {
+
+  /**
+   * Give a {@link User}.
+   *
+   * @return a new empty {@link User}
+   */
+  public static User getUser() {
+    return new UserBiz();
+  }
+
+}

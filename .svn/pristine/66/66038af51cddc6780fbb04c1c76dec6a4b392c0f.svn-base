@@ -1,0 +1,20 @@
+package biz;
+
+import biz.dto.UserDto;
+import biz.objects.BusinessFactory;
+
+/**
+ * Implementation of the Data Transfer Object Factory.
+ */
+class DtoFactoryImpl implements DtoFactory {
+
+  /**
+   * Give an empty User.
+   * 
+   * @return empty {@link UserDto}
+   */
+  public UserDto getUser() {
+    return BusinessFactory.getUser();
+  }
+
+}

@@ -1,0 +1,32 @@
+package dal.dao.schema;
+
+import java.sql.Types;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
+public interface UserSchema {
+
+  String TABLE = "utilisateurs";
+
+  String FIELD_USER_LOGIN = "login";
+  String FIELD_USER_PASSWORD = "password";
+  String FIELD_USER_LAST_NAME = "nom";
+  String FIELD_USER_FIRST_NAME = "prenom";
+  String FIELD_USER_EMAIL = "email";
+  String FIELD_USER_RESPONSIBLE = "responsible";
+  String FIELD_USER_SUBSCRIBE_DATE = "date_inscription";
+
+  Map<String, Integer> FIELDS_MAP = Collections.unmodifiableMap(new HashMap<String, Integer>() {
+    {
+      put(FIELD_USER_LOGIN, Types.VARCHAR);
+      put(FIELD_USER_PASSWORD, Types.VARCHAR);
+      put(FIELD_USER_LAST_NAME, Types.VARCHAR);
+      put(FIELD_USER_FIRST_NAME, Types.VARCHAR);
+      put(FIELD_USER_EMAIL, Types.VARCHAR);
+      put(FIELD_USER_RESPONSIBLE, Types.BOOLEAN);
+      put(FIELD_USER_SUBSCRIBE_DATE, Types.TIMESTAMP);
+    }
+  });
+
+}

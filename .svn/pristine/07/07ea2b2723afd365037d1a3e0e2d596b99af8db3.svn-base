@@ -1,0 +1,7 @@
+package biz.objects;
+
+
+class ContactBiz extends BizObject implements Contact {
+
+
+}

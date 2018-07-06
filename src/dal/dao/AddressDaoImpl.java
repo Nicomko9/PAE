@@ -1,0 +1,273 @@
+package dal.dao;
+
+import biz.DtoFactory;
+import biz.dto.AbstractDto;
+import biz.dto.AddressDto;
+import biz.exceptions.FatalException;
+import biz.exceptions.OptimisticLockException;
+import biz.objects.Address;
+import biz.objects.BizObject;
+import dal.DalBackEndServices;
+import dal.dao.schema.AddressSchema;
+import ihm.utils.Logger;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Collections;
+
+class AddressDaoImpl extends AbstractDao implements AddressDao, AddressSchema {
+
+  /**
+   * Insert Address auto generated query.
+   */
+  private static final String ADDRESS_CREATE_QUERY =
+      "INSERT INTO " + TABLE + " (" + String.join(",", FIELDS_MAP) + ") VALUES ("
+          + String.join(",", Collections.nCopies(FIELDS_MAP.size(), "?")) + ") RETURNING *";
+
+  /**
+   * A compiled expression finding all fields from the table addresses in database.
+   */
+  private static final String ADDRESS_FIND_QUERY = "SELECT * FROM " + TABLE + " WHERE ";
+
+  /**
+   * Update Address auto generated query.
+   */
+  private static final String ADDRESS_UPDATE_QUERY =
+      "UPDATE " + TABLE + " SET (" + String.join(",", FIELDS_MAP) + ") = ("
+          + String.join(",", Collections.nCopies(FIELDS_MAP.size(), "?")) + ") WHERE "
+          + FIELD_ADDRESS_PK + " = ? AND " + FIELD_VERSION + " = ? returning *";
+
+  /**
+   * Constuctor.
+   *
+   * @param dal services provider
+   * @param factory {@link DtoFactory} object
+   */
+  public AddressDaoImpl(DalBackEndServices dal, DtoFactory factory) {
+    super(dal, factory);
+  }
+
+  /**
+   * Persist an address into the table addresses in database.
+   *
+   * @param address the {@link AddressDto} to persist
+   * @return the value of the {@link Address} casted in {@link AddressDto}
+   */
+  @Override
+  public AddressDto create(Address address) {
+    try {
+      PreparedStatement stmt = this.dal.prepareStatement(ADDRESS_CREATE_QUERY);
+
+      stmt.setString(1, address.getStreet());
+      stmt.setInt(2, address.getStreetNumber());
+      stmt.setInt(3, address.getBox());
+      stmt.setInt(4, address.getZipCode());
+      stmt.setString(5, address.getCommune());
+      stmt.setInt(6, 1);
+
+      ResultSet rs = stmt.executeQuery();
+
+      if (!rs.next()) {
+        rs.close();
+        Logger.log("AddressDaoImpl", "create", "The address creation failed", Logger.ERROR);
+        throw new FatalException();
+      }
+
+      address = populateDto(rs);
+
+      Logger.log("AddressDaoImpl", "create", "The address was successfully created",
+          Logger.SUCCESS);
+
+      rs.close();
+
+      return address;
+    } catch (SQLException exception) {
+      Logger.log("AddressDaoImpl", "create", "The address creation failed : " 
+          + exception.getMessage(), Logger.ERROR);
+      throw new FatalException();
+    }
+  }
+
+  /**
+   * Persist an address into the table addresses in database.
+   *
+   * @param address the {@link AbstractDto} to persist
+   * @return the value of the {@link Address} casted in {@link AbstractDto}
+   */
+  @Override
+  public AbstractDto insert(AbstractDto abstractDto) {
+    try {
+      return create((Address) abstractDto);      
+    } catch (ClassCastException exception) {
+      throw new IllegalArgumentException();
+    }
+  }
+
+  /**
+   * Find an address based on his street, street number, zip code and commune.
+   *
+   * @param street the street to match
+   * @param streetNumber the street number to match
+   * @param zipCode the postal code to match
+   * @param commune the commune to match
+   * @return the {@link AddressDto} instance found in the research
+   */
+  @Override
+  public AddressDto findAddress(String street, int streetNumber, int zipCode, String commune) {
+    AddressDto address;
+
+    try {
+      PreparedStatement stmt = this.dal.prepareStatement(
+          ADDRESS_FIND_QUERY + FIELD_ADDRESS_STREET + " = ? and " + FIELD_ADDRESS_STREET_NUMBER
+          + " = ? and " + FIELD_ADDRESS_ZIPCODE + " = ? and " + FIELD_ADDRESS_COMMUNE + " = ?");
+
+      stmt.setString(1, street);
+      stmt.setInt(2, streetNumber);
+      stmt.setInt(3, zipCode);
+      stmt.setString(4, commune);
+      ResultSet rs = stmt.executeQuery();
+
+      if (!rs.next()) {
+        rs.close();
+        Logger.log("AddressDaoImpl", "findAddress", "The address was not found",
+            Logger.INFORMATION);
+        return null;
+      }
+
+      address = populateDto(rs);
+
+      Logger.log("AddressDaoImpl", "findAddress", "The address was found", Logger.SUCCESS);
+
+      rs.close();
+
+      return address;
+    } catch (SQLException exception) {
+      Logger.log("AddressDaoImpl", "findAddress", "The search of the address failed : "
+          + exception.getMessage(), Logger.ERROR);
+      throw new FatalException();
+    }
+  }
+
+  /**
+   * Find a single address based on a Primary Key.
+   *
+   * @param pk the primary key
+   * @return the {@link AddressDto}
+   */
+  @Override
+  public AddressDto findByPk(int pk) {
+    if (this.cacheContains(pk)) {
+      return (AddressDto) this.cacheGet(pk);
+    }
+
+    AddressDto address;
+
+    try {
+      PreparedStatement stmt =
+          this.dal.prepareStatement(ADDRESS_FIND_QUERY + FIELD_ADDRESS_PK + " = ?");
+
+      stmt.setInt(1, pk);
+      ResultSet rs = stmt.executeQuery();
+
+      if (!rs.next()) {
+        rs.close();
+        Logger.log("AddressDaoImpl", "findByPk", "The address was not found", Logger.INFORMATION);
+        return null;
+      }
+
+      address = populateDto(rs);
+
+      Logger.log("AddressDaoImpl", "findByPk", "The address with the pk (" 
+          + pk + ") was found", Logger.SUCCESS);
+
+      rs.close();
+
+      this.cacheStore(pk, (BizObject) address);
+
+      return address;
+    } catch (SQLException exception) {
+      Logger.log("AddressDaoImpl", "findByPk", "The search of the address failed : "
+          + exception.getMessage(), Logger.ERROR);
+      throw new FatalException();
+    }
+  }
+
+  /**
+   * Update an address already present in the database.
+   *
+   * @param address {@link Address} to persist
+   * @return the new value of the {@link Address} casted in {@link AddressDto}
+   */
+  @Override
+  public AddressDto update(Address address) {
+    try {
+      PreparedStatement stmt = this.dal.prepareStatement(ADDRESS_UPDATE_QUERY);
+      stmt.setString(1, address.getStreet());
+      stmt.setInt(2, address.getStreetNumber());
+      stmt.setInt(3, address.getBox());
+      stmt.setInt(4, address.getZipCode());
+      stmt.setString(5, address.getCommune());
+      stmt.setInt(6, address.getVersion() + 1);
+      stmt.setInt(7, address.getPk());
+      stmt.setInt(8, address.getVersion());
+
+      ResultSet rs = stmt.executeQuery();
+
+      if (!rs.next()) {
+        rs.close();
+        Logger.log("AddressDaoImpl", "update", "The address update failed : "
+            + "The version number does not match that of the database", Logger.ERROR);
+        throw new OptimisticLockException();
+      }
+
+      address = populateDto(rs);
+
+      rs.close();
+
+      Logger.log("AddressDaoImpl", "update", "The address was successfully updated",
+          Logger.SUCCESS);
+      return address;
+    } catch (SQLException exception) {
+      Logger.log("AddressDaoImpl", "update", "The address update failed : "
+          + exception.getMessage(), Logger.ERROR);
+      throw new FatalException();
+    }
+  }
+  
+  /**
+   * Update an address already present in the database.
+   *
+   * @param address {@link Address} to persist
+   * @return the new value of the {@link Address} casted in {@link AddressDto}
+   */
+  @Override
+  public AddressDto update(AbstractDto abstractDto) {
+    try {
+      return update((Address) abstractDto);
+    } catch (ClassCastException exception) {
+      throw new IllegalArgumentException();
+    }
+  }
+
+  /**
+   * Create an instance of DTO user based on result set.
+   *
+   * @param rs {@link ResultSet} coming directly from database
+   * @return a {@link Address} object with the informations of the {@link ResultSet}
+   * @throws SQLException if an error occurs during result set access
+   */
+  private Address populateDto(ResultSet rs) throws SQLException {
+    Address address = (Address) this.factory.getAddress();
+
+    address.setPk(rs.getInt(FIELD_ADDRESS_PK));
+    address.setStreet(rs.getString(FIELD_ADDRESS_STREET));
+    address.setStreetNumber(rs.getInt(FIELD_ADDRESS_STREET_NUMBER));
+    address.setBox(rs.getInt(FIELD_ADDRESS_BOX));
+    address.setZipCode(rs.getInt(FIELD_ADDRESS_ZIPCODE));
+    address.setCommune(rs.getString(FIELD_ADDRESS_COMMUNE));
+    address.setVersion(rs.getInt(FIELD_VERSION));
+
+    return address;
+  }
+
+}

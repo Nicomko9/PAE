@@ -1,0 +1,14 @@
+package bizz.objects;
+
+import bizz.dto.UserDto;
+import bizz.exceptions.BusinessException;
+
+public interface UserBizz extends UserDto {
+
+  boolean comparePassword(String password);
+
+  void checkConstraints() throws BusinessException;
+
+  void prepareForInsert() throws BusinessException;
+
+}

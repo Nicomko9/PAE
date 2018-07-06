@@ -1,0 +1,124 @@
+package config;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Parameter;
+import java.util.Properties;
+
+class AppConfigImpl implements AppConfig, DependencyManager {
+
+  private Properties properties = new Properties();
+
+  private String environment = AppConfig.APP_DEV;
+
+  /**
+   * Empty constructor for AppConfigImpl.
+   */
+  AppConfigImpl() {
+  }
+
+  public <T> T getClassForName(Class<T> className) {
+    if (!this.properties.containsKey("plugin." + className.getName())) {
+      throw new IllegalArgumentException(
+          "[" + this.environment + "] You cannot load plugin for '" + className.getName() + "'");
+    }
+
+    try {
+      Class<?> impl = Class.forName(this.properties.getProperty("plugin." + className.getName()));
+
+      Constructor<?>[] constructors = impl.getDeclaredConstructors();
+
+      for (Constructor<?> constructor : constructors) {
+        try {
+          constructor.setAccessible(true);
+
+          int index = 0;
+          Object[] params = new Object[constructor.getParameterCount()];
+          for (Parameter param : constructor.getParameters()) {
+            params[index] = getClassForName(param.getType());
+            index++;
+          }
+
+          return (T) constructor.newInstance(params);
+        } catch (Exception e) {
+          System.out.println("Skipping constructor - error happened : " + e.getMessage() + " "
+              + e.getStackTrace()[0].getFileName() + ":" + e.getStackTrace()[0].getLineNumber());
+        }
+      }
+
+      // No constructor match
+      throw new IllegalArgumentException(
+          "[" + this.environment + "] You cannot load plugin for '" + className.getName()
+              + "' : problem finding constructor");
+    } catch (Exception e) {
+      System.out.println("AppConfigImpl::getClassForName : exception");
+      System.out.println(e.getMessage());
+      return null;
+    }
+  }
+
+  /**
+   * Return the environment string id.
+   *
+   * @return the current environment
+   */
+  public String getEnvironment() {
+    return this.environment;
+  }
+
+  /**
+   * Set the environment based on given string.
+   *
+   * @param environment the prod or dev environment currently running
+   */
+  public void setEnvironment(String environment) {
+    environment = environment.toLowerCase();
+
+    if (environment.equals(AppConfig.APP_DEV)
+        && environment.equals(AppConfig.APP_PROD)) {
+      throw new IllegalArgumentException("You cannot set environment to " + environment);
+    }
+
+    this.environment = environment;
+  }
+
+  /**
+   * Load the configurations.
+   */
+  public boolean load() {
+    String configurationFile = "conf/" + this.getEnvironment() + ".properties";
+    try (FileInputStream file = new FileInputStream(configurationFile)) {
+      properties.load(file);
+
+      return true;
+    } catch (IOException exception) {
+      System.out.println("Internel system error : exiting application");
+      exception.printStackTrace();
+
+      return false;
+    }
+  }
+
+  /**
+   * Return a property from configuration file.
+   *
+   * @param key lookup key
+   * @return the associated value
+   */
+  public String getProperty(String key) {
+    return this.properties.getProperty(key);
+  }
+
+  /**
+   * Return a property from configuration file, and a default value if not found.
+   *
+   * @param key lookup key
+   * @param defaultValue the value to return on miss
+   * @return defaultValue on miss, associated value on hit
+   */
+  public String getProperty(String key, String defaultValue) {
+    return this.properties.getProperty(key, defaultValue);
+  }
+
+}

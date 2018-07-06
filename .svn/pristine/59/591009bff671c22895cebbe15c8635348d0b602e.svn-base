@@ -1,0 +1,6 @@
+package biz.objects;
+
+
+abstract class BizObject {
+
+}

@@ -1,0 +1,154 @@
+package ihm;
+
+import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
+import java.text.SimpleDateFormat;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.auth0.jwt.JWTSigner;
+import com.auth0.jwt.JWTVerifier;
+import com.auth0.jwt.JWTVerifyException;
+import com.owlike.genson.Genson;
+import com.owlike.genson.GensonBuilder;
+
+import config.PluginFactory;
+import ucc.DtoEmptyFactory;
+import ucc.UserUcc;
+import ucc.dto.UserDto;
+
+class IhmUtilitaire {
+
+  private static final String SECRET =
+      "R=:E2Jj-+lv&}fhP5JZ~q{UF`b>{-#x'%U_7sb[lBJ]}IRp6J4PRtrN}]$27y+{";
+
+  static Genson genson = new GensonBuilder().useIndentation(true)
+      .useDateFormat(new SimpleDateFormat("dd/MM/yyyy")).useConstructorWithArguments(true).create();
+
+  @SuppressWarnings("unchecked")
+  static Map<String, Object> traitementJsonConn(String json) {
+
+    Map<String, Object> m = new HashMap<String, Object>();
+    return genson.deserialize(json, Map.class);
+
+  }
+
+  static UserDto getEmptyUser() {
+
+    DtoEmptyFactory emptyUser = PluginFactory.INSTANCE.getPluginFor(ucc.DtoEmptyFactory.class);
+    return emptyUser.getUser();
+
+  }
+
+  static UserDto setUserDto(String log, String pwd) {
+
+    UserDto user = getEmptyUser();
+    user.setLogin(log);
+    user.setPassword(pwd);
+    return user;
+
+  }
+
+  static UserDto setUserDto(String log, String name, String first_name, String pwd, String email) {
+
+    UserDto user = setUserDto(log, pwd);
+    user.setFirstname(first_name);
+    user.setLastname(name);
+    user.setEmail(email);
+    return user;
+
+  }
+
+  static boolean connectUser(UserDto userDto) {
+
+    UserUcc userUcc = PluginFactory.INSTANCE.getPluginFor(ucc.UserUcc.class);
+    UserDto userDtb = userUcc.connect(userDto);
+    // Vérifier correspondance entre les mots de passe et les login
+    if (userDtb.getLogin().equals(userDto.getLogin())
+        && userDtb.getPassword().equals(userDto.getPassword())) {
+      return true;
+    }
+    return false;
+
+  }
+
+  static String inscriptionUser(UserDto userDto) {
+
+    UserUcc userUcc = PluginFactory.INSTANCE.getPluginFor(ucc.UserUcc.class);
+    return userUcc.inscription(userDto);
+
+  }
+
+  static void addCook(String login, HttpServletRequest req, HttpServletResponse resp) {
+
+    Map<String, Object> claims = new HashMap<>();
+    req.getSession().setAttribute("user", login);
+    req.getSession().setMaxInactiveInterval(5 * 60);
+    claims.put("login", login);
+    claims.put("ip", req.getRemoteAddr());
+    String token = new JWTSigner(SECRET).sign(claims);
+
+    Cookie cook = new Cookie("user", token);
+    cook.setPath("/");
+    // Life = 1 month
+    cook.setMaxAge(1 * 60 * 60 * 24 * 31);
+    resp.addCookie(cook);
+
+  }
+
+  static String checkConnection(HttpServletResponse resp, HttpServletRequest req) {
+
+    System.out.println("IhmUtilitaire.checkConnection()");
+    try {
+      if (req.getSession().getAttribute("user") != null) {
+        System.out.println("IhmUtilitaire.checkConnection()-Return session");
+        return req.getSession().getAttribute("user").toString();
+      }
+      System.out.println("IhmUtilitaire.checkConnection()-No session");
+      Cookie[] cookies = req.getCookies();
+      if (cookies.length == 0) {
+        System.out.println("IhmUtilitaire.checkConnection()-No cookies");
+        return null;
+      }
+      String token = "";
+      for (Cookie c : cookies) {
+        if (c.getName().equals("user")) {
+          System.out.println("IhmUtilitaire.checkConnection()-Get cookie");
+          token = c.getValue();
+        }
+      }
+      Map<String, Object> decodedPayload = new JWTVerifier(SECRET).verify(token);
+      String user = decodedPayload.get("login").toString();
+      req.getSession().setAttribute("user", user);
+      System.out.println("IhmUtilitaire.checkConnection()-Return cookie's content");
+      return user;
+    } catch (InvalidKeyException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (NoSuchAlgorithmException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (IllegalStateException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (SignatureException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (JWTVerifyException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    return null;
+
+  }
+
+}

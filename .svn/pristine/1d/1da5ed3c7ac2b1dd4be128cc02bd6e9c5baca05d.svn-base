@@ -1,0 +1,128 @@
+package biz.objects;
+
+import biz.dto.CompanyDto;
+import biz.dto.ContactDto;
+import biz.dto.ParticipationDto;
+import biz.exceptions.BusinessException;
+import biz.exceptions.ErrorsCode;
+
+class PresenceBiz extends BizObject implements Presence {
+
+  private Participation participation;
+
+  private Company company;
+
+  private Contact contact;
+
+  public PresenceBiz() {}
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = super.hashCode();
+    result = prime * result + ((company == null) ? 0 : company.hashCode());
+    result = prime * result + ((contact == null) ? 0 : contact.hashCode());
+    result = prime * result + ((participation == null) ? 0 : participation.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (!super.equals(obj)) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    PresenceBiz other = (PresenceBiz) obj;
+    if (company == null) {
+      if (other.company != null) {
+        return false;
+      }
+    } else if (!company.equals(other.company)) {
+      return false;
+    }
+    if (contact == null) {
+      if (other.contact != null) {
+        return false;
+      }
+    } else if (!contact.equals(other.contact)) {
+      return false;
+    }
+    if (participation == null) {
+      if (other.participation != null) {
+        return false;
+      }
+    } else if (!participation.equals(other.participation)) {
+      return false;
+    }
+    return true;
+  }
+
+  @Override
+  public ParticipationDto getParticipation() {
+    return participation;
+  }
+
+  @Override
+  public void setParticipation(Participation participation) {
+    this.participation = participation;
+  }
+
+  @Override
+  public CompanyDto getCompany() {
+    return company;
+  }
+
+  @Override
+  public void setCompany(Company company) {
+    this.company = company;
+  }
+
+  @Override
+  public ContactDto getContact() {
+    return contact;
+  }
+
+  @Override
+  public void setContact(Contact contact) {
+    this.contact = contact;
+  }
+
+  @Override 
+  @Deprecated
+  public int getPk() {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override 
+  @Deprecated
+  public void setPk(int primaryKey) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public String toString() {
+    return "PresenceBiz [participation=" + participation.getJe().getDayYear() + ", company=" 
+        + company.getCompanyName() + ", contact=" + contact.getEmail() + "]";
+  }
+
+  @Override
+  public void prepareForInsert() {
+    checkConstraints();
+  }
+
+  @Override
+  public void checkConstraints() throws BusinessException {
+    if (company == null || participation == null || contact == null) {
+      throw new BusinessException(ErrorsCode.BUSINESS_INVALID_PRESENCE);
+    }
+    company.checkConstraints();
+    participation.checkConstraints();
+    contact.checkConstraints();
+  }
+
+}

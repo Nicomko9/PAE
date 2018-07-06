@@ -1,0 +1,94 @@
+package biz.ucc;
+
+import static org.junit.Assert.*;
+import static util.Util.*;
+
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import biz.ContactUcc;
+import biz.objects.Address;
+import biz.objects.Company;
+import biz.objects.Contact;
+import biz.objects.User;
+import config.AppConfig;
+
+public class ContactUccImplTest {
+
+  
+  private static AppConfig appConfig;
+  private static ContactUcc contactUcc;
+  private static Contact contact;
+  private static Company company;
+  private static Address address;
+  private static User creator;
+  private static int pkContact, pkCompany, pkAddress, pkCreator;
+  
+  @BeforeClass
+  public static void setUpBeforeClass() throws Exception {
+    appConfig = new AppConfig(AppConfig.APP_DEV);
+    if(!appConfig.load())
+      throw new Exception();
+    contactUcc = (ContactUcc) appConfig.newInstanceOf(ContactUcc.class);
+    
+    address = createAddress(appConfig);
+    pkAddress = address.getPk();
+    
+    creator = createUser(appConfig);
+    pkCreator = creator.getPk();
+    
+    company = createCompany(appConfig, address, creator);
+    pkCompany = company.getPk();
+
+    contact = createContact(appConfig, company);
+    pkContact = contact.getPk();
+  }
+  
+  @AfterClass
+  public static void tearDownAfterClass() throws Exception {
+    deleteTestRecord(appConfig);
+  }
+  
+  @Before
+  public void setUp() throws Exception {
+    fillAddress(address, 12, COMMUNE, pkAddress, STREET, STREET_NUMBER, ZIP_CODE);
+    fillUser(creator, EMAIL, FIRSTNAME, NAME, LOGIN, PASSWORD, pkCreator);
+    fillCompany(company, address, COMPANY_NAME, creator, pkCompany);
+    fillContact(contact, company, EMAIL, FIRSTNAME, NAME, PHONE, pkContact);
+  }
+
+  @Test
+  public void testCreateNewContact1() {
+    contactUcc.createNewContact(contact);
+  }
+  
+  @Test
+  public void testCreateNewContact2() {
+    contact.setEmail("");
+    contactUcc.createNewContact(contact);
+  }
+  
+  @Test
+  public void testCreateNewContact3() {
+    contact.setEmail("test.test@test.be");
+    contactUcc.createNewContact(contact);    
+   }
+  
+  @Test
+  public void testGetContactsForCompany1(){
+    contactUcc.getContactsForCompany("name_co_junit");
+  }
+  
+  @Test
+  public void testUpdate(){
+    contactUcc.update(contact);
+  }
+  
+  @Test
+  public void testGetAllContact(){
+    assertFalse(contactUcc.getAllContact().isEmpty());
+  }
+
+}

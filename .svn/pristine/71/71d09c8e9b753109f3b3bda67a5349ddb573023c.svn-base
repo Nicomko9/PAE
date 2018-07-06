@@ -1,0 +1,88 @@
+<div class="page-container" style="display: none; padding-top: 50px;"
+	id="container-application" data-template="dashboard.html">
+	<header>
+		<nav class="navbar navbar-default navbar-fixed-top" role="navigation"
+			style="margin-bottom: 0">
+			<div class="navbar-header">
+				<button type="button" class="navbar-toggle" data-toggle="collapse"
+					data-template=".navbar-collapse">
+					<span class="sr-only">Toggle navigation</span> <span
+						class="icon-bar"></span> <span class="icon-bar"></span> <span
+						class="icon-bar"></span>
+				</button>
+			</div>
+			<div class="navbar-tools">
+				<ul class="nav navbar-right  navbar-top-links">
+					<li class="dropdown"><a class="dropdown-toggle"
+						data-toggle="dropdown" href="#"> <i class="fa fa-user fa-fw"></i>
+							<span data-toggle="user.full_name"></span> <i
+							class="fa fa-caret-down"></i>
+					</a>
+						<ul class="dropdown-menu dropdown-user">
+							<li><a href="#" data-view="connection:disconnect"
+								id="disconnect"> <i class="fa fa-sign-out fa-fw"></i> Logout
+							</a></li>
+						</ul> <!-- /.dropdown-user --></li>
+				</ul>
+			</div>
+		</nav>
+	</header>
+
+	<div class="navbar-default sidebar" role="navigation">
+		<div class="sidebar-nav navbar-collapse">
+			<a href="#" data-view="dashboard:main"> <img id="logo"
+				alt="Logo Journify" src="/images/LogoJournify.png">
+			</a>
+			<ul class="nav">
+				<li class="sidebar-search"><input type="text"
+					class="form-control" name="app-search" placeholder="Search...">
+					<ul class="dropdown-menu autocomplete">
+						<li class="dropdown-header">Journée entreprise</li>
+						<li role="separator" class="divider"></li>
+						<li class="dropdown-header">Companies</li>
+						<li role="separator" class="divider"></li>
+						<li class="dropdown-header">Contacts</li>
+					</ul></li>
+			</ul>
+			<ul class="nav" id="side-menu">
+				<li><a href="#" data-view="dashboard:main"><i
+						class="fa fa-dashboard fa-fw"></i> Dashboard</a></li>
+				<li><a href="#"> <i class="fa fa-calendar fa-fw"></i>
+						Journées Entreprise<span class="fa arrow"></span>
+				</a>
+					<ul id="menu-je" class="nav nav-second-level">
+						<li><a href="#" data-view="dashboard:main">Journée en cours</a></li>
+						<li><a href=""> Historique<span class="fa arrow"></span>
+						</a>
+							<ul id="menu-je-history" class="nav nav-third-level">
+
+							</ul></li>
+						<li><a href=""> Journée à venir<span class="fa arrow"></span>
+						</a>
+							<ul id="menu-je-futur" class="nav nav-third-level">
+
+							</ul></li>
+						<li><a href="" data-view="je:showCreate"> Lancer une
+								Journée entreprise </a></li>
+					</ul></li>
+				<li><a href="#"><i class="fa fa-building-o fa-fw"></i>
+						Entreprises<span class="fa arrow"></span></a>
+					<ul class="nav nav-second-level">
+						<li><a href="#" data-view="entreprise:main"
+							data-template="entreprise.html">Lister</a></li>
+						<li><a href="#" data-view="entreprise:showCreate">Ajouter</a>
+						</li>
+					</ul></li>
+				<li><a href="#"><i class="fa fa-user fa-fw"></i> Personnes
+						de contact<span class="fa arrow"></span></a>
+					<ul class="nav nav-second-level">
+						<li><a href="#" data-view="contacts:main"
+							data-template="contacts.html">Lister</a></li>
+						<li><a href="#" data-view="contacts:showCreate"> Ajouter
+						</a></li>
+					</ul></li>
+			</ul>
+		</div>
+	</div>
+
+	<div id="page-wrapper">

@@ -1,0 +1,5 @@
+package biz.dto;
+
+public interface JeDto {
+
+}

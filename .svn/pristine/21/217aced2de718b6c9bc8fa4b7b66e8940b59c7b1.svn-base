@@ -1,0 +1,109 @@
+package biz.objects;
+
+import biz.exceptions.BusinessException;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+
+/**
+ * JE's business object.
+ */
+class JeBiz extends BizObject implements Je {
+
+  /**
+   * JE's company list.
+   */
+  private ArrayList<CompanyBiz> companies;
+
+  /**
+   * JE's contact map. Linked as company -> id of the contact
+   */
+  private HashMap<CompanyBiz, HashSet<Integer>> participationMap;
+
+  /**
+   * JE's contact list.
+   */
+  private ArrayList<ContactBiz> contacts;
+
+  /**
+   * JE's Day Date. Format : YYYY-MM-DD
+   */
+  private LocalDate dayDate;
+
+  /**
+   * JE's Day Year.
+   */
+  private int dayYear;
+
+  JeBiz() {
+  }
+
+  /*
+   * Getters & Setters
+   */
+
+  @SuppressWarnings("deprecation")
+  public void setDate(Timestamp date) {
+    this.dayDate = date.toLocalDateTime().toLocalDate();
+    this.dayYear = date.getYear() + 1900;
+  }
+
+  public void setDate(String date) throws ParseException {
+    SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
+    this.setDate(Timestamp.from(format.parse(date).toInstant()));
+  }
+
+  public ArrayList<CompanyBiz> getCompanies() {
+    return this.companies;
+  }
+
+  public HashMap<CompanyBiz, HashSet<Integer>> getContactMap() {
+    return this.participationMap;
+  }
+
+  public ArrayList<ContactBiz> getContacts() {
+    return this.contacts;
+  }
+
+  public LocalDate getDayDate() {
+    return this.dayDate;
+  }
+
+  public void setDayDate(Timestamp date) {
+    this.dayDate = date.toLocalDateTime().toLocalDate();
+  }
+
+  public int getDayYear() {
+    return this.dayYear;
+  }
+
+
+  int getVersion() {
+    return this.version;
+  }
+
+  void setVersion(int version) {
+    this.version = version;
+  }
+
+  /**
+   * Prepare the {@link Je} to be insert in the database.
+   */
+  public void prepareForInsert() throws BusinessException {
+    this.checkConstraints();
+  }
+
+  /**
+   * Check some Constraints.
+   *
+   * @throws BusinessException if of no respect of the constraints.
+   */
+  public void checkConstraints() throws BusinessException {
+    // Autres vérifications style taille des champs etc
+  }
+
+}

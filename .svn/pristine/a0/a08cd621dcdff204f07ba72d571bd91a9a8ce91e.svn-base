@@ -1,0 +1,10 @@
+package config;
+
+
+public interface PluginFactory {
+
+  PluginFactory INSTANCE = (PluginFactory) AppConfig.INSTANCE;
+
+  <T> T getPluginFor(Class<T> className);
+
+}

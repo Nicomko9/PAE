@@ -1,0 +1,107 @@
+application.define("objects/jes", function() {
+  var loading = false;
+
+  var object;
+  var listJe = [];
+
+  function addJe(data) {
+    if (data == null) {
+      return;
+    }
+    listJe.push(data);
+    listJe.sort(function(a, b) {
+      return a.pk - b.pk;
+    });
+    object.listPk(listJe);
+    object.notify();
+  }
+
+  /**
+   * Load JE's at user loading time
+   */
+  application.require("objects/user").watch(function(data) {
+    loading = true;
+
+    application.require("utils/ajax").create({
+      url : "/app/je/list",
+      success : function(data) {
+        listJe = data;
+        object.listPk(listJe);
+        object.isReady();
+        object.notify();
+        loading = false;
+      }
+    }, undefined, function() {
+      loading = false;
+    });
+  }, "connection");
+
+  var o = {
+    dateFormat : function(date) {
+      return date.dayOfMonth + "/" + ((date.monthValue < 10) ? "0" : "")
+          + date.monthValue + "/" + date.year;
+    },
+    load   : function (annee, callback) {
+      if (loading) {
+        setTimeout(function() {
+          o.load(annee, callback);
+        }, 50);
+
+        return;
+      }
+
+      if (o.contains(annee)) {
+        callback(listJe[object.getPkIndex(annee)]);
+      } else {
+        application.require("utils/ajax").create("/app/je", {
+          data: {
+            year: annee
+          },
+          success : function (data) {
+            addJe(data);
+            callback();
+          }
+        })
+      }
+    },
+    create : function (date, callback) {
+      console.log("Creating JE : " + date);
+      application.require("utils/ajax").create({
+        url  : "/app/je/create",
+        data : { date : date },
+        success : function(data) {
+          addJe(data);
+          callback(data);
+        }
+      });
+    },
+    contains : function (k) {
+      return object.getPkIndex(k) != -1;
+    },
+    all      : function () {
+      return listJe
+    },
+    countJe  : function() {
+      return listJe.length;
+    },
+    futureJe : function () {
+      return listJe.filter(function(e) {
+        return e.pk > application.currentYear;
+      });
+    },
+    pastJe : function () {
+      return listJe.filter(function(e) {
+        return e.pk < application.currentYear;
+      });
+    },
+    currentJe : function () {
+      return listJe.filter(function(e) {
+        return e.pk == application.currentYear;
+      });
+    }
+  };
+
+  object = application.require("objects/object")("je", o);
+
+  return o;
+} ());

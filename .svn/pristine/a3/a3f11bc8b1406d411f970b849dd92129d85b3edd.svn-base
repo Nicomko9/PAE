@@ -1,0 +1,53 @@
+application.define("entreprise", function() {
+
+	return {
+		main : function(module, context) {
+			$("#NewEntreprise").click(
+				function() {
+					$("#popup-new-entreprise div[class='panel-heading']")
+						.html("Ajouter entreprise");
+					$("fieldset div[class='panel-heading']")
+						.html("Adresse de facturation");
+					$("#btn-save-popup-entreprise").click(function() {
+						console.log("Click");
+						application.require("entreprise", "create");
+					});
+				});
+		},
+		create : function () {
+			console.log("entreprise - create");
+			application.require("utils/forms", function(module) {
+				// Gestion du formulaire d'inscription d'une entreprise
+				var form = module.getForm("#CompForm");
+				
+				if (form.validate(true)) {
+					console.log(form.getValues());
+					console.log("Ajax");
+					$.ajax({
+						url : "/app/entreprise/create",
+						data : {
+							json : JSON.stringify(form.getValues())
+						},
+						method : "POST",
+						dataType : "json",
+						success : function(data) {
+							form.clean();
+							console.log("Company created");
+							alert("Company created");
+						},
+						error : function(xhr) {
+							console.log("Error create company : " + xhr.responseJSON);
+							alert("Error while creating company");
+							
+							if (xhr.responseJSON == 473) {
+				                module.tagInput($("#name-entreprise"), "danger", "Ce nom d'entreprise est déja utilisé");
+							} else {
+								alerteForm("Comp", errors.translate(xhr.responseJSON));
+							}
+						}
+					});
+				}
+			});
+		}
+	};
+}());

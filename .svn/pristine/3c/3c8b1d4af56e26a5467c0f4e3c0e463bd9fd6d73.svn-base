@@ -1,0 +1,14 @@
+# Jetty server configuration
+server.path=/
+server.resources=web
+server.port=8080
+# Database connection configuration
+db.driver=jdbc:postgresql:
+db.path=//studentittools.ipl.be:5432/
+db.db_name=dbnicolas_christodoulou
+db.login=nicolas_christodoulou
+db.password=jacquouille9
+
+
+
+

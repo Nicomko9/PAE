@@ -1,0 +1,254 @@
+package dal.dao;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import biz.DtoFactory;
+import biz.dto.AbstractDto;
+import biz.dto.PresenceDto;
+import biz.exceptions.FatalException;
+import biz.exceptions.OptimisticLockException;
+import biz.objects.Company;
+import biz.objects.Contact;
+import biz.objects.Je;
+import biz.objects.Participation;
+import biz.objects.Presence;
+import dal.DalBackEndServices;
+import ihm.utils.Logger;
+
+class PresenceDaoImpl extends AbstractDao implements PresenceDao {
+
+  /**
+   * Insert Presence auto generated query.
+   */
+  private static final String PRESENCE_CREATE_QUERY =
+      "INSERT INTO " + TABLE + " (" + String.join(",", FIELDS_MAP) + ") VALUES ("
+          + String.join(",", Collections.nCopies(FIELDS_MAP.size(), "?")) + ") RETURNING *";
+
+  /**
+   * A compiled expression finding all fields from the table presence in database.
+   */
+  private static final String PRESENCE_FIND_QUERY = "SELECT * FROM " + TABLE + " WHERE ";
+
+  /**
+   * Update Company auto generated query.
+   */
+  private static final String PRESENCE_UPDATE_QUERY =
+      "UPDATE " + TABLE + " SET " + FIELD_PRESENCE_ETAT + " = ?  WHERE "
+          + FIELD_PRESENCE_COMPANY_NUMBER + " = ? AND " + FIELD_PRESENCE_CONTACT_NUMBER
+          + " = ? AND " + FIELD_PRESENCE_PARTICIPATION_YEAR + " = ? returning *";
+
+
+  private ParticipationDao participationDao;
+  private CompanyDao companyDao;
+  private ContactDao contactDao;
+
+  PresenceDaoImpl(DalBackEndServices dal, DtoFactory factory, CompanyDao companyDao,
+      ContactDao contactDao, ParticipationDao participationDao) {
+    super(dal, factory);
+    this.companyDao = companyDao;
+    this.contactDao = contactDao;
+    this.participationDao = participationDao;
+  }
+
+  @Override
+  public PresenceDto create(Presence presence) {
+
+    try {
+      PreparedStatement stmt = this.dal.prepareStatement(PRESENCE_CREATE_QUERY);
+
+      stmt.setInt(1, presence.getParticipation().getJe().getDayYear());
+      stmt.setInt(2, presence.getCompany().getPk());
+      stmt.setInt(3, presence.getContact().getPk());
+
+      ResultSet rs = stmt.executeQuery();
+
+      if (!rs.next()) {
+        rs.close();
+        Logger.log("PresenceDaoImpl", "create", "The presence creation failed", Logger.ERROR);
+        throw new FatalException();
+      }
+
+      presence = populateDto(rs, true);
+
+      Logger.log("PresenceDaoImpl", "create", "The presence was successfully created",
+          Logger.SUCCESS);
+
+      rs.close();
+      return presence;
+    } catch (SQLException exception) {
+      if (exception.getMessage()
+          .contains("ERROR: duplicate key value violates unique constraint")) {
+        throw new OptimisticLockException();
+      }
+      Logger.log("PresenceDaoImpl", "create",
+          "The presence creation failed : " + exception.getMessage(), Logger.ERROR);
+      throw new FatalException();
+    }
+  }
+
+  @Override
+  public AbstractDto insert(AbstractDto abstractDto) {
+    try {
+      return create((Presence) abstractDto);
+    } catch (ClassCastException exception) {
+      throw new IllegalArgumentException();
+    }
+  }
+
+  /**
+   * Get All the presence for the given year.
+   *
+   * @return {@link List} of {@link PresenceDto}
+   */
+  @Override
+  public List<PresenceDto> findByYear(int year) {
+    List<PresenceDto> presences = new ArrayList<>();
+    try {
+      PreparedStatement stmt = this.dal
+          .prepareStatement(PRESENCE_FIND_QUERY + FIELD_PRESENCE_PARTICIPATION_YEAR + " = ?");
+
+      stmt.setInt(1, year);
+      ResultSet rs = stmt.executeQuery();
+
+      while (rs.next()) {
+        presences.add(populateDto(rs, true));
+      }
+      rs.close();
+
+    } catch (SQLException exception) {
+      Logger.log("PresenceDaoImpl", "findByYear",
+          "The search of the presence failed : " + exception.getMessage(), Logger.ERROR);
+      throw new FatalException();
+    }
+    return presences;
+  }
+
+  /**
+   * Create an instance of DTO presence based on result set.
+   *
+   * @param rs {@link ResultSet} coming directly from database
+   * @return a {@link Presence} object with the information of the {@link ResultSet}
+   * @throws SQLException if an error occurs during result set access
+   */
+  private Presence populateDto(ResultSet rs, boolean withFk) throws SQLException {
+    Presence presence = (Presence) this.factory.getPresence();
+
+    if (withFk) {
+      Company company = (Company) companyDao.findByPk(rs.getInt(FIELD_PRESENCE_COMPANY_NUMBER));
+      presence.setCompany(company);
+
+      // Participation participation = (Participation) participationDao.findByYearAndCompany(
+      // rs.getInt(FIELD_PRESENCE_PARTICIPATION_YEAR), rs.getInt(FIELD_PRESENCE_COMPANY_NUMBER));
+
+      Participation participation = (Participation) this.factory.getParticipation();
+      participation.setCompany(company);
+
+      Je je = (Je) this.factory.getCompanyDay();
+      je.setDayYear(rs.getInt(FIELD_PRESENCE_PARTICIPATION_YEAR));
+      participation.setJe(je);
+
+      presence.setParticipation(participation);
+
+      Contact contact = (Contact) contactDao.findByPk(rs.getInt(FIELD_PRESENCE_CONTACT_NUMBER));
+      presence.setContact(contact);
+    }
+
+    return presence;
+  }
+
+  @Override
+  public PresenceDto update(Presence presence) {
+
+    try {
+      PreparedStatement stmt = this.dal.prepareStatement(PRESENCE_UPDATE_QUERY);
+      stmt.setBoolean(1, presence.isActif());
+      stmt.setInt(2, presence.getCompany().getPk());
+      stmt.setInt(3, presence.getContact().getPk());
+      stmt.setInt(4, presence.getParticipation().getJe().getDayYear());
+
+      ResultSet rs = stmt.executeQuery();
+
+      if (!rs.next()) {
+        rs.close();
+        Logger.log("PresenceDaoImpl", "update", "The presence update failed : "
+            + "The version number does not match that of the database", Logger.ERROR);
+        throw new OptimisticLockException();
+      }
+
+      presence.setActif(rs.getBoolean(FIELD_PRESENCE_ETAT));
+
+      rs.close();
+
+      Logger.log("PresenceDaoImpl", "update", "The presence was successfully updated",
+          Logger.SUCCESS);
+
+      return presence;
+    } catch (SQLException exception) {
+      Logger.log("PresenceDaoImpl", "update",
+          "The presence update failed : " + exception.getMessage(), Logger.ERROR);
+      throw new FatalException();
+    }
+  }
+
+  @Override
+  public AbstractDto update(AbstractDto abstractDto) {
+    throw new UnsupportedOperationException();
+  }
+
+
+  public PresenceDto findForJe(int pkJe, int pkCompany, int pkContact) {
+    try {
+      PreparedStatement stmt = this.dal.prepareStatement(PRESENCE_FIND_QUERY
+          + FIELD_PRESENCE_PARTICIPATION_YEAR + " = ? " + "AND " + FIELD_PRESENCE_COMPANY_NUMBER
+          + " = ? " + "AND " + FIELD_PRESENCE_CONTACT_NUMBER + " = ?");
+      stmt.setInt(1, pkJe);
+      stmt.setInt(2, pkCompany);
+      stmt.setInt(3, pkContact);
+
+      ResultSet rs = stmt.executeQuery();
+
+      if (!rs.next()) {
+        rs.close();
+        return null;
+      }
+
+      PresenceDto presenceDto = this.factory.getPresence();
+      presenceDto.setActif(true);
+
+      return presenceDto;
+    } catch (SQLException exception) {
+      Logger.log("PresenceDaoImpl", "findPresencesForContact",
+          "The search of the presence " + "failed : " + exception.getMessage(), Logger.ERROR);
+      throw new FatalException();
+    }
+  }
+
+  @Override
+  public List<PresenceDto> findPresencesForContact(int id) {
+    List<PresenceDto> allPresences = new ArrayList<PresenceDto>();
+    try {
+      PreparedStatement stmt =
+          this.dal.prepareStatement(PRESENCE_FIND_QUERY + FIELD_PRESENCE_CONTACT_NUMBER + " = ?");
+      stmt.setInt(1, id);
+      ResultSet rs = stmt.executeQuery();
+
+      while (rs.next()) {
+        allPresences.add(populateDto(rs, true));
+      }
+      rs.close();
+
+      return allPresences;
+    } catch (SQLException exception) {
+      Logger.log("PresenceDaoImpl", "findPresencesForContact",
+          "The search of the presence " + "failed : " + exception.getMessage(), Logger.ERROR);
+      throw new FatalException();
+    }
+  }
+
+
+}

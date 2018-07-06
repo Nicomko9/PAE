@@ -1,0 +1,47 @@
+package biz;
+
+import biz.dto.ContactDto;
+import dal.DalFrontEndServices;
+import dal.dao.ContactDao;
+import ihm.utils.Logger;
+
+/**
+ * Implementation of the Contact's Use Case Controller.
+ */
+class ContactUccImpl implements ContactUcc {
+
+  private DalFrontEndServices dal;
+
+  private ContactDao contactDao;
+
+  ContactUccImpl(DalFrontEndServices dal, ContactDao contactDao) {
+    this.dal = dal;
+    this.contactDao = contactDao;
+  }
+
+  /**
+   * Register a new contact in the database.
+   * 
+   * @param contactDto {@link ContactDto} to persist
+   * @return a boolean to indicate whether it worked or not
+   */
+  @Override
+  public boolean register(ContactDto contactDto) {
+    // TODO
+    Logger.log("ContactUccImpl", "register", "Creating contact");
+    return false;
+  }
+
+  /**
+   * Update a contact already present in the database.
+   * 
+   * @param contactDto {@link ContactDto} to persist
+   * @return the information of the contact updated in the database
+   */
+  @Override
+  public ContactDto update(ContactDto contactDto) {
+    // TODO
+    Logger.log("ContactUccImpl", "update", "Updating contact");
+    return null;
+  }
+}
